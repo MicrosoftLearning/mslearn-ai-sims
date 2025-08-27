@@ -4,9 +4,7 @@ permalink: index.html
 layout: home
 ---
 
-The following exercises explore common artificial intelligence workloads in a variety of simulated applications.
-
-> **Note**: There are no setup requirements; all you need is a modern web browser, and you can dive right in to see the kinds of solution that AI enables.
+The following exercises explore common artificial intelligence workloads in a variety of applications. The goal of these exercises is to experience some of the capabilities of AI, and to learn about the kinds of solutions AI makes possible. You don't need to be a developer or a technical expert. There are no setup requirements. All you need is a modern web browser, and you can dive right in to see the kinds of solution that AI enables!
 
 ## Exercises
 
@@ -19,9 +17,9 @@ The following exercises explore common artificial intelligence workloads in a va
 
 {% endfor %}
 
-## Simulations
+## Applications
 
-If you'd rather explore the simulations for yourself, without the prescribed lab instructions, you can use the following links:
+If you'd rather explore the applications for yourself, without the prescribed lab instructions, you can use the following links:
 
 - [Home Rental App (Machine Learning)](https://aka.ms/mslearn-ml-sim){:target="_blank"}
 - [Expenses chat assistant (Generative AI Agent)](https://aka.ms/mslearn-agent-sim){:target="_blank"}
