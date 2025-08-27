@@ -26,4 +26,4 @@ Organizations that create and publish content often need to create and maintain 
 1. Use the **Suggested tags** button to generate relevant tags for the image.
 1. Repeat the process to generate tags for the other images.
 
-> **Note**: The application used in this exercise is a *simulation* - there's no actual AI computer vision service behind it. However, it's based on real capabilities you can implement with [Azure AI Foundry](https://azure.microsoft.com/products/ai-foundry/); and in particular, the [Azure AI Vision](https://azure.microsoft.com/products/ai-services/ai-vision/) service.
+> **Note**: The application used in this exercise is a *simulation* - there's no actual AI computer vision service behind it. However, it's based on real capabilities you can implement with [Azure AI Foundry](https://azure.microsoft.com/products/ai-foundry/){:target="_blank"}; and in particular, the [Azure AI Vision](https://azure.microsoft.com/products/ai-services/ai-vision/){:target="_blank"} service.

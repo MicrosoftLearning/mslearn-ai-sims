@@ -16,7 +16,7 @@ Let's say you own an apartment in the thriving town of Dataville. You decide you
 
 1. In a web browser, open the [Home rental estimator](https://aka.ms/mslearn-ml-sim){:target="_blank"} app at `https://aka.ms/mslearn-ml-sim`.
 1. To generate a rental prediction, set the following properties and then select **Predict Rent**:
-    - **Postal Code**: Select one of the postal codes for the fictitious town of Dataville.
+    - **Postal Code**: Select one of the postal codes for the fictional town of Dataville.
     - **Apartment size**: Use the slider to set the size of your apartment in square feet.
     - **Bedrooms**: Select the number of bedrooms in your apartment.
 1. Review the generated rent prediction.
@@ -28,4 +28,4 @@ To create a machine learning model that predicts rental prices, some training da
 
 1. Use the **View sample rental data** button to reveal a sample of the training data for the rental prediction model.
 
-> **Note**: The application used in this exercise is a *simulation* - there's no actual machine learning model behind it. However, it's based on a real model that was trained and tested using [Azure Machine Learning](https://azure.microsoft.com/products/machine-learning/) - a platform for machine learning model development, deployment, and management.
+> **Note**: The application used in this exercise is a *simulation* - there's no actual machine learning model behind it. However, it's based on a real model that was trained and tested using [Azure Machine Learning](https://azure.microsoft.com/products/machine-learning/){:target="_blank"} - a platform for machine learning model development, deployment, and management.

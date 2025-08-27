@@ -33,4 +33,4 @@ AI agents are more than just generative AI enabled chatbots. They can also perfo
 
     The agent should respond indicating that it has taken action on your behalf.
 
-> **Note**: The application used in this exercise is a *simulation* - there's no actual AI agent or generative AI model behind it. However, it's based on real capabilities you can implement with [Azure AI Foundry Agent Service](https://azure.microsoft.com/products/ai-agent-service/).
+> **Note**: The application used in this exercise is a *simulation* - there's no actual AI agent or generative AI model behind it. However, it's based on real capabilities you can implement with [Azure AI Foundry Agent Service](https://azure.microsoft.com/products/ai-agent-service/){:target="_blank"}.
