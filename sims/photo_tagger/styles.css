@@ -59,6 +59,26 @@ button#upload-btn{background:var(--accent); color:#fff; border:0; padding:10px 1
 #dialog-open{background:var(--accent);color:#fff;border:0;padding:8px 12px;border-radius:6px;cursor:pointer}
 #dialog-open[disabled]{opacity:0.5;cursor:default}
 
+/* Suggested tags button */
+#suggested-tags-btn, .suggested-tags {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+#suggested-tags-btn:focus {
+  outline: 2px solid rgba(37,99,235,0.18);
+  outline-offset: 2px;
+}
+
+/* layout for the button and tags rendered to its right */
+.suggested-tags-wrap { display:inline-flex; gap:10px; align-items:center; margin-top:8px; }
+.suggested-tags-list { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.tag-badge { background: rgba(37,99,235,0.08); color: var(--accent); padding:4px 8px; border-radius:6px; font-size:13px; }
+
 @media (max-width:640px){
   .dialog-panel{width:calc(100% - 20px)}
   .folder-list{display:none}

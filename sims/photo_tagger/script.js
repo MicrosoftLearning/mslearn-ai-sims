@@ -5,6 +5,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
     'image3': 'A lion in a field of tall grass'
   };
 
+  // mapping of suggested tags per image base name
+  const suggestedTagsMap = {
+    'image1': ['animal','outdoor','giraffe','savannah','safari'],
+    'image2': ['animal','outdoor','elephant','tusk','safari'],
+    'image3': ['animal','outdoor','lion','bigcat','safari']
+  };
+
   const uploadBtn = document.getElementById('upload-btn');
   const dialog = document.getElementById('file-dialog');
   const fileList = document.getElementById('file-list');
@@ -125,6 +132,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(analyzeTimeout){ clearTimeout(analyzeTimeout); analyzeTimeout = null; }
     if(typingInterval){ clearInterval(typingInterval); typingInterval = null; }
     captionEl.classList.remove('typing');
+    removeSuggestedTags();
   }
 
   function typeCaption(text, charDelay = 40){
@@ -138,8 +146,75 @@ document.addEventListener('DOMContentLoaded', ()=>{
         clearInterval(typingInterval);
         typingInterval = null;
         captionEl.classList.remove('typing');
+        // show suggested tags button after caption has been fully typed
+        createSuggestedTagsButton();
       }
     }, charDelay);
+  }
+
+  // helper functions to manage the suggested tags UI
+  function removeSuggestedTags(){
+    const wrap = document.getElementById('suggested-tags-wrap');
+    if(wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
+    const oldBtn = document.getElementById('suggested-tags-btn');
+    if(oldBtn && oldBtn.parentNode) oldBtn.parentNode.removeChild(oldBtn);
+  }
+
+  function populateSuggestedTags(){
+    const listEl = document.getElementById('suggested-tags-list');
+    if(!listEl) return;
+
+    // determine base name from selectedFile or preview image alt/src
+    let base = selectedFile || previewImg.alt || '';
+    if(!base && previewImg.src){
+      const m = previewImg.src.match(/\/([^\/\?#]+)(?:[?#].*)?$/);
+      base = m ? m[1] : '';
+    }
+    base = base.replace(/\.[^/.]+$/, '');
+
+    const tags = suggestedTagsMap[base] || [];
+    listEl.innerHTML = '';
+    tags.forEach(t => {
+      const span = document.createElement('span');
+      span.className = 'tag-badge';
+      span.textContent = t;
+      listEl.appendChild(span);
+    });
+    if(tags.length === 0) listEl.textContent = 'No tags';
+  }
+
+  function createSuggestedTagsButton(){
+    removeSuggestedTags();
+    const wrap = document.createElement('div');
+    wrap.id = 'suggested-tags-wrap';
+    wrap.className = 'suggested-tags-wrap';
+
+    const btn = document.createElement('button');
+    btn.id = 'suggested-tags-btn';
+    btn.type = 'button';
+    btn.className = 'suggested-tags';
+    btn.textContent = 'Suggested tags';
+    btn.setAttribute('aria-label','Show suggested tags');
+
+    const listEl = document.createElement('div');
+    listEl.id = 'suggested-tags-list';
+    listEl.className = 'suggested-tags-list';
+    listEl.setAttribute('aria-live','polite');
+    listEl.style.display = 'none';
+
+    btn.addEventListener('click', ()=> {
+      if(listEl.style.display === 'none' || getComputedStyle(listEl).display === 'none'){
+        populateSuggestedTags();
+        listEl.style.display = 'flex';
+      } else {
+        listEl.style.display = 'none';
+      }
+    });
+
+    wrap.appendChild(btn);
+    wrap.appendChild(listEl);
+    captionEl.insertAdjacentElement('afterend', wrap);
+    return btn;
   }
 
   function loadFile(filename){
@@ -168,6 +243,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       preview.hidden = false;
       disclaimer.hidden = false;
       captionEl.textContent = 'Unable to load image';
+      removeSuggestedTags();
     };
 
     previewImg.src = `images/${filename}`;
