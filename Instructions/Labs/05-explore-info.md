@@ -14,7 +14,7 @@ This exercise should take approximately **15** minutes to complete.
 
 Suppose an organization needs to automate expense claim processing. One requirement for such an application might be to locate and extract key information from scanned receipts, which may be in multiple styles and layouts.
 
-1. In a web browser, open the [Receipt Analyzer app](https://aka.ms/mslearn-ai-info-sim) app at `https://aka.ms/mslearn-ai-info-sim`.
+1. In a web browser, open the [Receipt Analyzer app](https://aka.ms/mslearn-ai-info-sim){:target="_blank"} app at `https://aka.ms/mslearn-ai-info-sim`.
 1. Use the **Upload Receipt** button to open **receipt-1.png**. When the image opens, wait for the analysis to finish and review the information extracted from the receipt - which should include the vendor name, the transaction date, and the total amount.
 1. Note that the app has extracted the field values and also their locations within the receipt; which are marked on the image.
 1. Repeat the process to analyze receipts 2 and 3; noting that the right information is extracted, even though the receipts vary in layout, style, and formatting for numbers and dates.

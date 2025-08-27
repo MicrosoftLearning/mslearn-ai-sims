@@ -14,7 +14,7 @@ This exercise should take approximately **15** minutes to complete.
 
 Suppose you work for the fictional *Contoso* organization, and you need to submit an expense claim for a recent business trip.
 
-1. In a web browser, open the [Expense chat assistant](https://aka.ms/mslearn-agent-sim) app at `https://aka.ms/mslearn-agent-sim`.
+1. In a web browser, open the [Expense chat assistant](https://aka.ms/mslearn-agent-sim){:target="_blank"} app at `https://aka.ms/mslearn-agent-sim`.
 1. In the chat interface, enter a prompt, such as `Hello`, and review the response.
 1. Try another prompt, such as `What can you do?`, and review the response.
 1. Try selecting one of the sample prompts, such as `How much can I spend on a meal?` and entering it. Then review the response.

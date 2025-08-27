@@ -14,7 +14,7 @@ This exercise should take approximately **15** minutes to complete.
 
 Let's say you own an apartment in the thriving town of Dataville. You decide you want to rent out the apartment, and you need to determine an appropriate monthly rental amount that you can charge the tenant. Rent prices are based on a variety of factors related to the property and its location, so you're going to use a property web site that include a machine learning powered app to help you determine the right rental amount.
 
-1. In a web browser, open the [Home rental estimator](https://aka.ms/mslearn-ml-sim) app at `https://aka.ms/mslearn-ml-sim`.
+1. In a web browser, open the [Home rental estimator](https://aka.ms/mslearn-ml-sim){:target="_blank"} app at `https://aka.ms/mslearn-ml-sim`.
 1. To generate a rental prediction, set the following properties and then select **Predict Rent**:
     - **Postal Code**: Select one of the postal codes for the fictitious town of Dataville.
     - **Apartment size**: Use the slider to set the size of your apartment in square feet.
