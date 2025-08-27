@@ -15,6 +15,10 @@ The following exercises explore common artificial intelligence workloads in a va
 
 {% endfor %}
 
+<hr>
+
+## AI Applications
+
 If you'd rather explore the applications for yourself, without the prescribed lab instructions, you can use the following links:
 
 - [Home Rental App (Machine Learning)](https://aka.ms/mslearn-ml-sim){:target="_blank"}
