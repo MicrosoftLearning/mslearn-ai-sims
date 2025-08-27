@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Photo Tagger</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <main class="container">
+    <h1>Photo Tagger</h1>
+    <p class="muted">Simulated uploader — choose an image to generate a caption.</p>
+
+    <div class="controls">
+      <button id="upload-btn" type="button">Upload Image</button>
+    </div>
+
+    <div id="preview" class="preview" aria-live="polite" hidden>
+      <img id="preview-img" alt="" src="" />
+      <p id="caption" class="caption"></p>
+      <p id="disclaimer" class="disclaimer muted" hidden>AI-generated information can contain mistakes.</p>
+    </div>
+
+    <!-- Simulated "Open File" dialog listing files in images folder -->
+    <div id="file-dialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" hidden>
+      <div class="dialog-panel" role="document">
+
+        <div class="titlebar">
+          <div class="titlebar-left">
+            <span class="app-icon" aria-hidden="true"></span>
+            <span id="dialog-title">Open</span>
+          </div>
+          <div class="titlebar-right">
+            <button id="dialog-minimize" class="title-btn" aria-hidden="true">_</button>
+            <button id="dialog-close" class="title-btn" aria-label="Close dialog">&times;</button>
+          </div>
+        </div>
+
+        <div class="dialog-body">
+          <aside class="folder-list" aria-label="Folders">
+            <ul>
+              <li class="folder-item selected">images</li>
+            </ul>
+          </aside>
+
+          <section class="file-area">
+            <div class="file-grid-wrap">
+              <ul id="file-list" class="file-list" role="listbox" tabindex="0"></ul>
+            </div>
+
+            <div class="dialog-toolbar">
+              <label for="file-name">File name:</label>
+              <input id="file-name" class="file-name" type="text" readonly>
+
+              <label for="file-type">Files of type:</label>
+              <select id="file-type"><option>All Image Files</option></select>
+            </div>
+
+            <div class="dialog-actions">
+              <button id="dialog-open" type="button" disabled>Open</button>
+              <button id="dialog-cancel" type="button">Cancel</button>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</body>
+</html>

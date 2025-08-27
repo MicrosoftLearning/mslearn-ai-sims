@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Expense Chat Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <main class="container">
+    <h1>Expense Chat Assistant</h1>
+    <p class="signed-in muted">Signed in as user@contoso.com</p>
+
+    <div id="chat" class="chat" aria-live="polite">
+      <ul id="messages" class="messages" role="list"></ul>
+    </div>
+
+    <!-- Added: example samples learners can click to populate the input (not submit) -->
+    <div class="samples" id="samples">
+      <p class="muted">Try a sample:</p>
+      <div class="sample-list">
+        <button type="button" class="sample-btn" data-sample="How much can I spend on a meal?">How much can I spend on a meal?</button>
+        <button type="button" class="sample-btn" data-sample="What's the maximum I can claim for a hotel?">What's the maximum I can claim for a hotel?</button>
+        <button type="button" class="sample-btn" data-sample="How do I submit an expense claim?">How do I submit an expense claim?</button>
+      </div>
+    </div>
+
+    <form id="chat-form" class="chat-form" autocomplete="off" aria-label="Ask a question">
+      <input id="chat-input" class="chat-input" type="text" placeholder="Ask a question..." aria-label="Question" />
+      <button id="send-btn" class="send-btn" type="submit">Send</button>
+    </form>
+
+  </main>
+  <footer class="disclaimer" aria-hidden="true">AI-generated content may contain mistakes.</footer>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryBridge - Oral Histories</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Aptos:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="top-section">
+        <h1>StoryBridge - Oral Histories</h1>
+        <img src="logo.png" alt="Logo" width="100" height="100" style="display:block;margin:24px auto 0 auto;" />
+        <div class="intro">
+            <p>A storytelling platform for sharing oral histories across cultures. Using AI to complete:</p>
+            <ul>
+                <li><strong>Speech to text</strong>: Transcribe spoken stories.</li>
+                <li><strong>Language Detection</strong>: Identify the language of the storyteller.</li>
+                <li><strong>Translation</strong>: Make stories accessible globally.</li>
+                <li><strong>Named Entity Extraction</strong>: Highlight cultural references and historical figures.</li>
+                <li><strong>Sentiment Analysis</strong>: Capture emotional tone of narratives.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="upload-section">
+        <button id="uploadBtn">Upload File</button>
+        <div id="fileDialog" class="file-dialog" style="display:none;"></div>
+    </div>
+    <div id="audioContainer" style="display:none;">
+        <audio id="audioPlayer" controls></audio>
+        <div id="analyzing" class="analyzing" style="display:none;">Analyzing audio...</div>
+        <div id="infoTable" style="display:none;"></div>
+    </div>
+    <div class="disclaimer">AI-generated content may contain mistakes.</div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+:root{
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --accent:#2563eb;
+  --muted:#6b7280;
+  --radius:10px;
+}
+
+*{box-sizing:border-box}
+body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); margin:0; color:#0f172a}
+.container{max-width:760px; margin:48px auto; padding:24px; background:linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.95)); border-radius:var(--radius); box-shadow:0 6px 24px rgba(15,23,42,0.06)}
+h1{margin-top:0}
+.muted{color:var(--muted)}
+.controls{margin-top:12px}
+button#upload-btn{background:var(--accent); color:#fff; border:0; padding:10px 14px; border-radius:8px; cursor:pointer}
+
+.preview{margin-top:20px; display:flex; flex-direction:column; gap:12px; align-items:flex-start}
+.preview img{max-width:100%; border-radius:8px; box-shadow:0 4px 16px rgba(2,6,23,0.08)}
+.caption{background:var(--card); padding:10px 12px; border-radius:8px; box-shadow:inset 0 1px 0 rgba(0,0,0,0.02)}
+/* When caption is being typed, show a blinking caret */
+.caption.typing::after{
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  background: currentColor;
+  margin-left: 6px;
+  vertical-align: middle;
+  animation: blink 1s steps(2) infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+.disclaimer{font-size:12px; margin-top:8px; color:var(--muted)}
+
+/* Dialog styles */
+.dialog{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,6,23,0.4); z-index:40}
+.titlebar{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,#0078d7,#005ea6);color:#fff;padding:8px 12px;border-top-left-radius:10px;border-top-right-radius:10px}
+.titlebar-left{display:flex;align-items:center;gap:8px;font-weight:600}
+.app-icon{width:18px;height:18px;background:rgba(255,255,255,0.18);border-radius:3px;display:inline-block}
+.title-btn{background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer;padding:4px 8px}
+.dialog-panel{width:min(820px, calc(100% - 40px));overflow:hidden;border-radius:10px; background:var(--card); border:1px solid rgba(15,23,42,0.06);}
+.dialog-body{display:flex;gap:12px;padding:12px}
+.folder-list{width:160px;border-right:1px solid #e6eef9;padding-right:8px}
+.folder-list ul{list-style:none;padding:0;margin:0}
+.folder-item{padding:8px 6px;border-radius:6px;cursor:default}
+.folder-item.selected{background:rgba(37,99,235,0.08);font-weight:600}
+.file-area{flex:1;display:flex;flex-direction:column;gap:10px}
+.file-grid-wrap{max-height:360px;overflow:auto}
+.file-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:0;margin:0;list-style:none}
+.file-item{display:flex;flex-direction:column;gap:6px;align-items:center;padding:8px;border-radius:6px;cursor:pointer;border:1px solid transparent;background:transparent;transition:background .12s,border-color .12s;text-align:center}
+.file-item .thumb{width:120px;height:80px;object-fit:cover;border-radius:6px}
+.file-item .name{font-size:13px;word-break:break-word;max-width:120px}
+.file-item:hover,.file-item:focus{outline:none;border-color:rgba(37,99,235,0.12);background:rgba(37,99,235,0.03)}
+.file-item.selected{background:var(--accent);color:#fff;border-color:rgba(0,0,0,0.06);box-shadow:0 6px 20px rgba(2,6,23,0.12)}
+.dialog-toolbar{display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #f1f5f9}
+.file-name{flex:1;padding:8px 10px;border-radius:6px;border:1px solid #e6eef9;background:#fff}
+.dialog-actions{display:flex;justify-content:flex-end;gap:8px}
+#dialog-open{background:var(--accent);color:#fff;border:0;padding:8px 12px;border-radius:6px;cursor:pointer}
+#dialog-open[disabled]{opacity:0.5;cursor:default}
+
+@media (max-width:640px){
+  .dialog-panel{width:calc(100% - 20px)}
+  .folder-list{display:none}
+  .file-list{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+}
+
+/* Add rule to honor the HTML 'hidden' attribute so the dialog stays hidden until opened */
+[hidden]{display:none !important;}

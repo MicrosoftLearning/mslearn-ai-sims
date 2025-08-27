@@ -1,0 +1,59 @@
+:root{
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --accent:#2563eb;
+  --muted:#6b7280;
+  --user:#0b57d0;
+  --radius:10px;
+}
+
+*{box-sizing:border-box}
+body{margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial; background:var(--bg); color:#0f172a}
+.container{max-width:760px; margin:36px auto; padding:20px; background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.95)); border-radius:12px}
+h1{margin:0 0 12px 0}
+
+.chat{border:1px solid rgba(15,23,42,0.06); border-radius:8px; background:var(--card); padding:12px; height:420px; overflow:auto}
+.messages{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px}
+
+.message{max-width:78%; padding:10px 12px; border-radius:12px; box-shadow:0 6px 18px rgba(2,6,23,0.06)}
+.assistant{align-self:flex-start; background:#f1f5f9; color:#0f172a}
+.user{align-self:flex-end; background:var(--user); color:#fff}
+.meta{font-size:12px; color:var(--muted); margin-top:6px}
+
+.chat-form{display:flex; gap:8px; margin-top:12px}
+.chat-input{flex:1; padding:10px 12px; border-radius:8px; border:1px solid #e6eef9}
+.send-btn{background:var(--accent); color:#fff; border:0; padding:10px 14px; border-radius:8px; cursor:pointer}
+
+.typing{display:inline-block; width:60px}
+.typing span{display:inline-block; width:8px; height:8px; margin-right:4px; background:rgba(15,23,42,0.24); border-radius:50%; animation:blink 1s infinite}
+.typing span:nth-child(2){animation-delay:0.12s}
+.typing span:nth-child(3){animation-delay:0.24s}
+@keyframes blink{0%{opacity:0.2}50%{opacity:1}100%{opacity:0.2}}
+
+.caption{margin:0}
+.muted{color:var(--muted)}
+
+/* small light text for the signed-in label */
+.signed-in{font-size:13px; color:var(--muted); margin:0 0 12px 0}
+
+.samples{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.sample-list{display:flex;gap:8px;flex-wrap:wrap}
+.sample-btn{background:#fff;border:1px solid #e6eef9;padding:8px 12px;border-radius:999px;cursor:pointer;color:var(--accent);font-size:14px}
+.sample-btn:hover{background:rgba(37,99,235,0.04)}
+.sample-btn:focus{outline:2px solid rgba(37,99,235,0.14)}
+
+/* small, subdued disclaimer fixed at the bottom of the page */
+.disclaimer{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:8px;
+  font-size:12px;
+  color:var(--muted);
+  text-align:center;
+  opacity:0.9;
+  pointer-events:none;
+  z-index:999;
+}
+
+@media (max-width:520px){ .container{margin:16px; padding:12px} .chat{height:360px} }
