@@ -1,16 +1,9 @@
-# Microsoft Lab Exercises
-<!-- Change the title above as appropriate -->
+# Microsoft AI Application Simulations
 
-<!-- Review the notes in the index.md file to set up the repo for GitHub Pages -->
+- [Home Rental App (Machine Learning)](https://aka.ms/mslearn-ml-sim){:target="_blank"}
+- [Expenses chat assistant (Generative AI Agent)](https://aka.ms/mslearn-agent-sim){:target="_blank"}
+- [StoryBridge social history project (Natural Language Processing)](https://aka.ms/mslearn-nlp-sim){:target="_blank"}
+- [Photo Tagger (Computer Vision)](https://aka.ms/mslearn-vision-sim){:target="_blank"}
+- [Receipt Analyzer (Information Extraction)](https://aka.ms/mslearn-ai-info-sim){:target="_blank"}
 
-This repo contains exercises and supporting files for Microsoft skilling content.
-
-The exercises may be used in both self-paced skilling experiences on [Microsoft Learn](https://learn.microsoft.com) and in Microsoft authorized instructor-led training.
-<!-- Update the paragraph above with a link to a specific Learning Path or course as appropriate -->
-
-## Information for MCTs
-<!-- You can remove this section if the exercises will not be used to support Microsoft Official Curriculum ILT -->
-
-**Are you an MCT?** - Have a look at our [GitHub User Guide for MCTs](https://microsoftlearning.github.io/MCT-User-Guide/)
-
-Any MCT (Microsoft Certified Trainer) can submit a pull request to the code or content in the GitHub repro. Microsoft and the course author will then triage and include content and lab code changes as needed. You can submit bugs, changes, improvement, and ideas. Find a new Azure or Microsoft 365 feature before we have? Submit a new demo!
+> **Note**: These applications are *simulations* - there are no actual AI models or services behind them. However, they're based on real capabilities that you can implement using [Microsoft Azure AI technologies](https://azure.microsoft.com/solutions/ai/){:target="_blank"}.

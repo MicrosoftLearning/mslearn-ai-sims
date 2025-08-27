@@ -6,8 +6,6 @@ layout: home
 
 The following exercises explore common artificial intelligence workloads in a variety of applications. The goal of these exercises is to experience some of the capabilities of AI, and to learn about the kinds of solutions AI makes possible. You don't need to be a developer or a technical expert. There are no setup requirements. All you need is a modern web browser, and you can dive right in to see the kinds of solution that AI enables!
 
-## Exercises
-
 {% assign labs = site.pages | where_exp:"page", "page.url contains '/Instructions/Labs'" %}
 {% for activity in labs  %}
 <hr>
@@ -16,8 +14,6 @@ The following exercises explore common artificial intelligence workloads in a va
 {{activity.lab.description}}
 
 {% endfor %}
-
-## Applications
 
 If you'd rather explore the applications for yourself, without the prescribed lab instructions, you can use the following links:
 
