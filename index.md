@@ -1,5 +1,5 @@
 ---
-title: A Simulations
+title: Home
 permalink: index.html
 layout: home
 ---
