@@ -2,14 +2,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const captions = {
     'image1': 'A giraffe standing in a field',
     'image2': 'An elephant with tusks in a field',
-    'image3': 'A lion in a field of tall grass'
+    'image3': 'A lion in a field of tall grass',
+    'image4': 'A zebra standing on the side of a road'
   };
 
   // mapping of suggested tags per image base name
   const suggestedTagsMap = {
     'image1': ['animal','outdoor','giraffe','savannah','safari'],
     'image2': ['animal','outdoor','elephant','tusk','safari'],
-    'image3': ['animal','outdoor','lion','bigcat','safari']
+    'image3': ['animal','outdoor','lion','bigcat','safari'],
+    'image4': ['animal','outdoor','zebra','text','safari']
   };
 
   const uploadBtn = document.getElementById('upload-btn');
@@ -93,7 +95,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     setSelectionElement(null);
 
     let imgFiles = [];
-    try{ imgFiles = await listImagesFromFolder(); } catch(e){ imgFiles = ['image1.jpg','image2.jpg','image3.jpg']; }
+    try{ imgFiles = await listImagesFromFolder(); } catch(e){ imgFiles = ['image1.jpg','image2.jpg','image3.jpg','image4.jpg']; }
 
     imgFiles.forEach(fn => {
       const li = document.createElement('li');
@@ -133,6 +135,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(typingInterval){ clearInterval(typingInterval); typingInterval = null; }
     captionEl.classList.remove('typing');
     removeSuggestedTags();
+    removeDetectedText();
   }
 
   function typeCaption(text, charDelay = 40){
@@ -148,9 +151,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
         captionEl.classList.remove('typing');
         // show suggested tags button after caption has been fully typed
         createSuggestedTagsButton();
+        // show any detected text (if present for this image)
+        createDetectedTextDisplay();
       }
     }, charDelay);
   }
+
+  // mapping of detected text per image (simulated OCR results)
+  const detectedTextMap = {
+    'image4': 'SAFARI\nLODGE\n2 MILES'
+  };
 
   // helper functions to manage the suggested tags UI
   function removeSuggestedTags(){
@@ -158,6 +168,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
     const oldBtn = document.getElementById('suggested-tags-btn');
     if(oldBtn && oldBtn.parentNode) oldBtn.parentNode.removeChild(oldBtn);
+  }
+
+  // helper to remove detected text UI
+  function removeDetectedText(){
+    const existing = document.getElementById('detected-text');
+    if(existing && existing.parentNode) existing.parentNode.removeChild(existing);
   }
 
   function populateSuggestedTags(){
@@ -185,6 +201,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   function createSuggestedTagsButton(){
     removeSuggestedTags();
+    removeDetectedText();
     const wrap = document.createElement('div');
     wrap.id = 'suggested-tags-wrap';
     wrap.className = 'suggested-tags-wrap';
@@ -217,6 +234,42 @@ document.addEventListener('DOMContentLoaded', ()=>{
     return btn;
   }
 
+  // create and insert the detected text UI when OCR results are available
+  function createDetectedTextDisplay(){
+    removeDetectedText();
+
+    // determine base name from selectedFile or preview image alt/src
+    let base = selectedFile || previewImg.alt || '';
+    if(!base && previewImg.src){
+      const m = previewImg.src.match(/\/([^\/\?#]+)(?:[?#].*)?$/);
+      base = m ? m[1] : '';
+    }
+    base = base.replace(/\.[^/.]+$/, '');
+
+    const text = detectedTextMap[base];
+    if(!text) return;
+
+    const container = document.createElement('div');
+    container.id = 'detected-text';
+    container.className = 'detected-text';
+
+    const label = document.createElement('div');
+    label.className = 'detected-text-label';
+    label.textContent = 'Text detected:';
+
+    const pre = document.createElement('pre');
+    pre.className = 'detected-text-pre';
+    pre.textContent = text;
+
+    container.appendChild(label);
+    container.appendChild(pre);
+
+    const wrap = document.getElementById('suggested-tags-wrap');
+    // insert the detected text above the suggested-tags button (before the wrap)
+    if(wrap && wrap.parentNode) wrap.insertAdjacentElement('beforebegin', container);
+    else captionEl.insertAdjacentElement('afterend', container);
+  }
+
   function loadFile(filename){
     // cancel any pending analyze/typing from previous image
     clearPendingTimers();
@@ -244,6 +297,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       disclaimer.hidden = false;
       captionEl.textContent = 'Unable to load image';
       removeSuggestedTags();
+      removeDetectedText();
     };
 
     previewImg.src = `images/${filename}`;

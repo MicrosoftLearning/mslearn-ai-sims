@@ -18,6 +18,13 @@ Suppose you work in a web publishing organization that uses images in articles. 
 1. Use the **Upload Image** button to open **image1.jpg**. When the image opens, wait for the analysis to finish and review the caption that is generated for the image.
 1. Repeat the process for images 2 and 3, reviewing the captions that are generated.
 
+## Read text
+
+Images often contain text, and an AI technique called *optical character recognition* (OCR) can be used to detect and read it.
+
+1. Upload **image4.jpg** and review the generated caption.
+1. Note that the image in the text is detected and read.
+
 ## Generate tags
 
 Organizations that create and publish content often need to create and maintain a *digital asset management* solution - essentially a library of digital assets like images that can be searched based on relevant keywords, or *tags*.
