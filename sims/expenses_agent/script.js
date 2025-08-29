@@ -165,6 +165,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     typingEl.remove();
     const bubble = appendMessage('assistant', '');
     const bubbleText = document.createElement('div');
+    // preserve line breaks if message contains newline characters so it looks like an email
+    if(response && response.indexOf('\n') !== -1){
+      bubbleText.style.whiteSpace = 'pre-wrap';
+    }
     bubble.appendChild(bubbleText);
     await typeText(bubbleText, response, 28);
   }
@@ -267,8 +271,60 @@ document.addEventListener('DOMContentLoaded', ()=>{
         return;
       }
 
-      // user provided details - send the email (simulated)
-      await sendAssistantMessage('Thanks. I\'ve sent an email to expenses@contoso.com on your behalf. You\'ll receive a confirmation email within 24 hours. You may be asked to provide more information and/or receipts.');
+      // Validate that the user entered both a description (some letters) and at least one numeric amount
+      const hasDescription = /[A-Za-z\u00C0-\u024F]/.test(text);
+      const hasAmount = /(?:\$|£|€)?\s*\d+(?:[.,]\d{1,2})?/.test(text);
+
+      if(!hasDescription || !hasAmount){
+        await sendAssistantMessage('I didn\'t detect both a description and a numeric amount. Please enter the details and amounts to be claimed (for example: "Lunch with client $45.00"). If you don\'t want to continue, reply "No".');
+        // keep awaitingSubmitDetails = true so we loop until valid or cancelled
+        input.disabled = false;
+        sendBtn.disabled = false;
+        input.focus();
+        return;
+      }
+
+      // user provided valid details - send the email (simulated)
+      // show typing indicator, then insert a formatted message that looks like an email
+      const typingEl = showTyping();
+      await new Promise(r => setTimeout(r, 500));
+      typingEl.remove();
+
+      const bubble = appendMessage('assistant', '');
+      const container = document.createElement('div');
+
+      // intro sentence
+      const intro = document.createElement('div');
+      intro.textContent = "Thanks. I've sent an email to expenses@contoso.com on your behalf.";
+      container.appendChild(intro);
+
+      // email headers with bold labels
+      const headers = document.createElement('div');
+      headers.style.marginTop = '8px';
+      headers.innerHTML = `<div><strong>To:</strong> expenses@contoso.com</div><div><strong>Subject:</strong> Expense claim</div>`;
+      // indent the headers to look like an email block
+      headers.style.marginLeft = '12px';
+      container.appendChild(headers);
+
+      // email content (preserve newlines)
+      const content = document.createElement('div');
+      content.style.whiteSpace = 'pre-wrap';
+      content.style.marginTop = '8px';
+      // indent the content to align with headers
+      content.style.marginLeft = '12px';
+      content.textContent = text;
+      container.appendChild(content);
+
+      // footer
+      const footer = document.createElement('div');
+      footer.style.marginTop = '8px';
+      footer.textContent = "You'll receive a confirmation email within 24 hours. You may be asked to provide more information and/or receipts.";
+      container.appendChild(footer);
+
+      bubble.appendChild(container);
+      // ensure the newly added, taller message is visible
+      scrollToBottom(true);
+
       awaitingSubmitConfirmation = false;
       awaitingSubmitDetails = false;
       input.disabled = false;
