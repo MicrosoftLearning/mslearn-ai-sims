@@ -39,7 +39,7 @@ Suppose an agricultural specialists needs to identify the type of wheat that wil
 ### Predict wheat types based on seed measurements
 
 1. In a web browser, open the [Seed Identifier](https://aka.ms/seed-identifier){:target="_blank"} app at `https://aka.ms/seed-identifier`.
-1. To generate a rental prediction, set the following properties and then select **Predict wheat species**:
+1. To generate a wheat species prediction, set the following properties and then select **Predict wheat species**:
     - **Seed length**: The overall length of the seed in millimeters.
     - **Seed width**: The width of the seed in millimeters.
     - **Groove length**: The length of the groove in the seed.
