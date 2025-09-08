@@ -14,7 +14,7 @@ This exercise should take approximately **15** minutes to complete.
 
 Suppose you work in a web publishing organization that uses images in articles. For each image, you need to include a caption - either as a visible description of the image or as alt-text for screen-reading software.
 
-1. In a web browser, open the [Photo Tagger app](https://aka.ms/mslearn-vision-sim){:target="_blank"} app at `https://aka.ms/mslearn-vision-sim`.
+1. In a web browser, open the [Photo Tagger app](https://aka.ms/photo-tagger){:target="_blank"} app at `https://aka.ms/photo-tagger`.
 1. Use the **Upload Image** button to open **image1.jpg**. When the image opens, wait for the analysis to finish and review the caption that is generated for the image.
 1. Repeat the process for images 2 and 3, reviewing the captions that are generated.
 
