@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seed Identifier</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="input-panel">
+            <h1 class="main-title">Seed Identifier</h1>
+            <h2>Seed Measurements</h2>
+            <div class="slider-group">
+                <label for="seed-length">Seed Length (mm)</label>
+                <img src="images/seed-length.png" alt="Seed Length measurement illustration" aria-label="Seed Length measurement illustration">
+                <input type="range" id="seed-length" min="0.1" max="7.0" step="0.1" value="5.0" aria-label="Seed Length slider">
+                <span id="seed-length-value">5.0</span>
+            </div>
+            <div class="slider-group">
+                <label for="seed-width">Seed Width (mm)</label>
+                <img src="images/seed-width.png" alt="Seed Width measurement illustration" aria-label="Seed Width measurement illustration">
+                <input type="range" id="seed-width" min="0.1" max="7.0" step="0.1" value="3.0" aria-label="Seed Width slider">
+                <span id="seed-width-value">3.0</span>
+            </div>
+            <div class="slider-group">
+                <label for="groove-length">Groove Length (mm)</label>
+                <img src="images/groove-length.png" alt="Groove Length measurement illustration" aria-label="Groove Length measurement illustration">
+                <input type="range" id="groove-length" min="0.1" max="7.0" step="0.1" value="4.5" aria-label="Groove Length slider">
+                <span id="groove-length-value">4.5</span>
+            </div>
+            <button id="predict-btn" aria-label="Predict wheat species">Predict wheat species</button>
+        </div>
+    <div class="output-panel" id="output-panel" aria-live="polite">
+            <!-- Prediction result will appear here -->
+        </div>
+    </div>
+    <div class="sample-data-toggle-section">
+    <button id="toggle-sample-data" aria-label="Show or hide sample seed data table">Show sample data</button>
+        <div id="sample-data" style="display:none; margin-top:16px;">
+            <table class="sample-data-table" aria-label="Sample seed data table">
+                <thead>
+                    <tr>
+                        <th>Seed Length (mm)</th>
+                        <th>Seed Width (mm)</th>
+                        <th>Groove Length (mm)</th>
+                        <th>Wheat Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>5.763</td><td>3.312</td><td>5.22</td><td>1</td></tr>
+                    <tr><td>5.554</td><td>3.333</td><td>4.956</td><td>1</td></tr>
+                    <tr><td>5.291</td><td>3.337</td><td>4.825</td><td>1</td></tr>
+                    <tr><td>5.324</td><td>3.379</td><td>4.805</td><td>1</td></tr>
+                    <tr><td>5.658</td><td>3.562</td><td>5.175</td><td>1</td></tr>
+                    <tr><td>6.191</td><td>3.561</td><td>6.06</td><td>2</td></tr>
+                    <tr><td>5.998</td><td>3.484</td><td>5.877</td><td>2</td></tr>
+                    <tr><td>5.978</td><td>3.594</td><td>5.791</td><td>2</td></tr>
+                    <tr><td>6.154</td><td>3.93</td><td>6.079</td><td>2</td></tr>
+                    <tr><td>6.017</td><td>3.486</td><td>5.841</td><td>2</td></tr>
+                    <tr><td>5.137</td><td>2.981</td><td>4.87</td><td>3</td></tr>
+                    <tr><td>5.14</td><td>2.795</td><td>5.003</td><td>3</td></tr>
+                    <tr><td>5.236</td><td>3.232</td><td>5.056</td><td>3</td></tr>
+                    <tr><td>5.175</td><td>2.836</td><td>5.044</td><td>3</td></tr>
+                    <tr><td>5.243</td><td>2.974</td><td>5.063</td><td>3</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
