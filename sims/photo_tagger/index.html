@@ -9,30 +9,30 @@
 </head>
 <body>
   <main class="container">
-    <h1>Photo Tagger</h1>
-    <p class="muted">Upload an image to generate a caption.</p>
+  <h1 id="app-title" aria-label="Photo Tagger application">Photo Tagger</h1>
+  <p class="muted" aria-label="Upload an image to generate a caption">Upload an image to generate a caption.</p>
 
-    <div class="controls">
-      <button id="upload-btn" type="button">Upload Image</button>
+    <div class="controls" aria-label="Image upload controls">
+      <button id="upload-btn" type="button" aria-label="Upload an image">Upload Image</button>
     </div>
 
-    <div id="preview" class="preview" aria-live="polite" hidden>
-      <img id="preview-img" alt="" src="" />
-      <p id="caption" class="caption"></p>
-      <p id="disclaimer" class="disclaimer muted" hidden>AI-generated information can contain mistakes.</p>
+    <div id="preview" class="preview" aria-live="polite" aria-label="Image preview area" hidden>
+      <img id="preview-img" alt="Preview of uploaded image" src="" />
+      <p id="caption" class="caption" aria-label="Generated caption"></p>
+      <p id="disclaimer" class="disclaimer muted" hidden aria-label="Disclaimer: AI-generated information can contain mistakes.">AI-generated information can contain mistakes.</p>
     </div>
 
     <!-- Simulated "Open File" dialog listing files in images folder -->
-    <div id="file-dialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" hidden>
-      <div class="dialog-panel" role="document">
+  <div id="file-dialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-label="Open file dialog" hidden>
+  <div class="dialog-panel" role="document" aria-label="Dialog panel">
 
-        <div class="titlebar">
+        <div class="titlebar" aria-label="Dialog title bar">
           <div class="titlebar-left">
             <span class="app-icon" aria-hidden="true"></span>
-            <span id="dialog-title">Open</span>
+            <span id="dialog-title" aria-label="Open file dialog title">Open</span>
           </div>
           <div class="titlebar-right">
-            <button id="dialog-minimize" class="title-btn" aria-hidden="true">_</button>
+            <button id="dialog-minimize" class="title-btn" aria-hidden="true" aria-label="Minimize dialog">_</button>
             <button id="dialog-close" class="title-btn" aria-label="Close dialog">&times;</button>
           </div>
         </div>
@@ -40,26 +40,26 @@
         <div class="dialog-body">
           <aside class="folder-list" aria-label="Folders">
             <ul>
-              <li class="folder-item selected">images</li>
+              <li class="folder-item selected" aria-label="images folder">images</li>
             </ul>
           </aside>
 
-          <section class="file-area">
-            <div class="file-grid-wrap">
-              <ul id="file-list" class="file-list" role="listbox" tabindex="0"></ul>
+          <section class="file-area" aria-label="File selection area">
+            <div class="file-grid-wrap" aria-label="Grid of image files">
+              <ul id="file-list" class="file-list" role="listbox" tabindex="0" aria-label="List of image files"></ul>
             </div>
 
-            <div class="dialog-toolbar">
-              <label for="file-name">File name:</label>
-              <input id="file-name" class="file-name" type="text" readonly>
+            <div class="dialog-toolbar" aria-label="Dialog toolbar">
+              <label for="file-name" aria-label="File name label">File name:</label>
+              <input id="file-name" class="file-name" type="text" readonly aria-label="Selected file name">
 
-              <label for="file-type">Files of type:</label>
-              <select id="file-type"><option>All Image Files</option></select>
+              <label for="file-type" aria-label="Files of type label">Files of type:</label>
+              <select id="file-type" aria-label="Select file type"><option>All Image Files</option></select>
             </div>
 
-            <div class="dialog-actions">
-              <button id="dialog-open" type="button" disabled>Open</button>
-              <button id="dialog-cancel" type="button">Cancel</button>
+            <div class="dialog-actions" aria-label="Dialog actions">
+              <button id="dialog-open" type="button" disabled aria-label="Open selected file">Open</button>
+              <button id="dialog-cancel" type="button" aria-label="Cancel file selection">Cancel</button>
             </div>
           </section>
         </div>

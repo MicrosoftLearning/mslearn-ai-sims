@@ -9,29 +9,29 @@
 </head>
 <body>
     <div class="top-section">
-        <h1>StoryBridge - Oral Histories</h1>
-        <img src="logo.png" alt="Logo" width="100" height="100" style="display:block;margin:24px auto 0 auto;" />
-        <div class="intro">
-            <p>A storytelling platform for sharing oral histories across cultures. Using AI to complete:</p>
-            <ul>
-                <li><strong>Speech to text</strong>: Transcribe spoken stories.</li>
-                <li><strong>Language Detection</strong>: Identify the language of the storyteller.</li>
-                <li><strong>Translation</strong>: Make stories accessible globally.</li>
-                <li><strong>Named Entity Extraction</strong>: Highlight cultural references and historical figures.</li>
-                <li><strong>Sentiment Analysis</strong>: Capture emotional tone of narratives.</li>
+        <h1 id="app-title" aria-label="StoryBridge Oral Histories application">StoryBridge - Oral Histories</h1>
+        <img src="logo.png" alt="StoryBridge logo" width="100" height="100" style="display:block;margin:24px auto 0 auto;" aria-label="StoryBridge logo" />
+        <div class="intro" aria-label="Application introduction">
+            <p aria-label="Platform description">A storytelling platform for sharing oral histories across cultures. Using AI to complete:</p>
+            <ul aria-label="AI features list">
+                <li aria-label="Speech to text feature"><strong>Speech to text</strong>: Transcribe spoken stories.</li>
+                <li aria-label="Language detection feature"><strong>Language Detection</strong>: Identify the language of the storyteller.</li>
+                <li aria-label="Translation feature"><strong>Translation</strong>: Make stories accessible globally.</li>
+                <li aria-label="Named entity extraction feature"><strong>Named Entity Extraction</strong>: Highlight cultural references and historical figures.</li>
+                <li aria-label="Sentiment analysis feature"><strong>Sentiment Analysis</strong>: Capture emotional tone of narratives.</li>
             </ul>
         </div>
     </div>
-    <div class="upload-section">
-        <button id="uploadBtn">Upload File</button>
-        <div id="fileDialog" class="file-dialog" style="display:none;"></div>
+    <div class="upload-section" aria-label="Upload section">
+        <button id="uploadBtn" aria-label="Upload an audio file">Upload File</button>
+        <div id="fileDialog" class="file-dialog" style="display:none;" aria-label="File dialog"></div>
     </div>
-    <div id="audioContainer" style="display:none;">
-        <audio id="audioPlayer" controls></audio>
-        <div id="analyzing" class="analyzing" style="display:none;">Analyzing audio...</div>
-        <div id="infoTable" style="display:none;"></div>
+    <div id="audioContainer" style="display:none;" aria-label="Audio playback and analysis area">
+        <audio id="audioPlayer" controls aria-label="Audio player for uploaded story"></audio>
+        <div id="analyzing" class="analyzing" style="display:none;" aria-label="Audio analysis status">Analyzing audio...</div>
+        <div id="infoTable" style="display:none;" aria-label="Story analysis results"></div>
     </div>
-    <div class="disclaimer">AI-generated content may contain mistakes.</div>
+    <div class="disclaimer" aria-label="Disclaimer: AI-generated content may contain mistakes.">AI-generated content may contain mistakes.</div>
     <script src="script.js"></script>
 </body>
 </html>

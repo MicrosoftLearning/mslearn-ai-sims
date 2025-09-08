@@ -9,48 +9,48 @@
 </head>
 <body>
   <main class="container">
-    <h1>Home Rental Estimator</h1>
+  <h1 id="main-title">Home Rental Estimator</h1>
 
-    <form id="rental-form" aria-describedby="form-desc">
+  <form id="rental-form" aria-describedby="form-desc" aria-labelledby="main-title">
       <p id="form-desc" class="muted">Select a postal code, apartment size, and number of bedrooms, then click "Predict Rent".</p>
 
       <label for="postal">Postal Code</label>
-      <select id="postal" name="postal">
-        <option value="0001">0001</option>
-        <option value="0002">0002</option>
-        <option value="0003">0003</option>
+      <select id="postal" name="postal" aria-label="Postal Code">
+        <option value="0001" aria-label="Postal code 0001">0001</option>
+        <option value="0002" aria-label="Postal code 0002">0002</option>
+        <option value="0003" aria-label="Postal code 0003">0003</option>
       </select>
 
-      <label for="size">Apartment size (sq ft): <strong><span id="size-value">1500</span></strong></label>
-      <input id="size" name="size" type="range" min="500" max="3000" step="10" value="1500">
+  <label for="size">Apartment size (sq ft): <strong><span id="size-value">1500</span></strong></label>
+  <input id="size" name="size" type="range" min="500" max="3000" step="10" value="1500" aria-valuemin="500" aria-valuemax="3000" aria-valuenow="1500" aria-label="Apartment size in square feet">
 
       <fieldset>
         <legend>Bedrooms</legend>
         <div class="radios">
-          <label><input type="radio" name="bedrooms" value="0"> 0</label>
-          <label><input type="radio" name="bedrooms" value="1" checked> 1</label>
-          <label><input type="radio" name="bedrooms" value="2"> 2</label>
-          <label><input type="radio" name="bedrooms" value="3"> 3</label>
-          <label><input type="radio" name="bedrooms" value="4"> 4</label>
-          <label><input type="radio" name="bedrooms" value="5"> 5</label>
+          <label><input type="radio" name="bedrooms" value="0" aria-label="Studio, 0 bedrooms"> 0</label>
+          <label><input type="radio" name="bedrooms" value="1" checked aria-label="1 bedroom"> 1</label>
+          <label><input type="radio" name="bedrooms" value="2" aria-label="2 bedrooms"> 2</label>
+          <label><input type="radio" name="bedrooms" value="3" aria-label="3 bedrooms"> 3</label>
+          <label><input type="radio" name="bedrooms" value="4" aria-label="4 bedrooms"> 4</label>
+          <label><input type="radio" name="bedrooms" value="5" aria-label="5 bedrooms"> 5</label>
         </div>
       </fieldset>
 
       <div class="actions">
-        <button id="predict" type="button">Predict Rent</button>
+        <button id="predict" type="button" aria-label="Predict Rent">Predict Rent</button>
       </div>
 
     </form>
 
-    <div id="result" class="result" aria-live="polite"></div>
+  <div id="result" class="result" aria-live="polite" aria-atomic="true" aria-label="Estimated monthly rent result"></div>
 
     <!-- Added: link to view sample data and container for the CSV -->
     <div class="view-data-wrapper">
-      <a id="view-data" href="#" class="link-button" role="button" aria-controls="data-container">View sample rent data</a>
+      <a id="view-data" href="#" class="link-button" role="button" aria-controls="data-container" aria-label="View sample rent data">View sample rent data</a>
       <div id="data-container" class="data-container" hidden aria-live="polite" aria-label="Sample rent data table"></div>
     </div>
 
-    <p class="disclaimer" role="note">AI-generated content may contain mistakes.</p>
+  <p class="disclaimer" role="note" aria-label="Disclaimer: AI-generated content may contain mistakes.">AI-generated content may contain mistakes.</p>
   </main>
 </body>
 </html>

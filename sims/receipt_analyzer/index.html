@@ -9,35 +9,35 @@
 <body>
   <div class="app">
     <header>
-      <h1>Receipt Analyzer</h1>
-      <button id="uploadBtn" class="btn">Upload Receipt</button>
+  <h1 id="app-title" aria-label="Receipt Analyzer application">Receipt Analyzer</h1>
+  <button id="uploadBtn" class="btn" aria-label="Upload a receipt to analyze">Upload Receipt</button>
     </header>
 
     <main class="content">
       <div class="left">
-        <div id="leftPlaceholder" class="placeholder">No receipt selected</div>
-        <img id="receiptImage" src="" alt="Selected receipt" hidden>
+    <div id="leftPlaceholder" class="placeholder" aria-label="No receipt selected">No receipt selected</div>
+    <img id="receiptImage" src="" alt="Preview of selected receipt image" hidden>
       </div>
 
-      <div class="right" id="rightContent">
-        <p>Select a receipt to analyze using the "Upload Receipt" button.</p>
+      <div class="right" id="rightContent" aria-label="Analysis results area">
+        <p aria-label="Instructions to select a receipt">Select a receipt to analyze using the "Upload Receipt" button.</p>
       </div>
     </main>
   </div>
 
   <!-- Simulated file chooser modal -->
-  <div id="fileModal" class="modal" aria-hidden="true">
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="fileModalTitle">
-      <div class="modal-header">
-        <h2 id="fileModalTitle">Select a receipt to upload</h2>
-        <button id="closeModal" class="close-btn" aria-label="Close">&times;</button>
+  <div id="fileModal" class="modal" aria-hidden="true" aria-label="File selection modal">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="fileModalTitle" aria-label="Select a receipt dialog">
+      <div class="modal-header" aria-label="Dialog header">
+        <h2 id="fileModalTitle" aria-label="Select a receipt to upload">Select a receipt to upload</h2>
+        <button id="closeModal" class="close-btn" aria-label="Close file selection dialog">&times;</button>
       </div>
-      <p class="modal-instructions">Choose a file from the simulated local folder:</p>
-      <ul id="fileList" class="file-list" role="listbox" aria-label="Receipts"></ul>
+      <p class="modal-instructions" aria-label="Instructions for selecting a file">Choose a file from the simulated local folder:</p>
+      <ul id="fileList" class="file-list" role="listbox" aria-label="List of available receipts"></ul>
 
-      <div class="modal-footer">
-        <button id="cancelBtn" class="btn secondary">Cancel</button>
-        <button id="openBtn" class="btn" disabled>Open</button>
+      <div class="modal-footer" aria-label="Dialog footer">
+        <button id="cancelBtn" class="btn secondary" aria-label="Cancel file selection">Cancel</button>
+        <button id="openBtn" class="btn" disabled aria-label="Open selected receipt">Open</button>
       </div>
     </div>
   </div>
@@ -45,6 +45,6 @@
   <script src="script.js"></script>
 
   <!-- Small, subdued disclaimer -->
-  <div class="disclaimer">AI-generated content may contain mistakes.</div>
+  <div class="disclaimer" aria-label="Disclaimer: AI-generated content may contain mistakes.">AI-generated content may contain mistakes.</div>
 </body>
 </html>
