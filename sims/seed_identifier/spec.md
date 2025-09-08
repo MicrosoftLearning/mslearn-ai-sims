@@ -4,7 +4,7 @@ The user can use the app to predict which type of wheat a seed will grow based o
 
 - Class 1: Kama Wheat
 - Class 2: Rosa Wheat
-- Class 3: Canadian Wheet
+- Class 3: Canadian Wheat
 
 The app should show, on the left side of the screen an area where the user can set the following seed measurements:
 
