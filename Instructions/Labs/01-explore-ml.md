@@ -34,7 +34,7 @@ To create a machine learning model that predicts rental prices, some training da
 
 Let's explore another example of how machine learning can help determine unknown information based on past observations.
 
-Suppose an agricultural specialist needs to identify the type of wheat that will be grown from a seed. Machine learning can be used to determine the most probably wheat species based on seed measurements.
+Suppose an agricultural specialist needs to identify the type of wheat that will be grown from a seed. Machine learning can be used to determine the most probable wheat species based on seed measurements.
 
 ### Predict wheat types based on seed measurements
 
