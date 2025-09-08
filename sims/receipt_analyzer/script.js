@@ -22,7 +22,7 @@
   const fileModal = document.getElementById('fileModal');
   const fileList = document.getElementById('fileList');
   const closeModal = document.getElementById('closeModal');
-  const receiptImage = document.getElementById('receiptImage');
+  let receiptImage = null;
   const leftPlaceholder = document.getElementById('leftPlaceholder');
   const rightContent = document.getElementById('rightContent');
 
@@ -130,9 +130,17 @@
     closeModalFn();
 
     leftPlaceholder.style.display = 'none';
-    receiptImage.hidden = false;
+    // Remove previous image if exists
+    if (receiptImage && receiptImage.parentNode) {
+      receiptImage.parentNode.removeChild(receiptImage);
+    }
+    // Create new image element
+    receiptImage = document.createElement('img');
+    receiptImage.id = 'receiptImage';
     receiptImage.src = `receipts/${filename}`;
     receiptImage.alt = `Original ${filename}`;
+    const leftDiv = document.querySelector('.left');
+    leftDiv.appendChild(receiptImage);
 
     rightContent.innerHTML = `<div class="analyzing"><div class="spinner" aria-hidden="true"></div><div>Analyzing receipt...</div></div>`;
 
@@ -186,6 +194,14 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && fileModal.classList.contains('open')) closeModalFn();
     });
+    // Initial state: show only the message, no image element
+    leftPlaceholder.style.display = '';
+    leftPlaceholder.textContent = 'No receipt selected';
+    // Remove image if present
+    const imgEl = document.getElementById('receiptImage');
+    if (imgEl && imgEl.parentNode) {
+      imgEl.parentNode.removeChild(imgEl);
+    }
   });
 
 })();
