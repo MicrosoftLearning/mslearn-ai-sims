@@ -118,12 +118,12 @@
       prev.setAttribute('aria-selected', 'false');
     }
 
-    btn.classList.add('selected');
-    btn.setAttribute('aria-selected', 'true');
-    selectedFile = name;
+  btn.classList.add('selected');
+  btn.setAttribute('aria-selected', 'true');
+  selectedFile = name;
 
-    if (openBtn) openBtn.disabled = false;
-    if (openBtn) openBtn.focus();
+  if (openBtn) openBtn.disabled = false;
+  if (openBtn) openBtn.focus();
   }
 
   function selectFile(filename) {
