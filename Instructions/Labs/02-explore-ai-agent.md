@@ -21,7 +21,7 @@ Suppose you work for the fictional *Contoso* organization, and you need to submi
 1. Try entering a variation on that prompt - for example, `What's the limit for food?` or `What about a taxi?` and note that the agent can interpret your input appropriately as meaning the same thing as asking how much you can spend on a meal.
 1. Carry on asking questions about expense limits for things like hotels and airfares.
 
-    > **Note**: In this simulated app, the agent's understanding is limited.
+    > **Note**: In this simulated app, the agent's understanding is limited. A real generative AI agent typically has *much* more versatility in understanding and generating language.
 
 ## Get the agent to initiate a task
 
