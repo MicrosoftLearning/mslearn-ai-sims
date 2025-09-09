@@ -75,22 +75,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
 
     // Meal-related: contains meal/food and a question about maximum/claim
-    if(has(/\b(meal|meals|food|lunch|dinner|snack)\b/) && has(/\b(max|maximum|allow|allowable|claim|limit|how much)\b/)){
+    if(has(/\b(meal|meals|food|lunch|dinner|snack)\b/) && has(/\b(max|maximum|allow|allowable|claim|limit|how much|what about)\b/)){
       return 'meal';
     }
 
     // Hotel-related: hotel, accommodation, stay, room, lodging
-    if(has(/\b(hotel|accommodation|stay|room|lodging)\b/) && has(/\b(max|maximum|allow|allowable|claim|limit|night|per night)\b/)){
+    if(has(/\b(hotel|accommodation|stay|room|lodging)\b/) && has(/\b(max|maximum|allow|allowable|claim|limit|night|per night|what about)\b/)){
       return 'hotel';
     }
 
     // Taxi / ride-share: taxi, cab, Uber, Lyft, ride share
-    if((has(/\b(taxi|cab|uber|lyft|rideshare)\b/) || has(/\b(ride\s+share)\b/)) && has(/\b(max|maximum|allow|allowable|claim|limit|how much)\b/)){
+    if((has(/\b(taxi|cab|uber|lyft|rideshare)\b/) || has(/\b(ride\s+share)\b/)) && has(/\b(max|maximum|allow|allowable|claim|limit|how much|what about)\b/)){
       return 'taxi';
     }
 
     // Flight-related: flight, airfare, plane, ticket
-    if(has(/\b(flight|airfare|airline|plane|ticket)\b/) && has(/\b(max|maximum|allow|allowable|claim|limit|how much)\b/)){
+    if(has(/\b(flight|flights|airfare|airline|plane|ticket)\b/) && has(/\b(max|maximum|allow|allowable|claim|limit|how much|what about)\b/)){
       return 'flight';
     }
 
