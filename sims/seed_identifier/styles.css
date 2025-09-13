@@ -98,3 +98,92 @@ button:hover {
     margin-top: 10px;
     text-align: center;
 }
+
+/* Modal styles for model details */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal[aria-hidden="false"] {
+    display: flex;
+}
+.modal-content {
+    position: relative; /* allow absolute-positioned close button inside */
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 520px;
+    width: 92%;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+    text-align: center;
+    padding-bottom: 56px; /* space for bottom-close button */
+}
+.modal-close-btn {
+    position: absolute;
+    right: 16px;
+    bottom: 12px;
+    display: inline-block;
+    background: #0078d4;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+.modal-close-btn:hover {
+    background: #005fa3;
+}
+.model-metrics {
+    margin-top: 12px;
+    font-size: 0.95rem;
+    color: #333;
+}
+.sample-data-toggle-section button {
+    margin-right: 12px;
+    margin-top: 12px;
+}
+.sample-data-toggle-section { /* slightly adjust spacing */
+    display: block;
+}
+.confusion-cell-text {
+    font-weight: 700;
+    color: #fff;
+}
+.modal-title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid #e6e6e6;
+    background: #0078d4; /* blue title bar */
+    color: #fff;
+}
+.modal-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+}
+.modal-body {
+    padding: 18px 12px 12px 12px;
+}
+.close-modal {
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #666;
+}
+.model-algo {
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+    color: #333;
+}

@@ -2,9 +2,9 @@ This is a specification for a seed identifier app. The app should be a HTML 5 we
 
 The user can use the app to predict which type of wheat a seed will grow based on its measurements. The possible species of wheat are identified as three classes:
 
-- Class 1: Kama Wheat
-- Class 2: Rosa Wheat
-- Class 3: Canadian Wheat
+- Class 0: Kama Wheat
+- Class 1: Rosa Wheat
+- Class 2: Canadian Wheat
 
 The app should show, on the left side of the screen an area where the user can set the following seed measurements:
 
@@ -18,9 +18,9 @@ Under the sliders, display a button labeled "Predict wheat species".
 
 When the "Predict wheat species" button is clicked, calculate the predicted class for the wheat species as follows:
 
-    - If the groove length is greater than 5.5, predict class 2
-    - Otherwise, if the seed width is less than 3.1, predict class 3
-    - Otherwise, predict class 1
+    - If the groove length is greater than 5.5, predict class 1
+    - Otherwise, if the seed width is less than 3.1, predict class 2
+    - Otherwise, predict class 0
 
 After calculating the class, on the right side of the screen display the following:
 

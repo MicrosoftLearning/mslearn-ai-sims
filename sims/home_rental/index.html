@@ -47,7 +47,30 @@
     <!-- Added: link to view sample data and container for the CSV -->
     <div class="view-data-wrapper">
       <a id="view-data" href="#" class="link-button" role="button" aria-controls="data-container" aria-label="View sample rent data">View sample rent data</a>
+      <button id="view-model" type="button" class="link-button" aria-haspopup="dialog" aria-controls="model-modal" aria-expanded="false">View model details</button>
       <div id="data-container" class="data-container" hidden aria-live="polite" aria-label="Sample rent data table"></div>
+    </div>
+
+    <!-- Modal dialog for model details -->
+    <div id="model-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="model-modal-title" hidden>
+      <div class="modal-content" role="document">
+        <div class="modal-header">
+          <h2 id="model-modal-title">Model details</h2>
+          <button class="modal-close" aria-label="Close model details">&times;</button>
+        </div>
+        <div class="modal-body">
+          <ul class="model-metrics">
+            <li><strong>Model Algorithm:</strong> Linear Regression</li>
+            <li><strong>Mean Absolute Error (MAE):</strong> 31.90</li>
+            <li><strong>Mean Squared Error (MSE):</strong> 1845.10</li>
+            <li><strong>Root Mean Squared Error (RMSE):</strong> 42.96</li>
+            <li><strong>Coefficient of Determination (R<sup>2</sup>):</strong> 0.99</li>
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button id="model-close-btn" class="btn primary" type="button">Close</button>
+        </div>
+      </div>
     </div>
 
   <p class="disclaimer" role="note" aria-label="Disclaimer: AI-generated content may contain mistakes.">AI-generated content may contain mistakes.</p>

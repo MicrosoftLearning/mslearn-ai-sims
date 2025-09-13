@@ -160,4 +160,53 @@ document.addEventListener('DOMContentLoaded', ()=>{
     });
   }
 
+  // Modal: show model details and manage accessibility
+  const viewModelBtn = document.getElementById('view-model');
+  const modelModal = document.getElementById('model-modal');
+  let _previousActiveElement = null;
+
+  function openModelModal(){
+    if(!modelModal) return;
+    _previousActiveElement = document.activeElement;
+    modelModal.hidden = false;
+    viewModelBtn && viewModelBtn.setAttribute('aria-expanded','true');
+    const closeBtn = modelModal.querySelector('.modal-close');
+    closeBtn && closeBtn.focus();
+  }
+
+  function closeModelModal(){
+    if(!modelModal) return;
+    modelModal.hidden = true;
+    viewModelBtn && viewModelBtn.setAttribute('aria-expanded','false');
+    try{ _previousActiveElement && _previousActiveElement.focus(); } catch(e){}
+  }
+
+  if(viewModelBtn && modelModal){
+    const closeBtn = modelModal.querySelector('.modal-close');
+
+    viewModelBtn.addEventListener('click', ()=>{
+      openModelModal();
+    });
+
+    if(closeBtn){
+      closeBtn.addEventListener('click', ()=>{ closeModelModal(); });
+    }
+
+    // also wire the textual Close button in the footer
+    const textCloseBtn = modelModal.querySelector('#model-close-btn');
+    if(textCloseBtn){
+      textCloseBtn.addEventListener('click', ()=>{ closeModelModal(); });
+    }
+
+    // close when clicking on overlay (but not when clicking inside the content)
+    modelModal.addEventListener('click', (e)=>{
+      if(e.target === modelModal){ closeModelModal(); }
+    });
+
+    // close on Escape
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape' && !modelModal.hidden){ closeModelModal(); }
+    });
+  }
+
 });
