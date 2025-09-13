@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Customer Segmentation</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1 id="appTitle">Customer Segmentation</h1>
+  </header>
+
+  <main class="container">
+    <section class="left">
+      <div class="controls">
+        <button id="uploadBtn" aria-label="Upload Data button, opens file dialog" aria-haspopup="dialog">Upload Data</button>
+      </div>
+      <div id="tableContainer" class="table-container" role="region" aria-label="Loaded customer data table">
+        <!-- Data table will be inserted here -->
+      </div>
+    </section>
+
+    <section class="right">
+      <div id="analysisControls" class="analysis-controls" style="display:none" aria-labelledby="appTitle">
+        <div id="status" class="status" role="status" aria-live="polite"> </div>
+        <div id="clusterIndicator" class="cluster-indicator not-analyzed" role="status" aria-live="polite">Not analyzed</div>
+        <button id="analyzeBtn" aria-label="Analyze data and compute clusters">Analyze</button>
+        <div id="debugLog" class="debug-log" aria-live="polite" aria-label="Debug log for analysis messages"></div>
+        <div id="kScores" class="k-scores" style="display:none" aria-label="Silhouette scores per K">
+          <h4>Silhouette scores</h4>
+          <ul id="kScoresList" aria-label="List of silhouette scores"></ul>
+        </div>
+        <div id="clusterSummary" class="cluster-summary" style="display:none" aria-label="Cluster summary statistics">
+          <h4>Cluster summary</h4>
+          <div id="clusterSummaryList">(will show mean Frequency and Spend per cluster)</div>
+        </div>
+        <div id="clusterLegend" class="cluster-legend" style="margin-top:8px" aria-label="Cluster legend"></div>
+      </div>
+      <div id="plotContainer" class="plot-container" style="display:none" aria-hidden="true">
+        <canvas id="scatterCanvas" width="600" height="480" role="img" aria-label="Scatter plot of customers: Frequency on X axis and Spend on Y axis"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <!-- Simulated open file modal -->
+  <div id="fileModal" class="modal" style="display:none" role="dialog" aria-modal="true" aria-label="Open File dialog">
+    <div class="modal-content file-dialog" role="document">
+      <div class="file-dialog-header">
+        <span class="label">Look in:</span>
+        <span class="path">/data</span>
+      </div>
+      <div class="file-dialog-body">
+        <div class="file-list-pane">
+          <ul id="fileList" class="file-list" role="listbox" tabindex="0" aria-label="Files in data folder">
+            <!-- files listed here -->
+          </ul>
+        </div>
+        <div class="file-details-pane">
+          <div class="file-preview">
+            <div id="filePreview" class="file-preview-content" aria-live="polite" aria-label="Preview of selected file">Select a file to see a preview</div>
+          </div>
+        </div>
+      </div>
+      <div class="file-dialog-footer">
+        <div class="filename-input-wrap">
+          <label for="filenameInput">File name:</label>
+          <input id="filenameInput" type="text" aria-label="File name input" aria-describedby="filePreview" />
+        </div>
+        <div class="modal-actions">
+          <button id="openModal" aria-label="Open selected file">Open</button>
+          <button id="closeModal" aria-label="Close file dialog">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error modal for displaying analysis errors -->
+  <div id="errorModal" class="modal" style="display:none" role="dialog" aria-modal="true" aria-label="Error dialog">
+    <div class="modal-content error-modal-content" role="document">
+      <h3>Error</h3>
+      <pre id="errorDetails" aria-label="Error details">An error occurred.</pre>
+      <div class="modal-actions">
+        <button id="errorCloseBtn" aria-label="Close error dialog">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

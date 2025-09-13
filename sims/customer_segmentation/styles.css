@@ -1,0 +1,72 @@
+* { box-sizing: border-box; font-family: Arial, sans-serif; }
+body { margin: 0; background: #f4f6f8; color: #222 }
+header { background: #1e88e5; color: white; padding: 16px }
+.container { display: flex; gap: 16px; padding: 16px }
+.left { flex: 1 }
+.right { flex: 1; display:flex; flex-direction:column; align-items:center }
+.table-container { background:white; padding:12px; border-radius:6px; max-height:600px; overflow:auto }
+table { width:100%; border-collapse:collapse }
+th, td { padding:8px; border-bottom:1px solid #eee; text-align:left }
+.controls { margin-bottom:12px }
+.analysis-controls { margin-bottom:12px }
+.plot-container { background:white; padding:12px; border-radius:6px; width:100%; display:flex; justify-content:center }
+.status { margin-bottom:8px; font-weight:600 }
+.modal { position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center }
+.modal-content { background:white; padding:16px; border-radius:6px; min-width:320px }
+.file-list { list-style:none; padding:0; margin:0 }
+.file-list li { padding:8px; border:1px solid #eee; margin-bottom:6px; cursor:pointer }
+.file-list li:hover { background:#f0f8ff }
+.file-dialog { min-width:640px; display:flex; flex-direction:column }
+.file-dialog-header { padding:8px 12px; border-bottom:1px solid #eee; display:flex; gap:8px }
+.file-dialog-header .label { font-weight:700 }
+.file-dialog-body { display:flex; padding:12px; gap:12px }
+.file-list-pane { width:40%; max-height:300px; overflow:auto; border:1px solid #eee; border-radius:4px }
+.file-details-pane { flex:1; border:1px solid #eee; border-radius:4px; padding:8px; min-height:200px }
+.file-list li.selected { background:#cce5ff; outline: 2px solid #1e88e5 }
+.filename-input-wrap { padding:8px 12px; display:flex; gap:8px; align-items:center }
+#filenameInput { flex:1; padding:6px }
+.file-preview-content { font-size:12px; white-space:pre-wrap; max-height:240px; overflow:auto }
+.cluster-indicator { padding:6px 8px; border-radius:4px; display:inline-block; margin-bottom:8px }
+.cluster-indicator.not-analyzed { background:#fff3cd; color:#856404; border:1px solid #ffeeba }
+.cluster-indicator.running { background:#d1ecf1; color:#0c5460; border:1px solid #bee5eb }
+.cluster-indicator.complete { background:#d4edda; color:#155724; border:1px solid #c3e6cb }
+.debug-log { margin-top:8px; padding:8px; background:#f8f9fa; border:1px solid #eee; max-height:160px; overflow:auto; font-size:12px; white-space:pre-wrap }
+.k-scores { margin-top:8px; background:#ffffff; border:1px solid #eee; padding:8px; border-radius:4px }
+.k-scores h4 { margin:0 0 8px 0 }
+.k-scores ul { margin:0; padding:0 0 0 20px }
+.cluster-summary { margin-top:8px; background:#fff; border:1px solid #eee; padding:8px; border-radius:4px }
+.cluster-summary h4 { margin:0 0 8px 0 }
+.cluster-summary table { width:100%; border-collapse:collapse }
+.cluster-summary th, .cluster-summary td { padding:6px; border-bottom:1px solid #f0f0f0; text-align:left }
+.cluster-legend { background:#fff; border:1px solid #eee; padding:8px; border-radius:4px }
+.legend-item { display:flex; align-items:center; gap:8px; padding:4px 0 }
+.legend-swatch { width:16px; height:16px; border-radius:3px; display:inline-block; border:1px solid #ccc }
+
+/* Primary button styling: make all buttons blue */
+button {
+  background: #1e88e5;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+button:hover { background: #1669b2; }
+button:active { background: #0f4f86; }
+button:disabled { background: #bfdaf0; color: #fff; cursor: not-allowed }
+
+/* File dialog title bar */
+.file-dialog .file-dialog-header {
+  background: linear-gradient(180deg,#1976d2,#1565c0);
+  color: white;
+  padding: 12px 16px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* Make modal action buttons slightly separated */
+.modal-actions button { margin-left:8px }
