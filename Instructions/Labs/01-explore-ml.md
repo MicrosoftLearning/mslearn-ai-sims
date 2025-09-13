@@ -52,7 +52,7 @@ Suppose an agricultural specialist needs to identify the type of wheat that will
 To create a machine learning model that predicts which wheat species a seed will grow, some training data that includes known species is used to determine a function that fits the *features* of an seed (length, width, groove length, etc.) to the *label* the model needs to predict (in this case, the species: 0 for *Kama* wheat, 1 for *Rosa* wheat, and 2 for *Canadian* wheat.)
 
 1. Use the **Show sample data** button to reveal a sample of the training data for the seed species prediction model.
-1. 1. Use the **View model details** button to view information about the model, including the algorithm used to train it and the evaluation metrics calculated from validation data.
+1. Use the **View model details** button to view information about the model, including the algorithm used to train it and the evaluation metrics calculated from validation data.
 
 ## Segment customers based on spending patterns
 
