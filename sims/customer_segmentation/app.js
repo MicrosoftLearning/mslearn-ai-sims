@@ -262,8 +262,8 @@ function drawScatter(points, clusters=null, centroids=null) {
 
   // labels
   ctx.fillStyle = '#333'; ctx.font = '12px Arial';
-  ctx.fillText('AverageFrequency (X)', scatterCanvas.width/2 - 40, scatterCanvas.height - 8);
-  ctx.save(); ctx.translate(10, scatterCanvas.height/2 + 40); ctx.rotate(-Math.PI/2); ctx.fillText('AverageSpend (Y)', 0, 0); ctx.restore();
+  ctx.fillText('AverageFrequency', scatterCanvas.width/2 - 40, scatterCanvas.height - 8);
+  ctx.save(); ctx.translate(10, scatterCanvas.height/2 + 40); ctx.rotate(-Math.PI/2); ctx.fillText('AverageSpend', 0, 0); ctx.restore();
 }
 
 // K-Means implementation
