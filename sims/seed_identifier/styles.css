@@ -377,6 +377,36 @@ h1 {
     flex: 1;
 }
 
+.model-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.confusion-section, .dataset-info-section {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.dataset-info {
+    font-size: 1em;
+    line-height: 1.6;
+}
+
+.dataset-info p {
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.dataset-info .count {
+    font-weight: normal;
+    color: #000000;
+}
+
 .close {
     color: #aaa;
     font-size: 28px;

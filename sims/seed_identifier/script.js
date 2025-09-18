@@ -715,6 +715,21 @@ function showModelDetails() {
     const modal = document.getElementById('modelModal');
     const confusionDiv = document.getElementById('confusionMatrix');
     const metricsDiv = document.getElementById('metricsTable');
+    const datasetDiv = document.getElementById('datasetInfo');
+
+    // Display dataset information
+    const totalDataPoints = trainingData.length + testData.length;
+    const trainingPercentage = ((trainingData.length / totalDataPoints) * 100).toFixed(1);
+    const testingPercentage = ((testData.length / totalDataPoints) * 100).toFixed(1);
+    
+    datasetDiv.innerHTML = `
+        <p><strong>Training Dataset:</strong> <span class="count">${trainingData.length} rows</span></p>
+        <p><strong>Validation Dataset:</strong> <span class="count">${testData.length} rows</span></p>
+        <p><strong>Total Dataset:</strong> <span class="count">${totalDataPoints} rows</span></p>
+        <hr style="margin: 15px 0; border: 1px solid #e9ecef;">
+        <p><strong>Training Split:</strong> <span class="count">${trainingPercentage}%</span></p>
+        <p><strong>Validation Split:</strong> <span class="count">${testingPercentage}%</span></p>
+    `;
 
     // Create confusion matrix
     const classes = [0, 1, 2];

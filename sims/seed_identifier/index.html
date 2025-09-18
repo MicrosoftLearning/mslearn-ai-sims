@@ -106,9 +106,19 @@
                 <div class="model-info">
                     <h3>Algorithm: Logistic Regression</h3>
                     
-                    <h3>Confusion Matrix</h3>
-                    <div id="confusionMatrix" class="confusion-matrix" 
-                         aria-label="Confusion matrix showing model performance across different wheat species"></div>
+                    <div class="model-details-grid">
+                        <div class="confusion-section">
+                            <h3>Confusion Matrix</h3>
+                            <div id="confusionMatrix" class="confusion-matrix" 
+                                 aria-label="Confusion matrix showing model performance across different wheat species"></div>
+                        </div>
+                        
+                        <div class="dataset-info-section">
+                            <h3>Dataset Information</h3>
+                            <div id="datasetInfo" class="dataset-info" 
+                                 aria-label="Information about training and validation dataset sizes"></div>
+                        </div>
+                    </div>
                     
                     <h3>Performance Metrics</h3>
                     <div id="metricsTable" class="metrics-table" 
