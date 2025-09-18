@@ -711,16 +711,21 @@ function showModelDetails() {
         <table>
             <tr>
                 <th></th>
+                <th></th>
                 <th colspan="3">Predicted</th>
             </tr>
             <tr>
-                <th>Actual</th>
+                <th></th>
+                <th></th>
                 ${classes.map(classNum => `<th>${classNum}</th>`).join('')}
             </tr>
     `;
 
-    classes.forEach(i => {
+    classes.forEach((i, index) => {
         confusionHTML += '<tr>';
+        if (index === 0) {
+            confusionHTML += `<th class="actual-label" rowspan="3">Actual</th>`;
+        }
         confusionHTML += `<th>${i}</th>`;
         classes.forEach(j => {
             const value = modelMetrics.confusionMatrix[i][j];

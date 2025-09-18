@@ -337,7 +337,7 @@ h1 {
 }
 
 .confusion-matrix th, .confusion-matrix td {
-    border: 1px solid #333;
+    border: none;
     width: 60px;
     height: 60px;
     text-align: center;
@@ -346,13 +346,20 @@ h1 {
 }
 
 .confusion-matrix th {
-    background-color: #d6d8db;
+    background-color: #f5f5f5;
     color: #333;
+}
+
+.confusion-matrix th.actual-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
 }
 
 .confusion-matrix .matrix-cell {
     font-size: 1.1em;
     transition: all 0.3s ease;
+    border: 1px solid #000;
 }
 
 .metrics-table {
