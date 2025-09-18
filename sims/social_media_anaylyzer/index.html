@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Yonder Airlines - Social Media Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Blue Yonder Airlines</h1>
+            <h2>Social Media Analysis Dashboard</h2>
+        </div>
+    </header>
+
+    <main class="dashboard" role="main" aria-label="Social Media Analysis Dashboard">
+        <!-- Top Panel: Analytics -->
+        <div class="top-panel" role="region" aria-label="Analytics and Statistics">
+            <div class="analytics-section">
+                <div class="gauge-container">
+                    <h3>Average Sentiment</h3>
+                    <div class="gauge-wrapper">
+                        <canvas id="sentimentGauge" width="200" height="120" 
+                                role="img" 
+                                aria-label="Sentiment gauge showing average sentiment from -1 (negative) to +1 (positive)"
+                                aria-describedby="sentimentValue"></canvas>
+                        <div id="sentimentValue" class="sentiment-value" aria-label="Current average sentiment value">0.0</div>
+                    </div>
+                </div>
+                
+                <div class="totals-container" role="region" aria-label="Post Statistics">
+                    <h3>Statistics</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Posts:</span>
+                        <span id="totalPosts" class="stat-value" aria-label="Total number of posts loaded">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Positive:</span>
+                        <span id="positivePosts" class="stat-value" aria-label="Number of positive sentiment posts">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Negative:</span>
+                        <span id="negativePosts" class="stat-value" aria-label="Number of negative sentiment posts">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Neutral:</span>
+                        <span id="neutralPosts" class="stat-value" aria-label="Number of neutral sentiment posts">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Panels: Posts and Details -->
+        <div class="bottom-panels">
+            <!-- Left Panel: Post Capture and List -->
+            <div class="left-panel" role="region" aria-label="Social Media Post Capture and List">
+                <div class="capture-section">
+                    <button id="captureBtn" class="capture-button" 
+                            aria-describedby="captureDescription"
+                            aria-pressed="false">Start capturing</button>
+                    <div id="captureDescription" class="sr-only">
+                        Click to start or stop capturing social media posts from Blue Yonder Airlines customers
+                    </div>
+                </div>
+                
+                <div class="posts-section">
+                    <h3>Social Media Posts</h3>
+                    <div id="postsList" class="posts-list" 
+                         role="listbox" 
+                         aria-label="List of social media posts"
+                         aria-describedby="postsDescription"
+                         tabindex="0">
+                        <!-- Posts will be dynamically added here -->
+                    </div>
+                    <div id="postsDescription" class="sr-only">
+                        Select a post to view detailed information including full text and key phrases
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Post Details -->
+            <div class="right-panel" role="region" aria-label="Selected Post Details">
+                <div class="post-details-section">
+                    <h3>Post Details</h3>
+                    <div id="postDetails" class="post-details" 
+                         role="region" 
+                         aria-live="polite"
+                         aria-label="Details of selected social media post">
+                        <p class="no-selection">Select a post from the list to view details</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
