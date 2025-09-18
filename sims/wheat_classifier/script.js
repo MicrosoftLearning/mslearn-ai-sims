@@ -658,20 +658,19 @@ function showSampleData() {
                         <th>Seed Length</th>
                         <th>Seed Width</th>
                         <th>Groove Length</th>
-                        <th>Species</th>
+                        <th>Class</th>
                     </tr>
                 </thead>
                 <tbody>
         `;
         
         sampleData.forEach(row => {
-            const speciesName = speciesMap[row.class].name;
             tableHTML += `
                 <tr>
                     <td>${row.seedLength.toFixed(3)}</td>
                     <td>${row.seedWidth.toFixed(3)}</td>
                     <td>${row.grooveWidth.toFixed(3)}</td>
-                    <td>${speciesName}</td>
+                    <td>${row.class}</td>
                 </tr>
             `;
         });
