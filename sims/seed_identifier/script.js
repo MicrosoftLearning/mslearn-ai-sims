@@ -631,6 +631,26 @@ function makePrediction() {
     const species = speciesMap[prediction];
     const resultDiv = document.getElementById('predictionResult');
     
+    // Create probability display for all classes
+    let probabilityHTML = '<div class="all-probabilities"><h4>Species Probabilities:</h4>';
+    
+    // Get all class keys and sort them to ensure consistent order (0, 1, 2)
+    const classKeys = Object.keys(probabilities).map(Number).sort();
+    
+    for (let classKey of classKeys) {
+        const speciesName = speciesMap[classKey].name;
+        const probability = (probabilities[classKey] * 100).toFixed(2);
+        const isHighest = classKey === prediction;
+        
+        probabilityHTML += `
+            <div class="probability-item ${isHighest ? 'highest-probability' : ''}">
+                <span class="species-label">${speciesName}:</span>
+                <span class="probability-value ${isHighest ? 'bold' : ''}">${probability}%</span>
+            </div>
+        `;
+    }
+    probabilityHTML += '</div>';
+    
     resultDiv.className = 'prediction-result has-result';
     resultDiv.innerHTML = `
         <div class="species-result">
@@ -638,7 +658,7 @@ function makePrediction() {
             <img src="${species.image}" alt="${species.name}" class="species-image">
         </div>
         <div class="prediction-confidence">
-            <p><strong>Confidence:</strong> ${(probabilities[prediction] * 100).toFixed(1)}%</p>
+            ${probabilityHTML}
         </div>
     `;
 }

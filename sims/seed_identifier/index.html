@@ -8,83 +8,111 @@
 </head>
 <body>
     <div class="container">
-        <h1>Wheat Seed Identifier</h1>
+        <header>
+            <h1>Wheat Seed Identifier</h1>
+        </header>
         
-        <div class="main-content">
+        <main class="main-content" role="main">
             <!-- Left side: Controls -->
-            <div class="controls-section">
+            <section class="controls-section" aria-labelledby="controlsHeading">
+                <h2 id="controlsHeading" class="visually-hidden">Seed Measurement Controls</h2>
                 <div class="slider-group">
                     <label for="seedLength">Seed Length</label>
-                    <img src="images/seed-length.png" alt="Seed Length" class="measurement-image">
-                    <input type="range" id="seedLength" min="2" max="8" step="0.01" value="5.0">
-                    <span id="seedLengthValue">5.0</span>
+                    <img src="images/seed-length.png" alt="Diagram showing how to measure seed length" class="measurement-image">
+                    <input type="range" id="seedLength" min="2" max="8" step="0.01" value="5.0" 
+                           aria-label="Seed length in millimeters, range 2 to 8" 
+                           aria-describedby="seedLengthValue">
+                    <span id="seedLengthValue" aria-label="Current seed length value">5.0</span>
                 </div>
                 
                 <div class="slider-group">
                     <label for="seedWidth">Seed Width</label>
-                    <img src="images/seed-width.png" alt="Seed Width" class="measurement-image">
-                    <input type="range" id="seedWidth" min="2" max="8" step="0.01" value="5.0">
-                    <span id="seedWidthValue">5.0</span>
+                    <img src="images/seed-width.png" alt="Diagram showing how to measure seed width" class="measurement-image">
+                    <input type="range" id="seedWidth" min="2" max="8" step="0.01" value="5.0"
+                           aria-label="Seed width in millimeters, range 2 to 8" 
+                           aria-describedby="seedWidthValue">
+                    <span id="seedWidthValue" aria-label="Current seed width value">5.0</span>
                 </div>
                 
                 <div class="slider-group">
                     <label for="grooveLength">
                         Groove Length
-                        <span class="constraint-info" title="Groove length cannot exceed seed length">ⓘ</span>
+                        <span class="constraint-info" title="Groove length cannot exceed seed length" 
+                              aria-label="Information: Groove length cannot exceed seed length">ⓘ</span>
                     </label>
-                    <img src="images/groove-length.png" alt="Groove Length" class="measurement-image">
-                    <input type="range" id="grooveLength" min="2" max="8" step="0.01" value="5.0">
-                    <span id="grooveLengthValue">5.0</span>
-                    <div id="grooveConstraintMessage" class="constraint-message" style="display: none;">
+                    <img src="images/groove-length.png" alt="Diagram showing how to measure groove length" class="measurement-image">
+                    <input type="range" id="grooveLength" min="2" max="8" step="0.01" value="5.0"
+                           aria-label="Groove length in millimeters, range 2 to 8, automatically adjusted to not exceed seed length" 
+                           aria-describedby="grooveLengthValue grooveConstraintMessage">
+                    <span id="grooveLengthValue" aria-label="Current groove length value">5.0</span>
+                    <div id="grooveConstraintMessage" class="constraint-message" style="display: none;" 
+                         aria-live="polite">
                         Groove length adjusted to match seed length
                     </div>
                 </div>
                 
-                <button id="predictBtn" class="predict-button">Predict Wheat Species</button>
-            </div>
+                <button id="predictBtn" class="predict-button" 
+                        aria-label="Predict wheat species based on the current seed measurements">
+                    Predict Wheat Species
+                </button>
+            </section>
             
             <!-- Right side: Results -->
-            <div class="results-section">
-                <h2>Predicted Species</h2>
-                <div id="predictionResult" class="prediction-result">
+            <section class="results-section" aria-labelledby="resultsHeading">
+                <h2 id="resultsHeading">Predicted Species</h2>
+                <div id="predictionResult" class="prediction-result" 
+                     aria-live="polite" aria-label="Prediction results will appear here">
                     <p>Make a prediction to see results</p>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
         
-        <div class="bottom-section">
-            <button id="showSampleBtn" class="secondary-button">Show Sample Data</button>
-            <button id="showModelBtn" class="secondary-button">Model Details</button>
-        </div>
+        <nav class="bottom-section" role="navigation" aria-label="Additional features">
+            <button id="showSampleBtn" class="secondary-button" 
+                    aria-label="Toggle display of sample training data used to train the model" 
+                    aria-expanded="false">
+                Show Sample Data
+            </button>
+            <button id="showModelBtn" class="secondary-button" 
+                    aria-label="Open modal with detailed information about the machine learning model">
+                Model Details
+            </button>
+        </nav>
         
         <!-- Sample Data Display -->
-        <div id="sampleDataContainer" class="data-container" style="display: none;">
-            <h3>Sample Training Data</h3>
-            <div id="sampleDataTable"></div>
-        </div>
+        <section id="sampleDataContainer" class="data-container" style="display: none;" 
+                 aria-labelledby="sampleDataHeading">
+            <h3 id="sampleDataHeading">Sample Training Data</h3>
+            <div id="sampleDataTable" role="table" 
+                 aria-label="Training data showing seed measurements and their corresponding wheat species"></div>
+        </section>
         
         <!-- Loading indicator -->
-        <div id="loadingIndicator" class="loading" style="display: none;">
+        <div id="loadingIndicator" class="loading" style="display: none;" 
+             role="status" aria-live="polite" aria-label="Training machine learning model">
             <p>Training model, please wait...</p>
         </div>
     </div>
     
     <!-- Modal for Model Details -->
-    <div id="modelModal" class="modal" style="display: none;">
+    <div id="modelModal" class="modal" style="display: none;" role="dialog" 
+         aria-labelledby="modalTitle" aria-describedby="modalBody" aria-modal="true">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Model Details</h2>
-                <span class="close">&times;</span>
+                <h2 id="modalTitle">Model Details</h2>
+                <span class="close" aria-label="Close model details dialog" role="button" tabindex="0">&times;</span>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="modalBody">
                 <div class="model-info">
                     <h3>Algorithm: Logistic Regression</h3>
                     
                     <h3>Confusion Matrix</h3>
-                    <div id="confusionMatrix" class="confusion-matrix"></div>
+                    <div id="confusionMatrix" class="confusion-matrix" 
+                         aria-label="Confusion matrix showing model performance across different wheat species"></div>
                     
                     <h3>Performance Metrics</h3>
-                    <div id="metricsTable" class="metrics-table"></div>
+                    <div id="metricsTable" class="metrics-table" 
+                         aria-label="Table showing model performance metrics including precision, recall, and F1-score"></div>
                 </div>
             </div>
         </div>
