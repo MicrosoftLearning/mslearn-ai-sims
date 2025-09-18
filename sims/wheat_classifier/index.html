@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheat Species Classifier</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Wheat Species Classifier</h1>
+        
+        <div class="main-content">
+            <!-- Left side: Controls -->
+            <div class="controls-section">
+                <div class="slider-group">
+                    <label for="seedLength">Seed Length</label>
+                    <img src="images/seed-length.png" alt="Seed Length" class="measurement-image">
+                    <input type="range" id="seedLength" min="2" max="8" step="0.01" value="5.0">
+                    <span id="seedLengthValue">5.0</span>
+                </div>
+                
+                <div class="slider-group">
+                    <label for="seedWidth">Seed Width</label>
+                    <img src="images/seed-width.png" alt="Seed Width" class="measurement-image">
+                    <input type="range" id="seedWidth" min="2" max="8" step="0.01" value="5.0">
+                    <span id="seedWidthValue">5.0</span>
+                </div>
+                
+                <div class="slider-group">
+                    <label for="grooveLength">
+                        Groove Length
+                        <span class="constraint-info" title="Groove length cannot exceed seed length">ⓘ</span>
+                    </label>
+                    <img src="images/groove-length.png" alt="Groove Length" class="measurement-image">
+                    <input type="range" id="grooveLength" min="2" max="8" step="0.01" value="5.0">
+                    <span id="grooveLengthValue">5.0</span>
+                    <div id="grooveConstraintMessage" class="constraint-message" style="display: none;">
+                        Groove length adjusted to match seed length
+                    </div>
+                </div>
+                
+                <button id="predictBtn" class="predict-button">Predict Wheat Species</button>
+            </div>
+            
+            <!-- Right side: Results -->
+            <div class="results-section">
+                <h2>Predicted Species</h2>
+                <div id="predictionResult" class="prediction-result">
+                    <p>Make a prediction to see results</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bottom-section">
+            <button id="showSampleBtn" class="secondary-button">Show Sample Data</button>
+            <button id="showModelBtn" class="secondary-button">Model Details</button>
+        </div>
+        
+        <!-- Sample Data Display -->
+        <div id="sampleDataContainer" class="data-container" style="display: none;">
+            <h3>Sample Training Data</h3>
+            <div id="sampleDataTable"></div>
+        </div>
+        
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" class="loading" style="display: none;">
+            <p>Training model, please wait...</p>
+        </div>
+    </div>
+    
+    <!-- Modal for Model Details -->
+    <div id="modelModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Model Details</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="model-info">
+                    <h3>Algorithm: Logistic Regression</h3>
+                    
+                    <h3>Confusion Matrix</h3>
+                    <div id="confusionMatrix" class="confusion-matrix"></div>
+                    
+                    <h3>Performance Metrics</h3>
+                    <div id="metricsTable" class="metrics-table"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
