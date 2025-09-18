@@ -6,7 +6,7 @@ lab:
 
 # Explore machine learning scenarios
 
-In this exercise you will use two applications that simulate the use of a machine learning model to predict unknown values.
+In this exercise you will explore applications that use machine learning to predict unknown values.
 
 This exercise should take approximately **15** minutes to complete.
 
@@ -17,19 +17,19 @@ Let's say you own an apartment in the thriving town of Dataville. You decide you
 ### Predict monthly rent amounts based on property features
 
 1. In a web browser, open the [Home rental estimator](https://aka.ms/rent-predictor){:target="_blank"} app at `https://aka.ms/rent-predictor`.
-1. To generate a rental prediction, set the following properties and then select **Predict Rent**:
+1. To generate a rental prediction, set the following properties and then select **Calculate Rent**:
     - **Postal Code**: Select one of the postal codes for the fictional town of Dataville.
-    - **Apartment size**: Use the slider to set the size of your apartment in square feet.
-    - **Bedrooms**: Select the number of bedrooms in your apartment.
+    - **Property Size**: Use the slider to set the size of your property in square feet.
+    - **Number of Bedrooms**: Select the number of bedrooms in your property.
 1. Review the generated rent prediction.
-1. Try adjusting the properties, and verify that the changes result in different rental predictions.
+1. Try adjusting the property details, and verify that the changes result in different rental predictions.
 
 ### Review rental data and model details
 
 To create a machine learning model that predicts rental prices, some training data that includes known rental prices is used to determine a function that fits the *features* of an apartment (location, size, number of bedrooms, etc.) to the *label* the model needs to predict (in this case, the rental amount.)
 
-1. Use the **View sample rental data** button to reveal a sample of the training data for the rental prediction model.
-1. Use the **View model details** button to view information about the model, including the algorithm used to train it and the evaluation metrics calculated from validation data.
+1. Use the **Show sample data** button to reveal a sample of the training data for the rental prediction model.
+1. Use the **Show model details** button to view information about the model, including the algorithm used to train it and the evaluation metrics calculated from validation data.
 
 ## Generate predictions for wheat seed species
 
@@ -72,4 +72,4 @@ Suppose a retail business wants to group customers into segments for marketing, 
 
     Each cluster represents a group of customers with similar spending habits.
 
-> **Note**: The applications used in this exercise are *simulations* - there are no actual machine learning models behind them and the features have been simplified. However, they're based on real models that were trained and tested using [Azure Machine Learning](https://azure.microsoft.com/products/machine-learning/){:target="_blank"} - a platform for machine learning model development, deployment, and management.
+> **Note**: The applications used in this exercise use machine learning models that are simple, and based on a small set of data features. In a real scenario, data scientists can use a range of machine learning frameworks with platforms like [Azure Machine Learning](https://azure.microsoft.com/products/machine-learning/){:target="_blank"} to develop, deploy, and manage machine learning models.
