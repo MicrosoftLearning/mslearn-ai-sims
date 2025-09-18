@@ -29,4 +29,4 @@ If you'd rather explore the applications for yourself, without the prescribed la
 - [Photo Tagger (Computer Vision)](https://aka.ms/photo-tagger){:target="_blank"}
 - [Receipt Analyzer (Information Extraction)](https://aka.ms/receipt-analyzer){:target="_blank"}
 
-> **Note**: These applications are *simulations* - there are no actual AI models or services behind them. However, they're based on real capabilities that you can implement using [Microsoft Azure AI technologies](https://azure.microsoft.com/solutions/ai/){:target="_blank"}.
+> **Note**: These applications are *simulations* - with simple models and no Azure AI services behind them. However, they're based on real capabilities that you can implement using [Microsoft Azure AI technologies](https://azure.microsoft.com/solutions/ai/){:target="_blank"}.
