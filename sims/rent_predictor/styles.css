@@ -284,38 +284,59 @@ table tr:last-child td {
 .modal-content {
     background-color: white;
     margin: 5% auto;
-    padding: 30px;
+    padding: 0;
     border-radius: 15px;
     width: 90%;
     max-width: 600px;
     max-height: 80vh;
-    overflow-y: auto;
+    overflow: hidden;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    position: absolute;
-    top: 15px;
-    right: 20px;
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    flex-shrink: 0;
 }
 
-.close:hover,
-.close:focus {
-    color: #667eea;
-    text-decoration: none;
-}
-
-.model-info h2 {
-    color: #4a5568;
-    margin-bottom: 20px;
-    text-align: center;
+.modal-header h2 {
+    margin: 0;
     font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+.model-info {
+    padding: 30px;
+    border-radius: 0 0 15px 15px;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(80vh - 80px);
 }
 
 .model-info h3 {
@@ -394,7 +415,20 @@ table tr:last-child td {
     .modal-content {
         margin: 10% auto;
         width: 95%;
+        padding: 0;
+    }
+    
+    .modal-header {
+        padding: 15px 20px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .model-info {
         padding: 20px;
+        max-height: calc(80vh - 60px);
     }
     
     table {

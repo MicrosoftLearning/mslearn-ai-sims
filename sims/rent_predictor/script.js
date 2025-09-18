@@ -438,12 +438,6 @@ class RentPredictor {
             console.log('Model details button event listener added');
         }
 
-        const closeModal = document.getElementById('closeModal');
-        if (closeModal) {
-            closeModal.addEventListener('click', () => this.closeModal());
-            console.log('Close modal event listener added');
-        }
-
         // Update size display
         const sizeSlider = document.getElementById('size');
         const sizeDisplay = document.getElementById('sizeDisplay');
@@ -615,7 +609,10 @@ class RentPredictor {
             }
             
             modalContent.innerHTML = `
-                <h2>Model Details</h2>
+                <div class="modal-header">
+                    <h2>Model Details</h2>
+                    <button class="close-btn" onclick="rentPredictor.closeModal()">Close</button>
+                </div>
                 <div class="model-info">
                     <h3>Algorithm</h3>
                     <p>Multiple Linear Regression</p>
@@ -661,11 +658,14 @@ class RentPredictor {
     }
 }
 
+// Global reference for the app instance
+let rentPredictor;
+
 // Initialize the app when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing RentPredictor...');
     try {
-        new RentPredictor();
+        rentPredictor = new RentPredictor();
     } catch (error) {
         console.error('Error initializing RentPredictor:', error);
         // Show error message to user
