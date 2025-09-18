@@ -26,6 +26,7 @@ If you'd rather explore the applications for yourself, without the prescribed la
 - [Customer segmentation (Machine Learning - Clustering)](https://aka.ms/customer-segmentation){:target="_blank"}
 - [Expenses chat assistant (Generative AI Agent)](https://aka.ms/expenses-agent){:target="_blank"}
 - [StoryBridge social history project (Natural Language Processing)](https://aka.ms/story-bridge){:target="_blank"}
+- [Blue Yonder Airlines social media analyzer (Natural Language Processing](https://aka.ms/blue_yonder_social){:target="_blank"}
 - [Photo Tagger (Computer Vision)](https://aka.ms/photo-tagger){:target="_blank"}
 - [Receipt Analyzer (Information Extraction)](https://aka.ms/receipt-analyzer){:target="_blank"}
 
