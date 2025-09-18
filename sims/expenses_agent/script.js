@@ -33,11 +33,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   // Responses (exact text comes from the spec)
   const RESPONSES = {
-    meal: 'The maximum allowable expense for a meal is $75.00.',
+    meal: 'You can claim up to $75.00 for a meal.',
     hotel: 'The maximum allowable expense for accommodation is $200.00 per night.',
     submit: 'To submit an expense claim, you can just send details and the amounts to be claimed to expenses@contoso.com. Would you like me to submit a claim on your behalf?',
-    flight: 'The maximum allowable expense for a flight is $600',
-    taxi: 'The maximum allowable expense for a taxi or ride-share is $50.',
+    flight: 'The maximum cost that can be reimbursed for a flight is $600.00',
+    taxi: 'The most you can spend on a taxi or ride-share is $50.00.',
     greeting: 'Hi. How can I help?',
     capabilities: 'I can help you with information and guidelines for expense claims.',
     thanks: 'You\'re welcome. Anything else I can help with?',
@@ -74,28 +74,40 @@ document.addEventListener('DOMContentLoaded', ()=>{
       return 'goodbye';
     }
 
-    // Meal-related: contains meal/food and a question about maximum/claim
-    if(has(/\b(meal|meals|food|lunch|dinner|snack)\b/) && has(/\b(max|maximum|allow|allowable|claim|limit|how much|what about)\b/)){
-      return 'meal';
-    }
+    // Check for expense-related questions with multiple items
+    if(has(/\b(max|maximum|allow|allowable|claim|limit|how much|spend|what about)\b/)){
+      const expenseTypes = [];
+      
+      // Meal-related: contains meal/food
+      if(has(/\b(meal|meals|food|lunch|dinner|snack|restaurant|breakfast)\b/)){
+        expenseTypes.push('meal');
+      }
 
-    // Hotel-related: hotel, accommodation, stay, room, lodging
-    if(has(/\b(hotel|accommodation|stay|room|lodging)\b/) && has(/\b(max|maximum|allow|allowable|claim|limit|night|per night|what about)\b/)){
-      return 'hotel';
-    }
+      // Hotel-related: hotel, accommodation, stay, room, lodging
+      if(has(/\b(hotel|hotels|accommodation|stay|room|rooms|lodging)\b/)){
+        expenseTypes.push('hotel');
+      }
 
-    // Taxi / ride-share: taxi, cab, Uber, Lyft, ride share
-    if((has(/\b(taxi|cab|uber|lyft|rideshare)\b/) || has(/\b(ride\s+share)\b/)) && has(/\b(max|maximum|allow|allowable|claim|limit|how much|what about)\b/)){
-      return 'taxi';
-    }
+      // Taxi / ride-share: taxi, cab, Uber, Lyft, ride share
+      if((has(/\b(taxi|cab|uber|lyft|rideshare|lift)\b/) || has(/\b(ride\s+share)\b/))){
+        expenseTypes.push('taxi');
+      }
 
-    // Flight-related: flight, airfare, plane, ticket
-    if(has(/\b(flight|flights|airfare|airline|plane|ticket)\b/) && has(/\b(max|maximum|allow|allowable|claim|limit|how much|what about)\b/)){
-      return 'flight';
+      // Flight-related: flight, airfare, plane, ticket
+      if(has(/\b(flight|flights|airfare|airline|plane|ticket)\b/)){
+        expenseTypes.push('flight');
+      }
+
+      // If multiple expense types found, return them as an array
+      if(expenseTypes.length > 1){
+        return expenseTypes;
+      } else if(expenseTypes.length === 1){
+        return expenseTypes[0];
+      }
     }
 
     // Submit-related: how to submit / where to send / receipt(s)
-    if((has(/\b(submit|how do i submit|how to submit|how to|how do i|where do i|send|file|process)\b/) && has(/\b(expense|claim|receipt|receipts|expense claim)\b/)) || has(/\b(expense claim|how to submit an expense)\b/)){
+    if((has(/\b(submit|how do i submit|how to submit|how to|how do i|where do i|send|file|process)\b/) && has(/\b(expense|claim|receipt|receipts|expense claim)\b/)) || has(/\b(expense claim|how to submit an expense|get reimbursed)\b/)){
       return 'submit';
     }
 
@@ -176,7 +188,15 @@ document.addEventListener('DOMContentLoaded', ()=>{
   async function respondTo(text){
     // determine intent
     const intent = matchIntent(text);
-    const response = intent ? RESPONSES[intent] : "I'm sorry. I didn't understand your question. Please try rewording it.\nNote that I can only help with questions about expenses.";
+    let response;
+    
+    // Handle multiple expense types
+    if(Array.isArray(intent)){
+      const responses = intent.map(type => RESPONSES[type]);
+      response = responses.join('\n');
+    } else {
+      response = intent ? RESPONSES[intent] : "I'm sorry. I didn't understand your question. Please try rewording it.\nNote that I can only help with questions about expenses.";
+    }
 
     // show typing indicator
     const typingEl = showTyping();
@@ -188,12 +208,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
     typingEl.remove();
     const bubble = appendMessage('assistant', '');
     const bubbleText = document.createElement('div');
+    
+    // preserve line breaks for multiple responses
+    if(response && response.indexOf('\n') !== -1){
+      bubbleText.style.whiteSpace = 'pre-wrap';
+    }
+    
     bubble.appendChild(bubbleText);
 
     // type the response
     await typeText(bubbleText, response, 28);
 
-    return intent;
+    return Array.isArray(intent) ? intent : intent;
   }
 
   function addPendingSample(text){
