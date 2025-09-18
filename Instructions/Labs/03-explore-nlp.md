@@ -1,6 +1,6 @@
 ---
 lab:
-    title: 'Explore natural language processing scenario's
+    title: 'Explore natural language processing scenarios'
     description: 'Explore applications that demonstrates how AI natural language processing capabilities can be used to transcribe and analyze spoken and written text.'
 ---
 
