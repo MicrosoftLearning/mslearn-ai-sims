@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Board - Resume Matcher</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Job Board Resume Matcher</h1>
+            <p>Find your perfect job match and generate a tailored cover letter</p>
+        </header>
+
+        <main>
+            <!-- Resume Upload Section -->
+            <section class="resume-section">
+                <h2>Step 1: Select Your Resume</h2>
+                <div class="upload-area">
+                    <button id="uploadBtn" class="upload-button">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Choose Resume
+                    </button>
+                    <p class="upload-text">Click to select from available resumes</p>
+                </div>
+                <div id="selectedResume" class="selected-resume hidden">
+                    <h3>Selected Resume:</h3>
+                    <div class="resume-preview"></div>
+                    <button id="changeResumeBtn" class="change-resume-btn">Change Resume</button>
+                </div>
+            </section>
+
+            <!-- Job Listings Section -->
+            <section class="jobs-section">
+                <h2>Step 2: Browse Available Jobs</h2>
+                <div id="jobListings" class="job-listings"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Resume Selection Modal -->
+    <div id="resumeModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Select a Resume</h2>
+                <button class="close-button" data-modal="resumeModal">&times;</button>
+            </div>
+            <div id="resumeList" class="resume-list"></div>
+        </div>
+    </div>
+
+    <!-- Job Comparison Modal -->
+    <div id="comparisonModal" class="modal hidden">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2 id="comparisonTitle">Job Match Analysis</h2>
+                <button class="close-button" data-modal="comparisonModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Match Overview -->
+                <div class="match-overview">
+                    <div class="match-score">
+                        <div class="score-circle">
+                            <span id="matchPercentage">0%</span>
+                        </div>
+                        <p id="matchMessage"></p>
+                    </div>
+                    <div class="quick-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="matchedSkills">0</span>
+                            <span class="stat-label">Matched Skills</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="missingSkills">0</span>
+                            <span class="stat-label">Missing Skills</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="experienceMatch">0%</span>
+                            <span class="stat-label">Experience Match</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Analysis -->
+                <div class="skills-analysis">
+                    <h3>Skills Breakdown</h3>
+                    <div id="skillsChart" class="skills-chart"></div>
+                </div>
+
+                <!-- Cover Letter Section -->
+                <div id="coverLetterSection" class="cover-letter-section hidden">
+                    <h3>🎉 Generated Cover Letter</h3>
+                    <p class="cover-letter-intro">Based on your strong match, we've generated a personalized cover letter:</p>
+                    <div id="coverLetter" class="cover-letter"></div>
+                    <div class="cover-letter-actions">
+                        <button id="downloadBtn" class="download-button">Download Cover Letter</button>
+                        <button id="copyBtn" class="copy-button">Copy to Clipboard</button>
+                    </div>
+                </div>
+
+                <!-- Improvement Suggestions -->
+                <div id="suggestionsSection" class="suggestions-section">
+                    <h3>💡 Improvement Suggestions</h3>
+                    <div id="suggestionsList" class="suggestions-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
