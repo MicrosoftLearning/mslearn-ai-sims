@@ -7,6 +7,7 @@ class RentPredictor {
         this.model = null;
         this.metrics = {};
         this.postalCodes = ['12345', '23456', '34567', '45678', '56789'];
+        this.isSampleDataVisible = false;
         this.init();
     }
 
@@ -509,69 +510,87 @@ class RentPredictor {
     }
 
     showSampleData() {
-        console.log('Showing sample data...');
+        const sampleDataBtn = document.getElementById('sampleDataBtn');
+        const sampleDataDiv = document.getElementById('sampleData');
         
-        try {
-            if (!this.data || this.data.length === 0) {
-                document.getElementById('sampleData').innerHTML = `
-                    <h3>Sample Data</h3>
-                    <p>No data available to display. Model may still be training.</p>
-                `;
-                return;
-            }
+        // Toggle visibility
+        if (this.isSampleDataVisible) {
+            // Hide the data
+            console.log('Hiding sample data...');
+            sampleDataDiv.innerHTML = '';
+            sampleDataBtn.textContent = 'Show Sample Data';
+            sampleDataBtn.setAttribute('aria-describedby', 'sample-help');
+            this.isSampleDataVisible = false;
+            console.log('Sample data hidden');
+        } else {
+            // Show the data
+            console.log('Showing sample data...');
             
-            const sampleSize = Math.min(10, this.data.length);
-            const randomSample = [];
-            const usedIndices = new Set();
-            
-            while (randomSample.length < sampleSize) {
-                const randomIndex = Math.floor(Math.random() * this.data.length);
-                if (!usedIndices.has(randomIndex)) {
-                    usedIndices.add(randomIndex);
-                    randomSample.push(this.data[randomIndex]);
+            try {
+                if (!this.data || this.data.length === 0) {
+                    sampleDataDiv.innerHTML = `
+                        <h3>Sample Data</h3>
+                        <p>No data available to display. Model may still be training.</p>
+                    `;
+                    return;
                 }
-            }
+                
+                const sampleSize = Math.min(10, this.data.length);
+                const randomSample = [];
+                const usedIndices = new Set();
+                
+                while (randomSample.length < sampleSize) {
+                    const randomIndex = Math.floor(Math.random() * this.data.length);
+                    if (!usedIndices.has(randomIndex)) {
+                        usedIndices.add(randomIndex);
+                        randomSample.push(this.data[randomIndex]);
+                    }
+                }
 
-            let tableHTML = `
-                <h3>Sample Data</h3>
-                <table role="table" aria-label="Sample rental property data">
-                    <thead>
-                        <tr>
-                            <th scope="col" aria-label="Property address">Address</th>
-                            <th scope="col" aria-label="Postal code area">Postal Code</th>
-                            <th scope="col" aria-label="Property size in square feet">Size (sq ft)</th>
-                            <th scope="col" aria-label="Number of bedrooms">Bedrooms</th>
-                            <th scope="col" aria-label="Monthly rent amount">Rent</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            randomSample.forEach(record => {
-                tableHTML += `
-                    <tr>
-                        <td aria-label="Address: ${record.address}">${record.address}</td>
-                        <td aria-label="Postal code: ${record.postal_code}">${record.postal_code}</td>
-                        <td aria-label="Size: ${record.size} square feet">${record.size}</td>
-                        <td aria-label="Bedrooms: ${record.bedrooms}">${record.bedrooms}</td>
-                        <td aria-label="Monthly rent: $${record.rent_amount.toLocaleString()}">$${record.rent_amount.toLocaleString()}</td>
-                    </tr>
+                let tableHTML = `
+                    <h3>Sample Data</h3>
+                    <table role="table" aria-label="Sample rental property data">
+                        <thead>
+                            <tr>
+                                <th scope="col" aria-label="Property address">Address</th>
+                                <th scope="col" aria-label="Postal code area">Postal Code</th>
+                                <th scope="col" aria-label="Property size in square feet">Size (sq ft)</th>
+                                <th scope="col" aria-label="Number of bedrooms">Bedrooms</th>
+                                <th scope="col" aria-label="Monthly rent amount">Rent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                 `;
-            });
 
-            tableHTML += `
-                    </tbody>
-                </table>
-            `;
+                randomSample.forEach(record => {
+                    tableHTML += `
+                        <tr>
+                            <td aria-label="Address: ${record.address}">${record.address}</td>
+                            <td aria-label="Postal code: ${record.postal_code}">${record.postal_code}</td>
+                            <td aria-label="Size: ${record.size} square feet">${record.size}</td>
+                            <td aria-label="Bedrooms: ${record.bedrooms}">${record.bedrooms}</td>
+                            <td aria-label="Monthly rent: $${record.rent_amount.toLocaleString()}">$${record.rent_amount.toLocaleString()}</td>
+                        </tr>
+                    `;
+                });
 
-            document.getElementById('sampleData').innerHTML = tableHTML;
-            console.log('Sample data displayed');
-        } catch (error) {
-            console.error('Error showing sample data:', error);
-            document.getElementById('sampleData').innerHTML = `
-                <h3>Sample Data</h3>
-                <p>Error loading sample data.</p>
-            `;
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+
+                sampleDataDiv.innerHTML = tableHTML;
+                sampleDataBtn.textContent = 'Hide Sample Data';
+                sampleDataBtn.setAttribute('aria-describedby', 'sample-help-hide');
+                this.isSampleDataVisible = true;
+                console.log('Sample data displayed');
+            } catch (error) {
+                console.error('Error showing sample data:', error);
+                sampleDataDiv.innerHTML = `
+                    <h3>Sample Data</h3>
+                    <p>Error loading sample data.</p>
+                `;
+            }
         }
     }
 
