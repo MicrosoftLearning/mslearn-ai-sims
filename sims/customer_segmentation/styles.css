@@ -14,8 +14,17 @@ th, td { padding:8px; border-bottom:1px solid #eee; text-align:left }
 .modal { position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center }
 .modal-content { background:white; padding:16px; border-radius:6px; min-width:320px }
 .file-list { list-style:none; padding:0; margin:0 }
-.file-list li { padding:8px; border:1px solid #eee; margin-bottom:6px; cursor:pointer }
+.file-list li { padding:8px; border:1px solid #eee; margin-bottom:6px; cursor:pointer; display:flex; align-items:center; gap:8px }
 .file-list li:hover { background:#f0f8ff }
+.file-icon { 
+  width:16px; 
+  height:16px; 
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="%23666"><path d="M4 0h5.5L14 4.5V15a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V1a1 1 0 0 1 1-1h1zm0 1v14h9V5h-3.5a.5.5 0 0 1-.5-.5V1H4z"/><path d="M4.5 8a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zM4.5 10.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7z"/></svg>'); 
+  background-repeat: no-repeat; 
+  background-size: contain; 
+  flex-shrink: 0 
+}
+.filename { flex: 1 }
 .file-dialog { min-width:640px; display:flex; flex-direction:column }
 .file-dialog-header { padding:8px 12px; border-bottom:1px solid #eee; display:flex; gap:8px }
 .file-dialog-header .label { font-weight:700 }

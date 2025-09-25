@@ -97,7 +97,19 @@ function showFileModal() {
     const li = document.createElement('li');
     li.id = 'file-' + f;
     li.tabIndex = 0;
-    li.textContent = f;
+    
+    // Create file icon
+    const icon = document.createElement('span');
+    icon.className = 'file-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    
+    // Create filename text
+    const filename = document.createElement('span');
+    filename.className = 'filename';
+    filename.textContent = f;
+    
+    li.appendChild(icon);
+    li.appendChild(filename);
     li.setAttribute('role','option');
     li.addEventListener('click', () => {
       // mark selection
