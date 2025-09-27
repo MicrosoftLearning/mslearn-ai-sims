@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fourth Coffee Co. - Voicemail System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header" role="banner">
+            <div class="header-content">
+                <img src="coffee-cup.svg" alt="Fourth Coffee Company logo - stylized coffee cup with steam" class="logo" id="coffeeImage">
+                <h1>Fourth Coffee Co.</h1>
+            </div>
+        </header>
+
+        <main class="main-content" role="main">
+            <aside class="sidebar" role="complementary" aria-label="Voicemail message list">
+                <h2>Voicemail Messages</h2>
+                <div class="message-list" role="list" aria-label="List of voicemail messages">
+                    <div class="message-item" data-message="message1" role="listitem" tabindex="0" aria-label="Voicemail message from number withheld at 8:17 AM. Click to view AI analysis.">
+                        <div class="message-info">
+                            <div class="phone-number" aria-label="Phone number">Number withheld</div>
+                            <div class="time" aria-label="Time received">8:17am</div>
+                        </div>
+                    </div>
+                    <div class="message-item" data-message="message2" role="listitem" tabindex="0" aria-label="Voicemail message from 555-316-5150 at 9:39 AM. Click to view AI analysis.">
+                        <div class="message-info">
+                            <div class="phone-number" aria-label="Phone number">555-316-5150</div>
+                            <div class="time" aria-label="Time received">09:39am</div>
+                        </div>
+                    </div>
+                    <div class="message-item" data-message="message3" role="listitem" tabindex="0" aria-label="Voicemail message from 555-101-8181 at 10:06 AM. Click to view AI analysis.">
+                        <div class="message-info">
+                            <div class="phone-number" aria-label="Phone number">555-101-8181</div>
+                            <div class="time" aria-label="Time received">10:06am</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="analysis-panel" role="region" aria-label="AI analysis of selected voicemail message">
+                <div class="analysis-content" id="analysisContent" aria-live="polite" aria-atomic="true">
+                    <div class="placeholder">
+                        <p>Select a voicemail message to view AI analysis</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="ai-disclaimer" role="contentinfo" aria-label="Disclaimer about AI-generated content">
+            <p>AI-generated information may contain mistakes</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
