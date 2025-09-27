@@ -24,7 +24,7 @@ Suppose a recruitment organization needs to streamline their process by automati
 
 Suppose you work for the fictional *Contoso* organization, and you need to submit an expense claim for a recent business trip. The company has created an AI Agent to help employees with expense policies and claims. AI agents are more than just generative AI enabled chatbots. They can also perform actions on your behalf, using access to data and tools to complete tasks.
 
-    > **Note**: In this simulated app, the agent's understanding is limited. A real generative AI agent typically has *much* more versatility in understanding and generating language.
+> **Note**: In this simulated app, the agent's understanding is limited. A real generative AI agent typically has *much* more versatility in understanding and generating language.
 
 1. In a web browser, open the [Expense chat assistant](https://aka.ms/expenses-agent){:target="_blank"} app at `https://aka.ms/expenses-agent`.
 1. In the chat interface, enter a prompt, such as `Hello`, and review the response.
