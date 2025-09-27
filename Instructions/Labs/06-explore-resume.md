@@ -1,9 +1,3 @@
----
-lab:
-    title: 'Explore an Resume App'
-    description: 'Explore an application that demonstrates how AI can be used to create a resume app.'
----
-
 # Explore an AI resume matching scenario
  
 In this exercise you will use an application that simulates an AI-powered job board with resume matching capabilities. The application analyzes how well a candidate's resume matches job requirements and generates personalized cover letters.

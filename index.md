@@ -24,8 +24,8 @@ If you'd rather explore the applications for yourself, without the prescribed la
 - [Home rental predictor (Machine Learning - Regression)](https://aka.ms/rent-predictor){:target="_blank"}
 - [Wheat seed identifier (Machine Learning - Classification)](https://aka.ms/seed-identifier){:target="_blank"}
 - [Customer segmentation (Machine Learning - Clustering)](https://aka.ms/customer-segmentation){:target="_blank"}
+- [Resume Matcher (Generative AI)](https://aka.ms/resume-app){:target="_blank"}
 - [Expenses chat assistant (Generative AI Agent)](https://aka.ms/expenses-agent){:target="_blank"}
-- [Resume App (Generative AI)](https://aka.ms/resume-app){:target="_blank"}
 - [StoryBridge social history project (Natural Language Processing)](https://aka.ms/story-bridge){:target="_blank"}
 - [Blue Yonder Airlines social media analyzer (Natural Language Processing)](https://aka.ms/blue_yonder_social){:target="_blank"}
 - [Photo Tagger (Computer Vision)](https://aka.ms/photo-tagger){:target="_blank"}

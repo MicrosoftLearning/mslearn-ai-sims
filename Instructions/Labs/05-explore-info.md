@@ -1,6 +1,6 @@
 ---
 lab:
-    title: 'Explore an AI information extraction scenario'
+    title: 'Explore AI information extraction scenarios'
     description: 'Explore applications that demonstrates how AI can be used to extract the information from content in multiple formats.'
 ---
 
