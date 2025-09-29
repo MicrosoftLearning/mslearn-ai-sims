@@ -21,7 +21,7 @@ header {
     text-align: center;
     margin-bottom: 40px;
     padding: 30px 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
     color: white;
     border-radius: 10px;
 }
@@ -45,7 +45,7 @@ section {
 }
 
 h2 {
-    color: #4a5568;
+    color: #1e40af;
     margin-bottom: 20px;
     font-size: 1.8em;
 }
@@ -66,12 +66,12 @@ h3 {
 }
 
 .upload-area:hover {
-    border-color: #667eea;
-    background-color: #f7fafc;
+    border-color: #2563eb;
+    background-color: #f0f9ff;
 }
 
 .upload-button {
-    background: #667eea;
+    background: #2563eb;
     color: white;
     border: none;
     padding: 12px 30px;
@@ -85,7 +85,7 @@ h3 {
 }
 
 .upload-button:hover {
-    background: #5a67d8;
+    background: #1d4ed8;
     transform: translateY(-2px);
 }
 
@@ -97,19 +97,19 @@ h3 {
 .selected-resume {
     margin-top: 20px;
     padding: 20px;
-    background: #f7fafc;
+    background: #f0f9ff;
     border-radius: 5px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #bfdbfe;
 }
 
 .resume-preview {
     font-size: 14px;
-    color: #4a5568;
+    color: #1e40af;
     margin-bottom: 15px;
 }
 
 .change-resume-btn {
-    background: #ed8936;
+    background: #f59e0b;
     color: white;
     border: none;
     padding: 8px 20px;
@@ -120,7 +120,7 @@ h3 {
 }
 
 .change-resume-btn:hover {
-    background: #dd6b20;
+    background: #d97706;
 }
 
 /* Job Listings */
@@ -138,8 +138,8 @@ h3 {
 }
 
 .job-card:hover {
-    border-color: #667eea;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+    border-color: #2563eb;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1);
     transform: translateY(-2px);
 }
 
@@ -152,12 +152,12 @@ h3 {
 
 .job-title {
     font-size: 1.3em;
-    color: #2d3748;
+    color: #1e293b;
     font-weight: 600;
 }
 
 .company-name {
-    color: #667eea;
+    color: #2563eb;
     font-weight: 500;
     margin-top: 5px;
 }
@@ -176,15 +176,15 @@ h3 {
 }
 
 .skill-tag {
-    background: #edf2f7;
-    color: #4a5568;
+    background: #f1f5f9;
+    color: #475569;
     padding: 5px 12px;
     border-radius: 20px;
     font-size: 14px;
 }
 
 .compare-button {
-    background: #48bb78;
+    background: #10b981;
     color: white;
     border: none;
     padding: 10px 25px;
@@ -198,7 +198,7 @@ h3 {
 }
 
 .compare-button:hover {
-    background: #38a169;
+    background: #059669;
     transform: translateY(-1px);
 }
 
@@ -257,7 +257,7 @@ h3 {
     align-items: center;
     padding: 20px;
     border-bottom: 1px solid #e2e8f0;
-    background: #f7fafc;
+    background: #f8fafc;
 }
 
 .modal-body {
@@ -295,7 +295,7 @@ h3 {
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: conic-gradient(#667eea var(--score), #e2e8f0 var(--score));
+    background: conic-gradient(#2563eb var(--score), #e2e8f0 var(--score));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -315,7 +315,7 @@ h3 {
 .score-circle span {
     font-size: 1.8em;
     font-weight: bold;
-    color: #667eea;
+    color: #2563eb;
     position: relative;
     z-index: 1;
 }
@@ -335,7 +335,7 @@ h3 {
 .stat-item {
     text-align: center;
     padding: 15px;
-    background: #f7fafc;
+    background: #f8fafc;
     border-radius: 8px;
 }
 
@@ -343,7 +343,7 @@ h3 {
     display: block;
     font-size: 1.5em;
     font-weight: bold;
-    color: #667eea;
+    color: #2563eb;
 }
 
 .stat-label {
@@ -371,11 +371,11 @@ h3 {
 }
 
 .skill-name.missing {
-    color: #e53e3e;
+    color: #dc2626;
 }
 
 .skill-name.matched {
-    color: #38a169;
+    color: #059669;
 }
 
 .skill-bar-container {
@@ -387,17 +387,17 @@ h3 {
 
 .skill-bar {
     height: 100%;
-    background: #667eea;
+    background: #2563eb;
     transition: width 0.5s ease;
     border-radius: 5px;
 }
 
 .skill-bar.missing {
-    background: #e53e3e;
+    background: #dc2626;
 }
 
 .skill-bar.matched {
-    background: #38a169;
+    background: #059669;
 }
 
 .skill-score {
@@ -406,31 +406,32 @@ h3 {
     color: #4a5568;
 }
 
-/* Cover Letter */
-.cover-letter-intro {
-    color: #38a169;
+/* Outreach Letter */
+.outreach-letter-intro {
+    color: #059669;
     margin-bottom: 15px;
     font-style: italic;
 }
 
-.cover-letter {
-    background: #f7fafc;
+.outreach-letter {
+    background: #f8fafc;
     padding: 25px;
     border-radius: 8px;
     margin-bottom: 20px;
     white-space: pre-wrap;
     line-height: 1.8;
     font-size: 15px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid #2563eb;
 }
 
-.cover-letter-actions {
+.outreach-letter-actions {
     display: flex;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
-.download-button, .copy-button {
-    background: #48bb78;
+.download-button, .copy-button, .send-button {
+    background: #10b981;
     color: white;
     border: none;
     padding: 12px 25px;
@@ -444,38 +445,82 @@ h3 {
 }
 
 .copy-button {
-    background: #667eea;
+    background: #2563eb;
+}
+
+.send-button {
+    background: #7c3aed;
 }
 
 .download-button:hover {
-    background: #38a169;
+    background: #059669;
 }
 
 .copy-button:hover {
-    background: #5a67d8;
+    background: #1d4ed8;
 }
 
-/* Suggestions */
-.suggestions-list {
+.send-button:hover {
+    background: #6d28d9;
+}
+
+/* Recruitment Section */
+.recruitment-advice {
     display: grid;
     gap: 15px;
 }
 
-.suggestion-item {
+.advice-item {
     padding: 15px;
-    background: #fef5e7;
-    border-left: 4px solid #ed8936;
     border-radius: 5px;
 }
 
-.suggestion-item h4 {
-    color: #c05621;
+.advice-item.strong {
+    background: #dcfce7;
+    border-left: 4px solid #16a34a;
+}
+
+.advice-item.moderate {
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+}
+
+.advice-item.weak {
+    background: #fee2e2;
+    border-left: 4px solid #dc2626;
+}
+
+.advice-item h4 {
     margin-bottom: 8px;
 }
 
-.suggestion-item p {
-    color: #744210;
+.advice-item.strong h4 {
+    color: #166534;
+}
+
+.advice-item.moderate h4 {
+    color: #92400e;
+}
+
+.advice-item.weak h4 {
+    color: #991b1b;
+}
+
+.advice-item p {
     font-size: 14px;
+    line-height: 1.5;
+}
+
+.advice-item.strong p {
+    color: #15803d;
+}
+
+.advice-item.moderate p {
+    color: #a16207;
+}
+
+.advice-item.weak p {
+    color: #b91c1c;
 }
 
 /* Resume List */
@@ -494,13 +539,13 @@ h3 {
 }
 
 .resume-option:hover {
-    border-color: #667eea;
-    background: #f7f6ff;
+    border-color: #2563eb;
+    background: #f0f9ff;
     transform: translateY(-1px);
 }
 
 .resume-option h4 {
-    color: #2d3748;
+    color: #1e293b;
     margin-bottom: 5px;
 }
 
@@ -542,7 +587,7 @@ h3 {
         gap: 10px;
     }
     
-    .cover-letter-actions {
+    .outreach-letter-actions {
         flex-direction: column;
     }
     

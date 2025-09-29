@@ -1,4 +1,3 @@
-// Sample data
 const resumes = [
     {
         id: 1,
@@ -7,7 +6,8 @@ const resumes = [
         filename: "sarah_chen_resume.pdf",
         skills: ["JavaScript", "React", "Node.js", "Python", "AWS", "Docker", "MongoDB", "PostgreSQL", "Git", "Agile"],
         experience: 8,
-        summary: "Experienced software developer with 8+ years building scalable web applications."
+        summary: "Experienced software developer with 8+ years building scalable web applications.",
+        email: "sarah.chen@email.com"
     },
     {
         id: 2,
@@ -16,7 +16,8 @@ const resumes = [
         filename: "michael_rodriguez_resume.pdf",
         skills: ["Digital Marketing", "SEO", "Content Strategy", "Social Media", "Google Analytics", "HubSpot", "Brand Management", "Budget Management"],
         experience: 6,
-        summary: "Results-driven marketing professional with proven track record in digital marketing and brand management."
+        summary: "Results-driven marketing professional with proven track record in digital marketing and brand management.",
+        email: "m.rodriguez@email.com"
     },
     {
         id: 3,
@@ -25,7 +26,8 @@ const resumes = [
         filename: "emily_johnson_resume.pdf",
         skills: ["Python", "R", "SQL", "Tableau", "Excel", "Statistical Analysis", "Machine Learning", "Data Visualization"],
         experience: 4,
-        summary: "Detail-oriented data analyst skilled in transforming complex data into actionable insights."
+        summary: "Detail-oriented data analyst skilled in transforming complex data into actionable insights.",
+        email: "emily.j@email.com"
     },
     {
         id: 4,
@@ -34,7 +36,8 @@ const resumes = [
         filename: "david_park_resume.pdf",
         skills: ["Project Management", "Agile", "Scrum", "Risk Management", "Jira", "MS Project", "Team Leadership", "Budget Management"],
         experience: 7,
-        summary: "PMP-certified project manager expert in agile methodologies and cross-functional team leadership."
+        summary: "PMP-certified project manager expert in agile methodologies and cross-functional team leadership.",
+        email: "david.park@email.com"
     },
     {
         id: 5,
@@ -43,7 +46,8 @@ const resumes = [
         filename: "jessica_liu_resume.pdf",
         skills: ["User Research", "Wireframing", "Prototyping", "Figma", "Sketch", "Adobe XD", "HTML/CSS", "Design Systems"],
         experience: 5,
-        summary: "Creative UX designer passionate about creating intuitive digital experiences."
+        summary: "Creative UX designer passionate about creating intuitive digital experiences.",
+        email: "jessica.liu@email.com"
     }
 ];
 
@@ -102,8 +106,7 @@ const comparisonModal = document.getElementById('comparisonModal');
 const resumeList = document.getElementById('resumeList');
 const selectedResumeDiv = document.getElementById('selectedResume');
 const jobListings = document.getElementById('jobListings');
-const downloadBtn = document.getElementById('downloadBtn');
-const copyBtn = document.getElementById('copyBtn');
+const sendBtn = document.getElementById('sendBtn');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -136,12 +139,8 @@ function setupEventListeners() {
         }
     });
     
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', downloadCoverLetter);
-    }
-    
-    if (copyBtn) {
-        copyBtn.addEventListener('click', copyCoverLetter);
+    if (sendBtn) {
+        sendBtn.addEventListener('click', sendToCandidate);
     }
 }
 
@@ -164,7 +163,7 @@ function renderJobs() {
                     <path d="M9 11H1l6-6v4.5z"></path>
                     <path d="M15 13h8l-6 6v-4.5z"></path>
                 </svg>
-                Compare with Resume
+                Analyze Match
             </button>
         </div>
     `).join('');
@@ -229,7 +228,7 @@ function selectResume(option) {
 // Compare with job
 function compareWithJob(jobId) {
     if (!selectedResume) {
-        alert('Please select a resume first');
+        alert('Please select a candidate resume first');
         return;
     }
     
@@ -282,43 +281,57 @@ function calculateMatch(resume, job) {
         skillMatches,
         matchedSkillsCount,
         missingSkillsCount: requiredSkills.length - matchedSkillsCount,
-        suggestions: generateSuggestions(skillMatches, experienceMatch, job)
+        recruitmentAdvice: generateRecruitmentAdvice(overallMatch, skillMatches, experienceMatch, job)
     };
 }
 
-// Generate improvement suggestions
-function generateSuggestions(skillMatches, experienceMatch, job) {
-    const suggestions = [];
+// Generate recruitment advice
+function generateRecruitmentAdvice(overallMatch, skillMatches, experienceMatch, job) {
+    const advice = [];
     
-    const missingSkills = skillMatches.filter(s => !s.hasSkill);
+    if (overallMatch >= 80) {
+        advice.push({
+            type: 'strong',
+            title: 'Strong Candidate - Proceed with Interview',
+            description: 'This candidate shows excellent alignment with the role requirements. Schedule an interview to discuss specific projects and cultural fit.'
+        });
+    } else if (overallMatch >= 60) {
+        advice.push({
+            type: 'moderate',
+            title: 'Potential Candidate - Consider with Training',
+            description: 'Good foundation but may need some skill development. Consider if your team can provide mentoring in missing areas.'
+        });
+    } else {
+        advice.push({
+            type: 'weak',
+            title: 'Skills Gap Too Large',
+            description: 'Significant training would be required. Consider only if candidate shows exceptional potential in other areas.'
+        });
+    }
     
+    const missingSkills = skillMatches.filter(s => !s.hasSkill).map(s => s.skill);
     if (missingSkills.length > 0) {
-        suggestions.push({
-            title: "Skill Development",
-            description: `Consider learning: ${missingSkills.slice(0, 3).map(s => s.skill).join(', ')}. These are key requirements for this role.`
+        advice.push({
+            type: overallMatch >= 70 ? 'moderate' : 'weak',
+            title: 'Skills Development Required',
+            description: `Candidate would need training in: ${missingSkills.slice(0, 3).join(', ')}. Assess if these can be learned on the job.`
         });
     }
     
     if (experienceMatch < 80) {
-        suggestions.push({
-            title: "Experience Building",
-            description: `This role typically requires ${job.experience}+ years of experience. Consider highlighting relevant project work or taking on additional responsibilities.`
+        advice.push({
+            type: 'moderate',
+            title: 'Experience Level Consideration',
+            description: `Role typically requires ${job.experience}+ years. Evaluate if candidate's quality of experience compensates for the gap.`
         });
     }
     
-    if (skillMatches.filter(s => s.hasSkill).length > 0) {
-        suggestions.push({
-            title: "Highlight Strengths",
-            description: `Make sure to emphasize your expertise in ${skillMatches.filter(s => s.hasSkill).slice(0, 2).map(s => s.skill).join(' and ')} in your application.`
-        });
-    }
-    
-    return suggestions;
+    return advice;
 }
 
 // Display comparison modal
 function displayComparisonModal(job, comparison) {
-    document.getElementById('comparisonTitle').textContent = `${job.title} at ${job.company}`;
+    document.getElementById('comparisonTitle').textContent = `${selectedResume.name} → ${job.title} at ${job.company}`;
     
     // Update match score
     updateMatchScore(comparison.overallMatch);
@@ -331,15 +344,15 @@ function displayComparisonModal(job, comparison) {
     // Update skills chart
     updateSkillsChart(comparison.skillMatches);
     
-    // Handle cover letter
-    if (comparison.overallMatch >= 70) {
-        generateAndShowCoverLetter(job);
+    // Handle outreach letter
+    if (comparison.overallMatch >= 50) {
+        generateAndShowOutreachLetter(job);
     } else {
-        document.getElementById('coverLetterSection').classList.add('hidden');
+        document.getElementById('outreachLetterSection').classList.add('hidden');
     }
     
-    // Show suggestions
-    updateSuggestions(comparison.suggestions);
+    // Show recruitment advice
+    updateRecruitmentAdvice(comparison.recruitmentAdvice);
     
     // Show modal
     comparisonModal.classList.remove('hidden');
@@ -355,14 +368,14 @@ function updateMatchScore(percentage) {
     matchPercentageEl.textContent = `${percentage}%`;
     
     let message = '';
-    if (percentage >= 90) {
-        message = 'Excellent match! You\'re highly qualified for this position.';
-    } else if (percentage >= 70) {
-        message = 'Good match! You meet most of the requirements.';
-    } else if (percentage >= 50) {
-        message = 'Moderate match. Consider highlighting transferable skills.';
+    if (percentage >= 80) {
+        message = 'Strong match - Recommend proceeding with interview';
+    } else if (percentage >= 60) {
+        message = 'Moderate match - Consider with additional training';
+    } else if (percentage >= 40) {
+        message = 'Weak match - Significant skill gaps present';
     } else {
-        message = 'Low match. You may need additional skills for this role.';
+        message = 'Poor match - Not recommended for this role';
     }
     matchMessage.textContent = message;
 }
@@ -382,65 +395,77 @@ function updateSkillsChart(skillMatches) {
     `).join('');
 }
 
-// Generate and show cover letter
-function generateAndShowCoverLetter(job) {
-    const coverLetterSection = document.getElementById('coverLetterSection');
-    coverLetterSection.classList.remove('hidden');
+// Generate and show outreach letter
+function generateAndShowOutreachLetter(job) {
+    const outreachLetterSection = document.getElementById('outreachLetterSection');
+    outreachLetterSection.classList.remove('hidden');
     
-    const coverLetter = `Dear Hiring Manager,
+    const missingSkills = currentComparison.skillMatches
+        .filter(s => !s.hasSkill)
+        .map(s => s.skill)
+        .slice(0, 3);
+    
+    const matchedSkills = currentComparison.skillMatches
+        .filter(s => s.hasSkill)
+        .map(s => s.skill)
+        .slice(0, 4);
+    
+    const outreachLetter = `Subject: Exciting ${job.title} Opportunity at ${job.company}
 
-I am writing to express my strong interest in the ${job.title} position at ${job.company}. With ${selectedResume.experience} years of experience as a ${selectedResume.title}, I am confident that my skills and background make me an ideal candidate for this role.
+Dear ${selectedResume.name},
+
+I hope this email finds you well. I'm reaching out regarding an exciting ${job.title} opportunity at ${job.company} that aligns well with your background as a ${selectedResume.title}.
 
 ${job.description}
 
-Throughout my career, I have developed strong expertise in ${selectedResume.skills.slice(0, 5).join(', ')}, which directly align with your requirements. I am particularly excited about the opportunity to leverage my experience in ${selectedResume.skills[0]} and ${selectedResume.skills[1]} to contribute to your team's success.
+Based on your resume, I can see you have strong experience in ${matchedSkills.join(', ')}, which are key requirements for this role. Your ${selectedResume.experience} years of experience would be valuable to their team.
 
-What sets me apart is my proven track record of delivering results and my passion for continuous learning. I am eager to bring my technical skills and collaborative approach to ${job.company}.
+To strengthen your application for this position, I recommend highlighting your experience with ${matchedSkills.slice(0, 2).join(' and ')} in your cover letter.${missingSkills.length > 0 ? ` Additionally, consider gaining some exposure to ${missingSkills.join(', ')} as these are also important for the role.` : ''}
 
-I would welcome the opportunity to discuss how my background and skills would benefit your team. Thank you for considering my application. I look forward to speaking with you about how I can contribute to ${job.company}'s continued success.
+The position offers excellent growth opportunities and the chance to work with cutting-edge technologies. The team values innovation and collaboration, which seems to align well with your professional background.
 
-Sincerely,
-${selectedResume.name}`;
+Would you be interested in learning more about this opportunity? I'd be happy to schedule a brief call to discuss the role in detail and answer any questions you might have.
+
+Best regards,
+[Your Name]
+[Your Title]
+[Contact Information]
+
+P.S. Based on my analysis, you have a ${currentComparison.overallMatch}% compatibility with this role - a ${currentComparison.overallMatch >= 70 ? 'strong' : currentComparison.overallMatch >= 50 ? 'moderate' : 'developing'} match that shows great potential.`;
     
-    document.getElementById('coverLetter').textContent = coverLetter;
+    document.getElementById('outreachLetter').textContent = outreachLetter;
 }
 
-// Update suggestions
-function updateSuggestions(suggestions) {
-    const suggestionsList = document.getElementById('suggestionsList');
+// Update recruitment advice
+function updateRecruitmentAdvice(advice) {
+    const recruitmentAdvice = document.getElementById('recruitmentAdvice');
     
-    suggestionsList.innerHTML = suggestions.map(suggestion => `
-        <div class="suggestion-item">
-            <h4>${suggestion.title}</h4>
-            <p>${suggestion.description}</p>
+    recruitmentAdvice.innerHTML = advice.map(item => `
+        <div class="advice-item ${item.type}">
+            <h4>${item.title}</h4>
+            <p>${item.description}</p>
         </div>
     `).join('');
 }
 
-// Download cover letter
-function downloadCoverLetter() {
-    const coverLetterText = document.getElementById('coverLetter').textContent;
-    const blob = new Blob([coverLetterText], { type: 'text/plain' });
+// Send to candidate (downloads the letter for demo)
+function sendToCandidate() {
+    const outreachLetterText = document.getElementById('outreachLetter').textContent;
+    const blob = new Blob([outreachLetterText], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cover_letter_${selectedResume.name.replace(/\s+/g, '_')}_${currentComparison ? 'job' : 'generic'}.txt`;
+    a.download = `outreach_letter_${selectedResume.name.replace(/\s+/g, '_')}_${Date.now()}.txt`;
     a.click();
     window.URL.revokeObjectURL(url);
-}
-
-// Copy cover letter to clipboard
-function copyCoverLetter() {
-    const coverLetterText = document.getElementById('coverLetter').textContent;
-    navigator.clipboard.writeText(coverLetterText).then(() => {
-        // Temporary feedback
-        const originalText = copyBtn.textContent;
-        copyBtn.textContent = 'Copied!';
-        copyBtn.style.background = '#38a169';
-        
-        setTimeout(() => {
-            copyBtn.textContent = originalText;
-            copyBtn.style.background = '#667eea';
-        }, 2000);
-    });
+    
+    // Visual feedback
+    const originalText = sendBtn.textContent;
+    sendBtn.textContent = 'Letter Downloaded!';
+    sendBtn.style.background = '#059669';
+    
+    setTimeout(() => {
+        sendBtn.textContent = originalText;
+        sendBtn.style.background = '#7c3aed';
+    }, 2000);
 }
