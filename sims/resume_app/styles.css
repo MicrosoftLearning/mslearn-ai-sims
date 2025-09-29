@@ -708,3 +708,17 @@ h3 {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Small, subdued disclaimer fixed at the bottom of the page */
+.disclaimer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 999;
+}
