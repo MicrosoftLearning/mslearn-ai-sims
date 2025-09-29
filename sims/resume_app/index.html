@@ -62,6 +62,16 @@
                 <button class="close-button" data-modal="comparisonModal">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Loading State -->
+                <div id="comparisonLoading" class="comparison-loading-container hidden">
+                    <div class="loading-container">
+                        <div class="spinner"></div>
+                        <span>Comparing resume with job description...</span>
+                    </div>
+                </div>
+                
+                <!-- Comparison Results Content -->
+                <div id="comparisonResults" class="comparison-results">
                 <!-- Match Overview -->
                 <div class="match-overview">
                     <div class="match-score">
@@ -92,13 +102,23 @@
                     <div id="skillsChart" class="skills-chart"></div>
                 </div>
 
-                <!-- Outreach Letter Section -->
+                <!-- Outreach Email Section -->
                 <div id="outreachLetterSection" class="outreach-letter-section hidden">
-                    <h3>📧 Generated Outreach Letter</h3>
-                    <p class="outreach-letter-intro">Personalized candidate outreach message with improvement recommendations:</p>
-                    <div id="outreachLetter" class="outreach-letter"></div>
-                    <div class="outreach-letter-actions">
-                        <button id="sendBtn" class="send-button">Send to Candidate</button>
+                    <!-- Celebration Message (shown when good match) -->
+                    <div id="celebrationMessage" class="celebration-message">
+                        <h3>🎉 Excellent Match Found!</h3>
+                        <p class="celebration-text">This candidate shows strong alignment with the role requirements. Ready to craft a personalized outreach message?</p>
+                        <button id="generateLetterBtn" class="generate-letter-btn">Generate Outreach Email</button>
+                    </div>
+                    
+                    <!-- Generated Letter (shown after generation) -->
+                    <div id="generatedLetterContainer" class="generated-letter-container hidden">
+                        <h3>📧 Generated Outreach Email</h3>
+                        <p class="outreach-letter-intro">Personalized candidate outreach message with improvement recommendations:</p>
+                        <div id="outreachLetter" class="outreach-letter"></div>
+                        <div class="outreach-letter-actions">
+                            <button id="sendBtn" class="send-button hidden">Download email text</button>
+                        </div>
                     </div>
                 </div>
 
@@ -107,6 +127,7 @@
                     <h3>🎯 Recruitment Recommendations</h3>
                     <div id="recruitmentAdvice" class="recruitment-advice"></div>
                 </div>
+                </div> <!-- End comparison-results -->
             </div>
         </div>
     </div>

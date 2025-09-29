@@ -142,6 +142,12 @@ function setupEventListeners() {
     if (sendBtn) {
         sendBtn.addEventListener('click', sendToCandidate);
     }
+    
+    // Generate letter button
+    const generateLetterBtn = document.getElementById('generateLetterBtn');
+    if (generateLetterBtn) {
+        generateLetterBtn.addEventListener('click', generateOutreachLetterWithTyping);
+    }
 }
 
 // Render jobs
@@ -205,24 +211,34 @@ function selectResume(option) {
     const resumeId = parseInt(option.dataset.resumeId);
     selectedResume = resumes.find(r => r.id === resumeId);
     
-    // Show selected resume
+    // Show selected resume area with loading state
     selectedResumeDiv.classList.remove('hidden');
     document.querySelector('.resume-preview').innerHTML = `
-        <strong>${selectedResume.name}</strong> - ${selectedResume.title}<br>
-        <em>${selectedResume.filename}</em><br>
-        <strong>Experience:</strong> ${selectedResume.experience} years<br>
-        <strong>Key Skills:</strong> ${selectedResume.skills.slice(0, 5).join(', ')}...
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <span>Summarizing resume...</span>
+        </div>
     `;
     
     resumeModal.classList.add('hidden');
     
-    // Enable compare buttons
-    document.querySelectorAll('.compare-button').forEach(btn => {
-        btn.disabled = false;
-    });
-    
-    // Re-render jobs to update button states
-    renderJobs();
+    // Show actual resume details after 2.5 seconds
+    setTimeout(() => {
+        document.querySelector('.resume-preview').innerHTML = `
+            <strong>${selectedResume.name}</strong> - ${selectedResume.title}<br>
+            <em>${selectedResume.filename}</em><br>
+            <strong>Experience:</strong> ${selectedResume.experience} years<br>
+            <strong>Key Skills:</strong> ${selectedResume.skills.slice(0, 5).join(', ')}...
+        `;
+        
+        // Enable compare buttons
+        document.querySelectorAll('.compare-button').forEach(btn => {
+            btn.disabled = false;
+        });
+        
+        // Re-render jobs to update button states
+        renderJobs();
+    }, 2500);
 }
 
 // Compare with job
@@ -233,9 +249,15 @@ function compareWithJob(jobId) {
     }
     
     const selectedJob = jobs.find(j => j.id === jobId);
-    currentComparison = calculateMatch(selectedResume, selectedJob);
     
-    displayComparisonModal(selectedJob, currentComparison);
+    // Show modal with loading state immediately
+    showComparisonLoadingModal(selectedJob);
+    
+    // Calculate match and display results after 2.5 seconds
+    setTimeout(() => {
+        currentComparison = calculateMatch(selectedResume, selectedJob);
+        displayComparisonResults(selectedJob, currentComparison);
+    }, 2500);
 }
 
 // Calculate match
@@ -329,9 +351,23 @@ function generateRecruitmentAdvice(overallMatch, skillMatches, experienceMatch, 
     return advice;
 }
 
-// Display comparison modal
-function displayComparisonModal(job, comparison) {
+// Show comparison modal with loading state
+function showComparisonLoadingModal(job) {
     document.getElementById('comparisonTitle').textContent = `${selectedResume.name} → ${job.title} at ${job.company}`;
+    
+    // Show loading state, hide results
+    document.getElementById('comparisonLoading').classList.remove('hidden');
+    document.getElementById('comparisonResults').classList.add('hidden');
+    
+    // Show modal
+    comparisonModal.classList.remove('hidden');
+}
+
+// Display comparison results (after loading)
+function displayComparisonResults(job, comparison) {
+    // Hide loading state, show results
+    document.getElementById('comparisonLoading').classList.add('hidden');
+    document.getElementById('comparisonResults').classList.remove('hidden');
     
     // Update match score
     updateMatchScore(comparison.overallMatch);
@@ -344,7 +380,7 @@ function displayComparisonModal(job, comparison) {
     // Update skills chart
     updateSkillsChart(comparison.skillMatches);
     
-    // Handle outreach letter
+    // Handle outreach email
     if (comparison.overallMatch >= 50) {
         generateAndShowOutreachLetter(job);
     } else {
@@ -353,6 +389,17 @@ function displayComparisonModal(job, comparison) {
     
     // Show recruitment advice
     updateRecruitmentAdvice(comparison.recruitmentAdvice);
+}
+
+// Display comparison modal (kept for compatibility - now just calls displayComparisonResults)
+function displayComparisonModal(job, comparison) {
+    document.getElementById('comparisonTitle').textContent = `${selectedResume.name} → ${job.title} at ${job.company}`;
+    
+    // Show results immediately (no loading)
+    document.getElementById('comparisonLoading').classList.add('hidden');
+    document.getElementById('comparisonResults').classList.remove('hidden');
+    
+    displayComparisonResults(job, comparison);
     
     // Show modal
     comparisonModal.classList.remove('hidden');
@@ -395,10 +442,27 @@ function updateSkillsChart(skillMatches) {
     `).join('');
 }
 
-// Generate and show outreach letter
+// Generate and show outreach email
+// Show celebration message for good matches
 function generateAndShowOutreachLetter(job) {
     const outreachLetterSection = document.getElementById('outreachLetterSection');
     outreachLetterSection.classList.remove('hidden');
+    
+    // Show celebration message, hide generated letter
+    document.getElementById('celebrationMessage').classList.remove('hidden');
+    document.getElementById('generatedLetterContainer').classList.add('hidden');
+    
+    // Store job data for later use
+    window.currentJobForLetter = job;
+}
+
+// Generate outreach email with typing animation
+function generateOutreachLetterWithTyping() {
+    const job = window.currentJobForLetter;
+    
+    // Hide celebration message, show generated letter container
+    document.getElementById('celebrationMessage').classList.add('hidden');
+    document.getElementById('generatedLetterContainer').classList.remove('hidden');
     
     const missingSkills = currentComparison.skillMatches
         .filter(s => !s.hasSkill)
@@ -416,7 +480,7 @@ Dear ${selectedResume.name},
 
 I hope this email finds you well. I'm reaching out regarding an exciting ${job.title} opportunity at ${job.company} that aligns well with your background as a ${selectedResume.title}.
 
-${job.description}
+    📄 "${job.description}"
 
 Based on your resume, I can see you have strong experience in ${matchedSkills.join(', ')}, which are key requirements for this role. Your ${selectedResume.experience} years of experience would be valuable to their team.
 
@@ -433,7 +497,54 @@ Best regards,
 
 P.S. Based on my analysis, you have a ${currentComparison.overallMatch}% compatibility with this role - a ${currentComparison.overallMatch >= 70 ? 'strong' : currentComparison.overallMatch >= 50 ? 'moderate' : 'developing'} match that shows great potential.`;
     
-    document.getElementById('outreachLetter').textContent = outreachLetter;
+    // Start typing animation
+    typeOutreachLetter(outreachLetter);
+}
+
+// Typing animation function
+function typeOutreachLetter(text) {
+    const letterElement = document.getElementById('outreachLetter');
+    const sendBtn = document.getElementById('sendBtn');
+    
+    letterElement.textContent = '';
+    letterElement.classList.add('typing-animation');
+    
+    // Hide the download button during typing
+    sendBtn.classList.add('hidden');
+    
+    let index = 0;
+    const typingSpeed = 20; // milliseconds per character
+    
+    function typeNextCharacter() {
+        if (index < text.length) {
+            letterElement.textContent += text.charAt(index);
+            index++;
+            setTimeout(typeNextCharacter, typingSpeed);
+        } else {
+            // Remove typing cursor when done and show download button
+            letterElement.classList.remove('typing-animation');
+            sendBtn.classList.remove('hidden');
+            
+            // Apply post-processing to style the job description
+            styleJobDescription();
+        }
+    }
+    
+    typeNextCharacter();
+}
+
+// Function to style the job description after typing is complete
+function styleJobDescription() {
+    const letterElement = document.getElementById('outreachLetter');
+    const content = letterElement.textContent;
+    
+    // Replace the job description line with styled HTML
+    const styledContent = content.replace(
+        /(\s{4}📄\s*"[^"]+")/, 
+        '<div class="job-description-quote"><em>$1</em></div>'
+    );
+    
+    letterElement.innerHTML = styledContent.replace(/\n/g, '<br>');
 }
 
 // Update recruitment advice
@@ -455,13 +566,13 @@ function sendToCandidate() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `outreach_letter_${selectedResume.name.replace(/\s+/g, '_')}_${Date.now()}.txt`;
+    a.download = `outreach_email_${selectedResume.name.replace(/\s+/g, '_')}_${Date.now()}.txt`;
     a.click();
     window.URL.revokeObjectURL(url);
     
     // Visual feedback
     const originalText = sendBtn.textContent;
-    sendBtn.textContent = 'Letter Downloaded!';
+    sendBtn.textContent = 'Email downloaded!';
     sendBtn.style.background = '#059669';
     
     setTimeout(() => {

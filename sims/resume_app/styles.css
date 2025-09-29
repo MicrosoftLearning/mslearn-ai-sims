@@ -406,7 +406,7 @@ h3 {
     color: #4a5568;
 }
 
-/* Outreach Letter */
+/* Outreach Email */
 .outreach-letter-intro {
     color: #059669;
     margin-bottom: 15px;
@@ -424,10 +424,90 @@ h3 {
     border-left: 4px solid #2563eb;
 }
 
+/* Style for job description quote in email */
+.job-description-quote {
+    margin: 15px 0;
+    padding: 15px 20px;
+    background: #f1f5f9;
+    border-left: 4px solid #64748b;
+    border-radius: 4px;
+    display: block;
+    white-space: normal;
+}
+
+.job-description-quote em {
+    color: #475569;
+    font-style: italic;
+    display: block;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
 .outreach-letter-actions {
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
+}
+
+/* Celebration Message */
+.celebration-message {
+    text-align: center;
+    padding: 30px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    border: 2px solid #0ea5e9;
+    margin-bottom: 20px;
+}
+
+.celebration-message h3 {
+    font-size: 1.5em;
+    color: #0369a1;
+    margin-bottom: 15px;
+}
+
+.celebration-text {
+    color: #0f172a;
+    font-size: 16px;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.generate-letter-btn {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.generate-letter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+}
+
+.generate-letter-btn:active {
+    transform: translateY(0);
+}
+
+/* Typing Animation */
+.typing-animation {
+    border-right: 2px solid #2563eb;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { border-right-color: #2563eb; }
+    51%, 100% { border-right-color: transparent; }
+}
+
+.outreach-letter.typing {
+    min-height: 40px;
 }
 
 .download-button, .copy-button, .send-button {
@@ -595,4 +675,36 @@ h3 {
         width: 95%;
         margin: 10px;
     }
+}
+
+/* Loading spinner styles */
+.loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 30px;
+    text-align: center;
+    color: #4a5568;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.comparison-loading-container {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
