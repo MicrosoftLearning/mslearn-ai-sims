@@ -12,7 +12,7 @@ This exercise should take approximately **15** minutes to complete.
 
 ## Engage in a conversation with an AI agent
 
-Suppose you work for the fictional *Contoso* organization, and you need to submit an expense claim for a recent business trip. The company has created an AI Agent to help employees with expense policies and claims. AI agents are more than just generative AI enabled chatbots. They can also perform actions on your behalf, using access to data and tools to complete tasks.
+Suppose you work for the fictional *Contoso* organization, and you need to submit an expense claim for a recent business trip. The company has created an AI Agent to help employees with expense policies and claims. AI agents are more than just generative AI enabled chatbots. They can also perform actions on your behalf, using access to data and tools to complete tasks. In this case, the agent can generate and submit an expense claim on your behalf.
 
 > **Note**: In this simulated app, the agent's understanding is limited. A real generative AI agent typically has *much* more versatility in understanding and generating language.
 
