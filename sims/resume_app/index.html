@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Board - Resume Matcher</title>
+    <title>Recruiter Dashboard - Resume Matcher</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Job Board Resume Matcher</h1>
-            <p>Find your perfect job match and generate a tailored cover letter</p>
+            <h1>Recruiter Dashboard</h1>
+            <p>Match candidates to opportunities and streamline your outreach process</p>
         </header>
 
         <main>
             <!-- Resume Upload Section -->
             <section class="resume-section">
-                <h2>Step 1: Select Your Resume</h2>
+                <h2>Step 1: Select Candidate Resume</h2>
                 <div class="upload-area">
                     <button id="uploadBtn" class="upload-button">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -24,20 +24,20 @@
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        Choose Resume
+                        Browse Candidate Pool
                     </button>
-                    <p class="upload-text">Click to select from available resumes</p>
+                    <p class="upload-text">Select from available candidate resumes</p>
                 </div>
                 <div id="selectedResume" class="selected-resume hidden">
-                    <h3>Selected Resume:</h3>
+                    <h3>Selected Candidate:</h3>
                     <div class="resume-preview"></div>
-                    <button id="changeResumeBtn" class="change-resume-btn">Change Resume</button>
+                    <button id="changeResumeBtn" class="change-resume-btn">Change Candidate</button>
                 </div>
             </section>
 
             <!-- Job Listings Section -->
             <section class="jobs-section">
-                <h2>Step 2: Browse Available Jobs</h2>
+                <h2>Step 2: Select Job Opening</h2>
                 <div id="jobListings" class="job-listings"></div>
             </section>
         </main>
@@ -47,7 +47,7 @@
     <div id="resumeModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Select a Resume</h2>
+                <h2>Candidate Pool</h2>
                 <button class="close-button" data-modal="resumeModal">&times;</button>
             </div>
             <div id="resumeList" class="resume-list"></div>
@@ -58,7 +58,7 @@
     <div id="comparisonModal" class="modal hidden">
         <div class="modal-content large-modal">
             <div class="modal-header">
-                <h2 id="comparisonTitle">Job Match Analysis</h2>
+                <h2 id="comparisonTitle">Candidate-Job Match Analysis</h2>
                 <button class="close-button" data-modal="comparisonModal">&times;</button>
             </div>
             <div class="modal-body">
@@ -77,36 +77,35 @@
                         </div>
                         <div class="stat-item">
                             <span class="stat-number" id="missingSkills">0</span>
-                            <span class="stat-label">Missing Skills</span>
+                            <span class="stat-label">Skills Gap</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-number" id="experienceMatch">0%</span>
-                            <span class="stat-label">Experience Match</span>
+                            <span class="stat-label">Experience Fit</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Skills Analysis -->
                 <div class="skills-analysis">
-                    <h3>Skills Breakdown</h3>
+                    <h3>Skills Assessment</h3>
                     <div id="skillsChart" class="skills-chart"></div>
                 </div>
 
-                <!-- Cover Letter Section -->
-                <div id="coverLetterSection" class="cover-letter-section hidden">
-                    <h3>🎉 Generated Cover Letter</h3>
-                    <p class="cover-letter-intro">Based on your strong match, we've generated a personalized cover letter:</p>
-                    <div id="coverLetter" class="cover-letter"></div>
-                    <div class="cover-letter-actions">
-                        <button id="downloadBtn" class="download-button">Download Cover Letter</button>
-                        <button id="copyBtn" class="copy-button">Copy to Clipboard</button>
+                <!-- Outreach Letter Section -->
+                <div id="outreachLetterSection" class="outreach-letter-section hidden">
+                    <h3>📧 Generated Outreach Letter</h3>
+                    <p class="outreach-letter-intro">Personalized candidate outreach message with improvement recommendations:</p>
+                    <div id="outreachLetter" class="outreach-letter"></div>
+                    <div class="outreach-letter-actions">
+                        <button id="sendBtn" class="send-button">Send to Candidate</button>
                     </div>
                 </div>
 
-                <!-- Improvement Suggestions -->
-                <div id="suggestionsSection" class="suggestions-section">
-                    <h3>💡 Improvement Suggestions</h3>
-                    <div id="suggestionsList" class="suggestions-list"></div>
+                <!-- Recruitment Recommendations -->
+                <div id="recruitmentSection" class="recruitment-section">
+                    <h3>🎯 Recruitment Recommendations</h3>
+                    <div id="recruitmentAdvice" class="recruitment-advice"></div>
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 # Project Specification
 
-Create a simple web app demo for a job board with resume matching capabilities. 
+Create a simple web app demo for a job board with resume matching capabilities aimed at recruiters and headhunters.
 
 ## Core Requirements:
 
@@ -27,19 +27,24 @@ Create a simple web app demo for a job board with resume matching capabilities.
      - Graded scores (e.g., 0-100% or 1-5 stars) indicating proficiency level
      - Visual indicators for skills the candidate has vs. skills they lack
 
-4. **Cover Letter Generation**:
-   - For candidates with a good match (e.g., >70% compatibility), automatically generate a personalized cover letter
-   - Include relevant skills and experiences from their resume
-   - Tailor the content to the specific job and company
+4. **Recruiter Outreach Letter Generation**:
+   - For candidates with a reasonable match (e.g., >50% compatibility), automatically generate a personalized outreach letter
+   - Include information about the job opportunity
+   - Highlight candidate's relevant skills and experiences
+   - Provide specific advice on resume improvements to better match the role
+   - Suggest skills to emphasize or add to increase their competitiveness
+   - Professional tone suitable for recruiter-to-candidate communication
 
 5. **User Interface**:
-   - Clean, intuitive design
+   - Clean, professional design suitable for recruiting professionals
    - Clear feedback on match results
    - Easy-to-understand visualization of compatibility
-   - Download option for generated cover letter
+   - Download option for generated outreach letter
+   - Resume improvement recommendations for candidate guidance
 
 ## Technical Considerations:
 - Use modern web technologies (React/Vue/Angular for frontend)
 - Pre-load sample resume data in JSON or similar format
 - Include sample job data for demonstration purposes
 - Ensure responsive design for mobile and desktop
+- Focus on recruiter workflow and efficiency
