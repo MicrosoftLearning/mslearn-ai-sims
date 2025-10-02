@@ -49,6 +49,146 @@ document.addEventListener('DOMContentLoaded', ()=>{
     return text.toLowerCase().replace(/["'`]/g, '').replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
+  // Auto-correct common spelling mistakes and typos
+  function autoCorrectSpelling(text){
+    // Common spelling corrections - case insensitive
+    const corrections = {
+      // General typos
+      'teh': 'the',
+      'hte': 'the',
+      'taht': 'that',
+      'thta': 'that',
+      'nad': 'and',
+      'adn': 'and',
+      'anf': 'and',
+      'cna': 'can',
+      'caan': 'can',
+      'yuo': 'you',
+      'recieve': 'receive',
+      'recieve': 'receive',
+      'seperate': 'separate',
+      'definate': 'definite',
+      'definately': 'definitely',
+      'thier': 'their',
+      'there': 'their', // context-dependent, but often correct for "their"
+      'occured': 'occurred',
+      'accomodate': 'accommodate',
+      'acheive': 'achieve',
+      'beleive': 'believe',
+      'reccomend': 'recommend',
+      'neccessary': 'necessary',
+      'begining': 'beginning',
+      'minumum': 'minimum',
+      'maximun': 'maximum',
+      'maxiumum': 'maximum',
+      'limite': 'limit',
+      'limits': 'limit', // singular for better matching
+      
+      // Expense-related typos
+      'expence': 'expense',
+      'expeses': 'expenses',
+      'expence': 'expense',
+      'expensess': 'expenses',
+      'reimberse': 'reimburse',
+      'reimburce': 'reimburse',
+      'reimbursment': 'reimbursement',
+      'reciept': 'receipt',
+      'recipt': 'receipt',
+      'recepit': 'receipt',
+      'receit': 'receipt',
+      'receits': 'receipts',
+      'reciepts': 'receipts',
+      'recipts': 'receipts',
+      'clame': 'claim',
+      'claime': 'claim',
+      'cliam': 'claim',
+      'submite': 'submit',
+      'sumbit': 'submit',
+      'sumbmit': 'submit',
+      'sumit': 'submit',
+      
+      // Accommodation typos
+      'hotell': 'hotel',
+      'accomodation': 'accommodation',
+      'acommodation': 'accommodation',
+      'acomodation': 'accommodation',
+      'lodgeing': 'lodging',
+      
+      // Meal typos
+      'meale': 'meal',
+      'males': 'meals',
+      'mealls': 'meals',
+      'resturant': 'restaurant',
+      'restaraunt': 'restaurant',
+      'restauraunt': 'restaurant',
+      'restraunt': 'restaurant',
+      'luch': 'lunch',
+      'luncg': 'lunch',
+      'diner': 'dinner',
+      'breakfest': 'breakfast',
+      'brekfast': 'breakfast',
+      
+      // Transportation typos
+      'flite': 'flight',
+      'fligt': 'flight',
+      'airfair': 'airfare',
+      'airfaire': 'airfare',
+      'airfar': 'airfare',
+      'taksi': 'taxi',
+      'texsi': 'taxi',
+      'taxie': 'taxi',
+      'ubar': 'uber',
+      'uber': 'Uber',
+      'lyft': 'Lyft',
+      'rideshare': 'ride share',
+      'ridesharre': 'ride share',
+      
+      // Question words
+      'wat': 'what',
+      'wht': 'what',
+      'waht': 'what',
+      'whta': 'what',
+      'hwo': 'how',
+      'hwat': 'what',
+      'wen': 'when',
+      'wher': 'where',
+      'whre': 'where',
+      'wher': 'where',
+      'whic': 'which',
+      'whihc': 'which',
+      'wich': 'which',
+      
+      // Common expense amounts/numbers
+      'dollers': 'dollars',
+      'doller': 'dollar',
+      'dollors': 'dollars',
+      'dollor': 'dollar'
+    };
+
+    let correctedText = text;
+    
+    // Apply corrections word by word, preserving case
+    Object.keys(corrections).forEach(typo => {
+      const correction = corrections[typo];
+      
+      // Create regex that matches the typo as a whole word (case insensitive)
+      const regex = new RegExp('\\b' + typo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+      
+      correctedText = correctedText.replace(regex, (match) => {
+        // Preserve the original case pattern
+        if (match === match.toUpperCase()) {
+          return correction.toUpperCase();
+        } else if (match[0] === match[0].toUpperCase()) {
+          return correction.charAt(0).toUpperCase() + correction.slice(1).toLowerCase();
+        } else {
+          return correction.toLowerCase();
+        }
+      });
+    });
+    
+    return correctedText;
+  }
+
   function matchIntent(text){
     const t = normalize(text);
 
@@ -250,18 +390,33 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   form.addEventListener('submit', async (e)=>{
     e.preventDefault();
-    const text = input.value.trim();
-    if(!text) return;
+    const originalText = input.value.trim();
+    if(!originalText) return;
+
+    // Auto-correct spelling mistakes
+    const correctedText = autoCorrectSpelling(originalText);
+    const wasCorrected = originalText !== correctedText;
 
     // remove pending preview (if any) to avoid duplicate
     if(pendingLi){ pendingLi.remove(); pendingLi = null; }
 
-    // add user message
+    // add user message (show corrected text if different)
     const userBubble = appendMessage('user', '');
-    userBubble.textContent = text;
+    userBubble.textContent = correctedText;
+    
+    // If text was corrected, add a subtle indicator
+    if(wasCorrected) {
+      userBubble.title = `Original: "${originalText}"`;
+      userBubble.style.borderLeft = '2px solid #4CAF50';
+      userBubble.style.paddingLeft = '8px';
+    }
+    
     input.value = '';
     input.disabled = true;
     sendBtn.disabled = true;
+
+    // Use corrected text for all processing
+    const text = correctedText;
 
     // handle stateful submit flow
     if(awaitingSubmitConfirmation){
