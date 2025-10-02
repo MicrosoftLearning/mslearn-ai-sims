@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
 
     // Check for expense-related questions with multiple items
-    if(has(/\b(max|maximum|allow|allowable|claim|limit|how much|spend|what about)\b/)){
+    if(has(/\b(max|maximum|allow|allowable|claim|limit|how much|spend|what about|how about)\b/)){
       const expenseTypes = [];
       
       // Meal-related: contains meal/food
