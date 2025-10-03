@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doorbell Photo Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <header role="banner">
+        <h1>Doorbell Photo Viewer</h1>
+        <p>Identify objects in photos from your front door</p>
+    </header>
+    
+    <main class="container" role="main" id="main-content">
+        <section class="left-panel" aria-labelledby="thumbnails-heading">
+            <h2 id="thumbnails-heading">Photo Thumbnails</h2>
+            <nav class="thumbnail-grid" id="thumbnailGrid" role="list" aria-label="Doorbell photo thumbnails">
+                <!-- Thumbnail images will be loaded here -->
+            </nav>
+        </section>
+        
+        <section class="right-panel" aria-labelledby="image-viewer-heading">
+            <h2 id="image-viewer-heading" class="sr-only">Image Viewer</h2>
+            
+            <div class="image-info" id="imageInfo" style="display: none;" role="status" aria-live="polite">
+                <h3 id="itemNumber">Item #</h3>
+            </div>
+            
+            <div class="image-display" id="imageDisplay" role="img" aria-label="Selected doorbell photo">
+                <div class="placeholder">
+                    <p>Click on a thumbnail from the left to view it here</p>
+                </div>
+            </div>
+            
+            <div class="analyzing-message" id="analyzingMessage" style="display: none;" role="status" aria-live="assertive">
+                <div class="spinner" aria-hidden="true"></div>
+                <p>Analyzing image...</p>
+            </div>
+            
+            <div class="button-container" id="buttonContainer" style="display: none;">
+                <button id="analyzeButton" class="analyze-btn" aria-describedby="imageStatus">Analyze Image</button>
+                <div class="image-status" id="imageStatus" role="status" aria-live="polite"></div>
+            </div>
+            
+            <div class="detected-objects" id="detectedObjects" style="display: none;" role="region" aria-labelledby="detected-objects-heading">
+                <h4 id="detected-objects-heading">Detected Objects:</h4>
+                <p id="objectsList"></p>
+            </div>
+        </section>
+    </main>
+    
+    <script src="script.js"></script>
+</body>
+</html>
