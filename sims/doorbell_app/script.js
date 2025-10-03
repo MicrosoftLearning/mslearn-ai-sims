@@ -128,6 +128,10 @@ function selectImage(index) {
     detectedObjects.style.display = 'none';
     imageInfo.style.display = 'none';
     
+    // Hide AI disclaimer
+    const aiDisclaimer = document.getElementById('aiDisclaimer');
+    aiDisclaimer.style.display = 'none';
+    
     // Announce image selection to screen readers
     announceToScreenReader(`Loading doorbell photo from ${image.item}`);
     
@@ -151,6 +155,10 @@ function selectImage(index) {
         // Show detected objects text
         itemNumber.textContent = `What's in the photo: ${image.detectedObjects}`;
         imageInfo.style.display = 'block';
+        
+        // Show AI disclaimer
+        const aiDisclaimer = document.getElementById('aiDisclaimer');
+        aiDisclaimer.style.display = 'block';
         
         // Announce completion to screen readers
         announceToScreenReader(`Analysis complete. Detected objects: ${image.detectedObjects}`);
@@ -194,6 +202,10 @@ function analyzeImage() {
             itemNumber.textContent = `What's in the photo: ${image.detectedObjects}`;
             imageInfo.style.display = 'block';
             
+            // Show AI disclaimer
+            const aiDisclaimer = document.getElementById('aiDisclaimer');
+            aiDisclaimer.style.display = 'block';
+            
             // Update button state
             isAnalyzed = true;
             analyzeButton.disabled = false;
@@ -213,8 +225,10 @@ function analyzeImage() {
             <img src="${image.originalPath}" alt="Original doorbell photo from ${image.item} showing ${image.detectedObjects.toLowerCase()}" class="main-image">
         `;
         
-        // Hide detected objects text
+        // Hide detected objects text and disclaimer
         detectedObjects.style.display = 'none';
+        const aiDisclaimer = document.getElementById('aiDisclaimer');
+        aiDisclaimer.style.display = 'none';
         
         isAnalyzed = false;
         analyzeButton.textContent = 'Analyze Image';

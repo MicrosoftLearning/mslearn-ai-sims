@@ -318,6 +318,24 @@ header p {
     border: 1px solid rgba(129, 199, 132, 0.3);
 }
 
+/* AI Disclaimer styling */
+.ai-disclaimer {
+    margin-top: 15px;
+    padding: 12px 20px;
+    background: rgba(248, 249, 250, 0.9);
+    border: 1px solid #6c757d;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.1);
+}
+
+.ai-disclaimer p {
+    color: #495057;
+    font-size: 0.9rem;
+    margin: 0;
+    font-style: italic;
+}
+
 .analyzing-message {
     text-align: center;
     padding: 40px;
