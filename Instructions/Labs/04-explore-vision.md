@@ -33,4 +33,4 @@ Let's look at a different example of computer vision. AI-powered doorbell camera
 1. View the analyzed image, in which any detected people or animals are highlighted.
 1. View the other thumbnails to see the objects detected in them.
 
-> **Note**: The applications used in this exercise are *simulations* - there are no actual AI computer vision service behind it. However, it's based on real capabilities you can implement with [Azure AI Foundry](https://azure.microsoft.com/products/ai-foundry/){:target="_blank"}; and in particular, the [Azure AI Vision](https://azure.microsoft.com/products/ai-services/ai-vision/){:target="_blank"} service.
+> **Note**: The applications used in this exercise are *simulations* - there are no actual AI computer vision service behind them. However, it's based on real capabilities you can implement with [Azure AI Foundry](https://azure.microsoft.com/products/ai-foundry/){:target="_blank"}; and in particular, the [Azure AI Vision](https://azure.microsoft.com/products/ai-services/ai-vision/){:target="_blank"} service.
