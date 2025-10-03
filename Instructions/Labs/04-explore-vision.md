@@ -20,7 +20,7 @@ Suppose you work in a web publishing organization that uses images in articles. 
     
     Organizations that create and publish content often need to create and maintain a *digital asset management* solution - essentially a library of digital assets like images that can be searched based on relevant keywords, or *tags*.
 
-1. Repeat the process for images 2, 3, and 4 reviewing the captions that are generated.
+1. Repeat the process for images 2, 3, and 4 reviewing the captions and tags that are generated.
 
     Note that if an image contains text, the app uses *optical character recognition* (OCR) to detect and read it.
 
