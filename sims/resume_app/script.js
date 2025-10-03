@@ -94,6 +94,560 @@ const jobs = [
     }
 ];
 
+// Resume content data
+const resumeContent = {
+    1: `# Sarah Chen
+**Senior Software Developer** | **8+ Years Experience**  
+📧 sarah.chen@email.com | 📱 (555) 123-4567 | 📍 Seattle, WA  
+💼 LinkedIn: linkedin.com/in/sarahchen | 🌐 GitHub: github.com/sarahchen
+
+---
+
+## Professional Summary
+Experienced software developer with 8+ years building scalable web applications. Proven track record in full-stack development, cloud architecture, and agile methodologies. Expert in modern JavaScript frameworks and backend technologies with strong focus on performance optimization and user experience.
+
+---
+
+## Technical Skills
+**Frontend:** JavaScript, React, HTML5, CSS3, TypeScript, Redux, Webpack  
+**Backend:** Node.js, Python, Express.js, RESTful APIs, GraphQL  
+**Databases:** MongoDB, PostgreSQL, Redis, DynamoDB  
+**Cloud & DevOps:** AWS (EC2, S3, Lambda, RDS), Docker, Kubernetes, CI/CD  
+**Tools & Methods:** Git, Agile/Scrum, Jest, Docker, Jenkins, Linux
+
+---
+
+## Professional Experience
+
+### **Senior Software Developer** | TechFlow Solutions  
+*March 2020 - Present (4+ years)*
+
+- Lead development of microservices architecture serving 500K+ daily active users
+- Architected and implemented React-based dashboard reducing customer onboarding time by 45%
+- Optimized database queries and API performance, improving response times by 60%
+- Mentored 3 junior developers and conducted code reviews for team of 8 engineers
+- Collaborated with product managers to define technical requirements and delivery timelines
+
+### **Full Stack Developer** | InnovateTech Inc.  
+*June 2017 - February 2020 (2.5 years)*
+
+- Developed and maintained 5 client-facing web applications using React and Node.js
+- Implemented automated testing suite increasing code coverage from 40% to 85%
+- Built RESTful APIs serving mobile and web clients with 99.9% uptime
+- Migrated legacy PHP applications to modern Node.js stack
+- Participated in agile ceremonies and sprint planning sessions
+
+### **Software Developer** | StartupLab  
+*August 2015 - May 2017 (1.5+ years)*
+
+- Created responsive web applications using JavaScript, HTML5, and CSS3
+- Integrated third-party APIs including payment processing and authentication services
+- Collaborated with UX designers to implement pixel-perfect user interfaces
+- Maintained and updated legacy codebases while implementing new features
+- Participated in hackathons and contributed to open-source projects
+
+---
+
+## Education
+
+### **Bachelor of Science in Computer Science**  
+*University of Washington, Seattle* | *Graduated: May 2015*  
+**GPA:** 3.7/4.0 | **Magna Cum Laude**
+
+**Relevant Coursework:** Data Structures & Algorithms, Database Systems, Software Engineering, Web Development, Computer Networks, Operating Systems
+
+**Senior Project:** Developed a real-time collaborative code editor using WebSockets and React
+
+---
+
+## Projects & Achievements
+
+### **E-Commerce Platform Redesign** *(2023)*
+- Led complete frontend overhaul using React and TypeScript
+- Implemented responsive design supporting mobile-first approach
+- Achieved 35% increase in conversion rates and 50% reduction in bounce rate
+
+### **Open Source Contribution** *(2022-Present)*
+- Active contributor to popular React component library (2,000+ GitHub stars)
+- Maintained documentation and resolved 50+ community issues
+- Implemented new accessibility features improving WCAG compliance
+
+---
+
+## Certifications & Awards
+- **AWS Certified Solutions Architect - Associate** *(2022)*
+- **Scrum Master Certification (CSM)** *(2021)*
+- **Employee of the Year - TechFlow Solutions** *(2022)*
+- **Best Innovation Award - InnovateTech Hackathon** *(2019)*`,
+
+    2: `# Michael Rodriguez
+**Marketing Manager** | **6+ Years Experience**  
+📧 m.rodriguez@email.com | 📱 (555) 234-5678 | 📍 Austin, TX  
+💼 LinkedIn: linkedin.com/in/mrodriguez | 🌐 Portfolio: michaelrodriguez.com
+
+---
+
+## Professional Summary
+Results-driven marketing professional with proven track record in digital marketing and brand management. Expert in developing comprehensive marketing strategies that drive growth, increase brand awareness, and optimize customer acquisition. Skilled in data-driven decision making and cross-functional team leadership.
+
+---
+
+## Core Competencies
+**Digital Marketing:** SEO/SEM, Content Strategy, Social Media Marketing, Email Campaigns  
+**Analytics & Tools:** Google Analytics, HubSpot, Salesforce, Marketo, Adobe Creative Suite  
+**Strategy:** Brand Management, Budget Management, Market Research, Campaign Planning  
+**Leadership:** Team Management, Cross-functional Collaboration, Stakeholder Communication
+
+---
+
+## Professional Experience
+
+### **Marketing Manager** | GrowthTech Solutions  
+*January 2021 - Present (3+ years)*
+
+- Manage $2M annual marketing budget across digital and traditional channels
+- Led rebranding initiative that increased brand recognition by 40% in target demographics
+- Developed content strategy resulting in 250% increase in organic website traffic
+- Implemented marketing automation workflows improving lead conversion by 35%
+- Managed team of 5 marketing specialists and coordinated with sales, product, and design teams
+- Launched successful product campaigns generating $5M in new revenue
+
+### **Digital Marketing Specialist** | TechStart Inc.  
+*March 2019 - December 2020 (1.5+ years)*
+
+- Executed multi-channel digital marketing campaigns reaching 500K+ monthly impressions
+- Optimized SEO strategy improving organic search rankings for 50+ target keywords
+- Managed social media presence across 4 platforms with 100K+ combined followers
+- Created and A/B tested email campaigns achieving 25% open rates and 8% CTR
+- Collaborated with design team to produce marketing collateral and web content
+- Analyzed campaign performance using Google Analytics and prepared monthly reports
+
+### **Marketing Coordinator** | BrandBoost Agency  
+*June 2017 - February 2019 (1.5+ years)*
+
+- Supported marketing campaigns for 15+ B2B and B2C clients across various industries
+- Managed client social media accounts and created engaging content calendars
+- Conducted market research and competitor analysis to inform campaign strategies
+- Assisted in organizing trade shows and corporate events for key clients
+- Maintained marketing databases and CRM systems with 95% data accuracy
+- Prepared campaign performance reports and client presentations
+
+---
+
+## Education
+
+### **Master of Business Administration (MBA)**  
+*University of Texas at Austin - McCombs School of Business* | *Graduated: May 2017*  
+**Concentration:** Marketing & Strategy | **GPA:** 3.8/4.0
+
+### **Bachelor of Arts in Communications**  
+*Texas State University* | *Graduated: May 2015*  
+**Minor:** Business Administration | **GPA:** 3.6/4.0
+
+**Relevant Coursework:** Digital Marketing, Consumer Behavior, Brand Management, Market Research, Statistical Analysis, Strategic Communication
+
+---
+
+## Certifications & Professional Development
+
+- **Google Analytics Certified** *(2023)*
+- **HubSpot Content Marketing Certification** *(2022)*
+- **Google Ads Certified** *(2022)*
+- **Facebook Blueprint Certification** *(2021)*
+- **Salesforce Marketing Cloud Consultant** *(2020)*
+
+---
+
+## Key Achievements & Projects
+
+### **Product Launch Campaign** *(2023)*
+- Orchestrated go-to-market strategy for SaaS product launch
+- Achieved 150% of lead generation targets in first quarter
+- Coordinated PR, content marketing, and paid advertising efforts
+
+### **Brand Repositioning Initiative** *(2022)*
+- Led comprehensive brand audit and repositioning strategy
+- Developed new brand messaging and visual identity guidelines
+- Resulted in 45% increase in brand sentiment scores
+
+### **Marketing Automation Implementation** *(2021)*
+- Implemented HubSpot marketing automation platform
+- Created lead scoring system and nurture workflows
+- Improved marketing qualified leads by 60%
+
+---
+
+## Professional Associations & Awards
+- **American Marketing Association (AMA)** - Active Member *(2018-Present)*
+- **Austin Marketing Association** - Board Member *(2022-Present)*
+- **Marketing Excellence Award** - GrowthTech Solutions *(2023)*
+- **Rising Star Award** - TechStart Inc. *(2020)*`,
+
+    3: `# Emily Johnson
+**Data Analyst** | **4+ Years Experience**  
+📧 emily.j@email.com | 📱 (555) 345-6789 | 📍 Denver, CO  
+💼 LinkedIn: linkedin.com/in/emilyjohnson | 🌐 Portfolio: emilyjdata.com
+
+---
+
+## Professional Summary
+Detail-oriented data analyst skilled in transforming complex data into actionable insights. Expertise in statistical analysis, data visualization, and machine learning with proven ability to drive business decisions through data-driven recommendations. Strong background in Python, R, and modern analytics tools.
+
+---
+
+## Technical Skills
+**Programming:** Python, R, SQL, JavaScript, VBA  
+**Analytics Tools:** Tableau, Excel, Power BI, Google Analytics, Jupyter Notebooks  
+**Machine Learning:** Scikit-learn, Pandas, NumPy, Matplotlib, Seaborn  
+**Databases:** MySQL, PostgreSQL, MongoDB, SQLite  
+**Statistics:** Regression Analysis, Hypothesis Testing, A/B Testing, Predictive Modeling
+
+---
+
+## Professional Experience
+
+### **Senior Data Analyst** | DataInsights Corp  
+*February 2022 - Present (2+ years)*
+
+- Analyze complex datasets containing 1M+ records to identify trends and business opportunities
+- Developed predictive models improving customer retention by 25% and reducing churn rate by 15%
+- Created automated reporting dashboards in Tableau serving 50+ stakeholders across departments
+- Led A/B testing initiatives for marketing campaigns resulting in 20% improvement in conversion rates
+- Collaborated with product and engineering teams to implement data-driven feature recommendations
+- Mentored 2 junior analysts and conducted training sessions on statistical methods
+
+### **Data Analyst** | TechMetrics Solutions  
+*August 2020 - January 2022 (1.5 years)*
+
+- Performed statistical analysis on customer behavior data to optimize user experience
+- Built predictive models using Python and scikit-learn to forecast sales trends with 85% accuracy
+- Designed and maintained ETL pipelines processing 100GB+ of daily transaction data
+- Created executive-level reports and presentations summarizing key business metrics
+- Implemented data quality checks reducing data inconsistencies by 40%
+- Supported cross-functional teams with ad-hoc analysis and insights
+
+### **Junior Data Analyst** | Analytics Plus  
+*June 2019 - July 2020 (1+ year)*
+
+- Conducted exploratory data analysis using R and Python to support business intelligence initiatives
+- Developed interactive dashboards and visualizations for marketing and sales teams
+- Performed market research analysis to identify customer segments and targeting opportunities
+- Assisted in data collection and validation processes ensuring 95% data accuracy
+- Created documentation for analytical processes and maintained data dictionaries
+- Supported senior analysts with statistical modeling and hypothesis testing
+
+---
+
+## Education
+
+### **Master of Science in Data Science**  
+*University of Colorado Boulder* | *Graduated: May 2019*  
+**GPA:** 3.9/4.0 | **Summa Cum Laude**
+
+**Thesis:** "Predictive Analytics for Customer Lifetime Value in E-commerce"  
+**Relevant Coursework:** Machine Learning, Statistical Methods, Database Systems, Data Mining, Big Data Analytics
+
+### **Bachelor of Science in Mathematics**  
+*Colorado State University* | *Graduated: May 2017*  
+**Minor:** Computer Science | **GPA:** 3.7/4.0
+
+**Senior Project:** Statistical analysis of climate data trends using R and advanced statistical methods
+
+---
+
+## Certifications & Professional Development
+
+- **Tableau Desktop Certified Associate** *(2023)*
+- **Google Analytics Individual Qualification (IQ)** *(2022)*
+- **Microsoft Power BI Data Analyst Associate** *(2022)*
+- **Python for Data Science Certification - IBM** *(2021)*
+- **SQL for Data Science - University of California, Davis** *(2020)*
+
+---
+
+## Key Projects & Achievements
+
+### **Customer Segmentation Analysis** *(2023)*
+- Developed RFM analysis model to segment customer base into 8 distinct groups
+- Implemented K-means clustering algorithm to identify high-value customer segments
+- Recommendations led to 30% increase in targeted marketing campaign effectiveness
+
+### **Sales Forecasting Model** *(2022)*
+- Built time series forecasting model using ARIMA and seasonal decomposition
+- Achieved 90% accuracy in quarterly sales predictions
+- Model insights helped optimize inventory management saving $500K annually
+
+### **Churn Prediction System** *(2021)*
+- Created machine learning model to predict customer churn with 82% precision
+- Implemented early warning system for at-risk customers
+- Enabled proactive retention strategies reducing churn by 18%
+
+---
+
+## Publications & Presentations
+- **"Leveraging Machine Learning for Customer Analytics"** - Data Science Conference 2023
+- **"Statistical Methods in Business Intelligence"** - Colorado Analytics Meetup 2022
+- **Co-author:** "Predictive Modeling in E-commerce" - Journal of Business Analytics (2020)
+
+---
+
+## Professional Associations
+- **American Statistical Association (ASA)** - Member *(2019-Present)*
+- **Denver Data Science Meetup** - Regular Presenter *(2020-Present)*
+- **Women in Data Science (WiDS)** - Ambassador *(2021-Present)*`,
+
+    4: `# David Park
+**Project Manager** | **7+ Years Experience**  
+📧 david.park@email.com | 📱 (555) 456-7890 | 📍 San Francisco, CA  
+💼 LinkedIn: linkedin.com/in/davidpark | 🌐 Portfolio: davidpark-pm.com
+
+---
+
+## Professional Summary
+PMP-certified project manager expert in agile methodologies and cross-functional team leadership. Proven track record of delivering complex projects on time and within budget. Specializes in software development projects, risk management, and stakeholder coordination with experience across fintech, healthcare, and e-commerce industries.
+
+---
+
+## Core Competencies
+**Project Management:** Agile, Scrum, Waterfall, Risk Management, Budget Management  
+**Tools & Software:** Jira, MS Project, Confluence, Slack, Trello, Monday.com  
+**Leadership:** Team Leadership, Stakeholder Management, Conflict Resolution, Mentoring  
+**Methodologies:** Lean, Six Sigma, Change Management, Quality Assurance
+
+---
+
+## Professional Experience
+
+### **Senior Project Manager** | InnovateTech Solutions  
+*March 2021 - Present (3+ years)*
+
+- Lead portfolio of 8 concurrent software development projects with combined budget of $12M
+- Manage cross-functional teams of 40+ engineers, designers, and business analysts
+- Implemented agile transformation reducing project delivery time by 30% across organization
+- Established PMO standards and best practices adopted company-wide
+- Maintained 95% on-time delivery rate while reducing project costs by 20%
+- Facilitated stakeholder meetings and presented project status to C-level executives
+
+### **Project Manager** | FinTech Dynamics  
+*June 2019 - February 2021 (1.5+ years)*
+
+- Managed end-to-end development of mobile banking application serving 500K+ users
+- Coordinated with regulatory compliance teams ensuring adherence to financial industry standards
+- Led risk assessment and mitigation strategies for high-stakes financial software projects
+- Facilitated daily standups, sprint planning, and retrospectives for 3 development teams
+- Implemented project tracking systems improving visibility and accountability by 40%
+- Successfully delivered 12 major releases with zero critical post-launch issues
+
+### **Associate Project Manager** | HealthTech Innovations  
+*January 2018 - May 2019 (1.5 years)*
+
+- Supported senior PMs in managing healthcare software implementation projects
+- Coordinated with clinical teams and IT departments for EHR system deployments
+- Managed project timelines, resources, and deliverables for 5 concurrent projects
+- Facilitated training sessions for end-users on new healthcare software systems
+- Maintained project documentation and status reports for stakeholder communication
+- Assisted in budget planning and resource allocation for $2M project portfolio
+
+### **Business Analyst** | TechConsulting Group  
+*July 2016 - December 2017 (1.5 years)*
+
+- Analyzed business requirements and translated them into technical specifications
+- Collaborated with development teams to ensure project deliverables met client expectations
+- Conducted user acceptance testing and quality assurance for software implementations
+- Created process documentation and workflow diagrams for business stakeholders
+- Supported project managers with scheduling, resource planning, and status reporting
+- Led client meetings and gathered requirements for system improvements
+
+---
+
+## Education
+
+### **Master of Business Administration (MBA)**  
+*Stanford Graduate School of Business* | *Graduated: June 2016*  
+**Concentration:** Technology Management & Operations | **GPA:** 3.8/4.0
+
+### **Bachelor of Science in Industrial Engineering**  
+*University of California, Berkeley* | *Graduated: May 2014*  
+**Minor:** Computer Science | **GPA:** 3.6/4.0
+
+**Senior Capstone:** Process optimization project for manufacturing company resulting in 25% efficiency improvement
+
+---
+
+## Certifications & Professional Development
+
+- **Project Management Professional (PMP)** *(2020)*
+- **Certified Scrum Master (CSM)** *(2019)*
+- **Certified SAFe 5 Agilist** *(2022)*
+- **ITIL Foundation Certificate** *(2021)*
+- **Lean Six Sigma Green Belt** *(2020)*
+- **Google Project Management Certificate** *(2019)*
+
+---
+
+## Key Projects & Achievements
+
+### **Digital Transformation Initiative** *(2023)*
+- Led enterprise-wide digital transformation affecting 2,000+ employees
+- Managed $8M budget and coordinated with 15 different departments
+- Delivered project 3 months ahead of schedule saving $1.2M in costs
+
+### **Mobile Banking Platform Launch** *(2020)*
+- Project manager for complete mobile banking platform redesign
+- Coordinated 25-person development team across 3 time zones
+- Achieved 99.9% uptime in first 6 months post-launch
+
+### **EHR System Implementation** *(2018)*
+- Led implementation of electronic health records system for 5 hospitals
+- Managed change management for 800+ healthcare professionals
+- Completed rollout with 98% user adoption rate within 3 months
+
+---
+
+## Professional Associations & Awards
+- **Project Management Institute (PMI)** - Active Member *(2018-Present)*
+- **Scrum Alliance** - Certified Member *(2019-Present)*
+- **Silicon Valley Project Management Group** - Board Member *(2022-Present)*
+- **Project Excellence Award** - InnovateTech Solutions *(2023)*
+- **Leadership Recognition Award** - FinTech Dynamics *(2020)*
+
+---
+
+## Speaking & Publications
+- **"Agile Transformation in Enterprise Environments"** - PMI Global Conference 2023
+- **"Risk Management in Fintech Projects"** - San Francisco PM Meetup 2022
+- **Contributing Author:** "Modern Project Management Practices" - PMI Publication 2021`,
+
+    5: `# Jessica Liu
+**UX Designer** | **5+ Years Experience**  
+📧 jessica.liu@email.com | 📱 (555) 567-8901 | 📍 Portland, OR  
+💼 LinkedIn: linkedin.com/in/jessicaliu | 🌐 Portfolio: jessicaliu.design
+
+---
+
+## Professional Summary
+Creative UX designer passionate about creating intuitive digital experiences. Expert in user research, interaction design, and design systems with proven ability to translate complex user needs into elegant, functional interfaces. Strong advocate for accessibility and inclusive design practices.
+
+---
+
+## Design Skills
+**UX/UI Design:** User Research, Wireframing, Prototyping, Information Architecture  
+**Design Tools:** Figma, Sketch, Adobe XD, InVision, Principle, Framer  
+**Development:** HTML5, CSS3, JavaScript (ES6), React basics, Design Systems  
+**Research Methods:** User Interviews, A/B Testing, Usability Testing, Analytics
+
+---
+
+## Professional Experience
+
+### **Senior UX Designer** | DesignForward Studio  
+*April 2022 - Present (2+ years)*
+
+- Lead UX design for 6 client projects including e-commerce, SaaS, and mobile applications
+- Conduct user research sessions with 100+ participants to inform design decisions
+- Created comprehensive design system reducing design-to-development handoff time by 40%
+- Mentored 2 junior designers and established UX best practices for 15-person design team
+- Collaborated with product managers and engineers to define product requirements and roadmaps
+- Improved key user metrics by 35% through data-driven design iterations
+
+### **UX Designer** | TechFlow Solutions  
+*September 2020 - March 2022 (1.5+ years)*
+
+- Designed user interfaces for B2B SaaS platform serving 10,000+ business users
+- Conducted competitive analysis and user journey mapping for 3 major product features
+- Created high-fidelity prototypes and interactive mockups using Figma and Principle
+- Facilitated design workshops with stakeholders to align on product vision and requirements
+- Implemented accessibility guidelines ensuring WCAG 2.1 AA compliance across all designs
+- Led usability testing sessions resulting in 25% improvement in task completion rates
+
+### **Junior UX Designer** | StartupLab  
+*January 2020 - August 2020 (8 months)*
+
+- Supported senior designers in creating wireframes and user flows for mobile applications
+- Conducted user interviews and created personas for 2 consumer-facing products
+- Designed responsive web interfaces ensuring consistent experience across devices
+- Collaborated with development team to implement design specifications and maintain quality
+- Participated in design critiques and contributed to design system documentation
+- Assisted in rebranding initiative including logo design and brand guideline creation
+
+### **UI/UX Design Intern** | CreativeWorks Agency  
+*June 2019 - December 2019 (6 months)*
+
+- Created wireframes and mockups for client websites and mobile applications
+- Assisted in user testing sessions and compiled insights for design improvements
+- Learned industry-standard design tools and methodologies under senior designer mentorship
+- Contributed to agency design system and component library documentation
+- Participated in client presentations and design concept development sessions
+
+---
+
+## Education
+
+### **Bachelor of Fine Arts in Graphic Design**  
+*Portland State University* | *Graduated: May 2019*  
+**Concentration:** Digital Media & Interaction Design | **GPA:** 3.8/4.0
+
+**Senior Portfolio Project:** Mobile app design for local food delivery service with complete UX research process
+
+**Relevant Coursework:** Interaction Design, User Experience Design, Typography, Digital Illustration, Web Design
+
+---
+
+## Certifications & Professional Development
+
+- **Google UX Design Professional Certificate** *(2023)*
+- **Figma Advanced Certification** *(2022)*
+- **Certified Usability Analyst (CUA)** *(2022)*
+- **Adobe Certified Expert (ACE) - XD** *(2021)*
+- **HFI Certified Usability Analyst** *(2020)*
+
+---
+
+## Featured Projects
+
+### **E-Commerce Redesign** *(2023)*
+- Led complete UX redesign for online retail platform with 500K+ monthly users
+- Conducted extensive user research including 50+ interviews and usability tests
+- Increased conversion rate by 45% and reduced cart abandonment by 30%
+- Implemented responsive design improving mobile experience significantly
+
+### **SaaS Dashboard Design** *(2022)*
+- Designed complex data visualization dashboard for business analytics platform
+- Created intuitive information architecture for 20+ different report types
+- Improved user task completion rate from 60% to 85% through iterative design
+- Developed comprehensive design system with 100+ reusable components
+
+### **Mobile App for Social Impact** *(2021)*
+- Pro-bono UX design for nonprofit organization serving underserved communities
+- Conducted field research and interviews with target user group
+- Designed accessible interface accommodating users with varying tech literacy
+- App achieved 4.8-star rating with 95% user retention rate
+
+---
+
+## Design Philosophy & Approach
+- **User-Centered Design:** Every design decision backed by user research and data
+- **Accessibility First:** Ensuring inclusive experiences for users of all abilities
+- **Collaborative Process:** Working closely with stakeholders and development teams
+- **Iterative Improvement:** Continuous testing and refinement based on user feedback
+
+---
+
+## Professional Associations & Recognition
+- **User Experience Professionals Association (UXPA)** - Member *(2020-Present)*
+- **AIGA (American Institute of Graphic Arts)** - Member *(2019-Present)*
+- **Women in UX Portland** - Active Participant *(2021-Present)*
+- **UX Design Excellence Award** - DesignForward Studio *(2023)*
+- **Rising Designer Award** - Portland Design Week *(2022)*
+
+---
+
+## Speaking & Community Involvement
+- **"Designing for Accessibility in Complex Applications"** - UX Portland 2023
+- **"From Research to Design: Building User Empathy"** - Design & Coffee Meetup 2022
+- **Workshop Facilitator:** "Introduction to Design Thinking" - Portland State University 2023`
+};
+
 // Global variables
 let selectedResume = null;
 let currentComparison = null;
@@ -228,7 +782,8 @@ function selectResume(option) {
             <strong>${selectedResume.name}</strong> - ${selectedResume.title}<br>
             <em>${selectedResume.filename}</em><br>
             <strong>Experience:</strong> ${selectedResume.experience} years<br>
-            <strong>Key Skills:</strong> ${selectedResume.skills.slice(0, 5).join(', ')}...
+            <strong>Key Skills:</strong> ${selectedResume.skills.slice(0, 5).join(', ')}...<br><br>
+            <a href="#" class="view-resume-link" onclick="openFullResume(${selectedResume.id}); return false;">View Full Resume</a>
         `;
         
         // Enable compare buttons
@@ -579,4 +1134,129 @@ function sendToCandidate() {
         sendBtn.textContent = originalText;
         sendBtn.style.background = '#7c3aed';
     }, 2000);
+}
+
+// Full Resume Functions
+function openFullResume(resumeId) {
+    const resume = resumes.find(r => r.id === resumeId);
+    if (!resume) return;
+    
+    const modal = document.getElementById('fullResumeModal');
+    const titleElement = document.getElementById('fullResumeTitle');
+    const contentElement = document.getElementById('resumeContent');
+    
+    // Update modal title
+    titleElement.textContent = `${resume.name} - Resume`;
+    
+    // Show loading state
+    contentElement.innerHTML = `
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <span>Loading resume...</span>
+        </div>
+    `;
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    
+    // Load resume content
+    loadResumeContent(resume, contentElement);
+}
+
+function loadResumeContent(resume, contentElement) {
+    // Simulate loading time
+    setTimeout(() => {
+        try {
+            // Get the resume content from embedded data
+            const markdownText = resumeContent[resume.id];
+            
+            if (!markdownText) {
+                throw new Error('Resume content not found');
+            }
+            
+            // Convert markdown to HTML
+            const htmlContent = convertMarkdownToHTML(markdownText);
+            contentElement.innerHTML = htmlContent;
+        } catch (error) {
+            console.error('Error loading resume:', error);
+            contentElement.innerHTML = `
+                <div class="error-message">
+                    <p>Sorry, we couldn't load the full resume at this time.</p>
+                    <p>Please try again later.</p>
+                </div>
+            `;
+        }
+    }, 1000);
+}
+
+function convertMarkdownToHTML(markdown) {
+    let html = markdown;
+    
+    // Remove any leading/trailing whitespace
+    html = html.trim();
+    
+    // Convert headers
+    html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+    html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+    html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+    
+    // Convert bold text
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Convert italic text
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Convert horizontal rules
+    html = html.replace(/^---+$/gm, '<hr>');
+    
+    // Convert bullet points (handle nested structure)
+    const lines = html.split('\n');
+    let inList = false;
+    const processedLines = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        if (line.match(/^- (.+)/)) {
+            if (!inList) {
+                processedLines.push('<ul>');
+                inList = true;
+            }
+            processedLines.push(`<li>${line.substring(2)}</li>`);
+        } else {
+            if (inList) {
+                processedLines.push('</ul>');
+                inList = false;
+            }
+            processedLines.push(line);
+        }
+    }
+    
+    if (inList) {
+        processedLines.push('</ul>');
+    }
+    
+    html = processedLines.join('\n');
+    
+    // Convert paragraphs (split by double newlines)
+    const paragraphs = html.split('\n\n');
+    const htmlParagraphs = paragraphs.map(para => {
+        para = para.trim();
+        if (!para) return '';
+        
+        // Don't wrap headers, lists, or hrs in p tags
+        if (para.match(/^<(h[1-6]|ul|hr)/)) {
+            return para;
+        }
+        
+        // Split by single newlines and join with <br> for better formatting
+        const lines = para.split('\n').map(line => line.trim()).filter(line => line);
+        if (lines.length === 1) {
+            return `<p>${lines[0]}</p>`;
+        } else {
+            return `<p>${lines.join('<br>')}</p>`;
+        }
+    });
+    
+    return htmlParagraphs.filter(p => p).join('\n');
 }

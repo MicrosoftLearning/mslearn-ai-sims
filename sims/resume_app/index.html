@@ -54,6 +54,24 @@
         </div>
     </div>
 
+    <!-- Full Resume Modal -->
+    <div id="fullResumeModal" class="modal hidden" role="dialog" aria-labelledby="fullResumeTitle" aria-modal="true">
+        <div class="modal-content resume-modal-content">
+            <div class="modal-header">
+                <h2 id="fullResumeTitle">Resume</h2>
+                <button class="close-button" data-modal="fullResumeModal" aria-label="Close resume viewer">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="resumeContent" class="resume-content" aria-live="polite">
+                    <div class="loading-container">
+                        <div class="spinner" aria-hidden="true"></div>
+                        <span>Loading resume...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Job Comparison Modal -->
     <div id="comparisonModal" class="modal hidden" role="dialog" aria-labelledby="comparisonTitle" aria-modal="true">
         <div class="modal-content large-modal">
