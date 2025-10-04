@@ -15,6 +15,13 @@
       "keyPhrases": ["delayed", "3 hours", "no explanation", "missing", "connecting flight", "frustrated"]
     },
     {
+      "id": 101,
+      "username": "@AmazedTraveler",
+      "text": "Wow! #BlueYonderAirlines exceeded all my expectations. Best flight experience I've ever had!",
+      "sentiment": "positive",
+      "keyPhrases": ["wow", "exceeded expectations", "best flight experience", "ever had"]
+    },
+    {
       "id": 3,
       "username": "@JohnDoe87",
       "text": "Flying with #BlueYonderAirlines to London. Standard flight, nothing special but got there safely.",
@@ -34,6 +41,13 @@
       "text": "Terrible customer service at #BlueYonderAirlines check-in. Rude staff and long wait times.",
       "sentiment": "negative",
       "keyPhrases": ["terrible", "customer service", "check-in", "rude staff", "long wait times"]
+    },
+    {
+      "id": 102,
+      "username": "@GratefulFlyer",
+      "text": "Crew went above & beyond to help with my family emergency. #BlueYonderAirlines truly cares!",
+      "sentiment": "positive",
+      "keyPhrases": ["crew", "above beyond", "family emergency", "truly cares"]
     },
     {
       "id": 6,
@@ -57,6 +71,13 @@
       "keyPhrases": ["seat", "broken", "couldn't recline", "maintain", "planes"]
     },
     {
+      "id": 103,
+      "username": "@SkyHighSatisfied",
+      "text": "Incredible views and smooth flight with #BlueYonderAirlines! Every detail was perfect.",
+      "sentiment": "positive",
+      "keyPhrases": ["incredible views", "smooth flight", "every detail", "perfect"]
+    },
+    {
       "id": 9,
       "username": "@ChicagoCommuter",
       "text": "#BlueYonderAirlines flight departed on time. No issues during the flight to Chicago.",
@@ -76,6 +97,13 @@
       "text": "Food was cold and tasteless on my #BlueYonderAirlines flight. Expected better for the price I paid.",
       "sentiment": "negative",
       "keyPhrases": ["food", "cold", "tasteless", "expected better", "price"]
+    },
+    {
+      "id": 104,
+      "username": "@DelightedCustomer",
+      "text": "Outstanding customer service from #BlueYonderAirlines! They fixed my booking issue instantly.",
+      "sentiment": "positive",
+      "keyPhrases": ["outstanding customer service", "fixed", "booking issue", "instantly"]
     },
     {
       "id": 12,
@@ -120,6 +148,13 @@
       "keyPhrases": ["overpriced", "snacks", "drinks", "$8", "water bottle", "ridiculous"]
     },
     {
+      "id": 106,
+      "username": "@SmileInTheSky",
+      "text": "Flight attendants made my birthday special! #BlueYonderAirlines crew brings joy to travel.",
+      "sentiment": "positive",
+      "keyPhrases": ["flight attendants", "birthday special", "crew", "joy", "travel"]
+    },
+    {
       "id": 18,
       "username": "@FamilyTraveler",
       "text": "Flying #BlueYonderAirlines to visit family. Standard experience, nothing to complain about.",
@@ -139,6 +174,13 @@
       "text": "Cancelled my flight with only 2 hours notice. #BlueYonderAirlines ruined my weekend plans.",
       "sentiment": "negative",
       "keyPhrases": ["cancelled", "2 hours notice", "ruined", "weekend plans"]
+    },
+    {
+      "id": 107,
+      "username": "@TechSavvyFlyer",
+      "text": "Love the new #BlueYonderAirlines app! Mobile boarding passes & seat selection made travel easy.",
+      "sentiment": "positive",
+      "keyPhrases": ["love", "new app", "mobile boarding passes", "seat selection", "travel easy"]
     },
     {
       "id": 21,
@@ -162,6 +204,13 @@
       "keyPhrases": ["seats", "cramped", "legroom", "tall passengers"]
     },
     {
+      "id": 108,
+      "username": "@EcoTraveler",
+      "text": "Appreciated #BlueYonderAirlines' sustainability efforts! Green initiatives make me feel good about flying.",
+      "sentiment": "positive",
+      "keyPhrases": ["appreciated", "sustainability efforts", "green initiatives", "feel good", "flying"]
+    },
+    {
       "id": 24,
       "username": "@SeattleBound",
       "text": "Arrived at my destination with #BlueYonderAirlines. Flight was on schedule and uneventful.",
@@ -181,6 +230,13 @@
       "text": "WiFi didn't work the entire flight on #BlueYonderAirlines. Need internet for work purposes.",
       "sentiment": "negative",
       "keyPhrases": ["WiFi", "didn't work", "entire flight", "internet", "work purposes"]
+    },
+    {
+      "id": 109,
+      "username": "@WorldExplorer",
+      "text": "Amazing international service! #BlueYonderAirlines connects me to the world with style.",
+      "sentiment": "positive",
+      "keyPhrases": ["amazing", "international service", "connects", "world", "style"]
     },
     {
       "id": 27,
@@ -204,6 +260,13 @@
       "keyPhrases": ["bathrooms", "dirty", "supplies", "ran out", "maintenance"]
     },
     {
+      "id": 110,
+      "username": "@SafetyFirst",
+      "text": "Thorough safety briefing and clean cabin on #BlueYonderAirlines. Peace of mind while flying!",
+      "sentiment": "positive",
+      "keyPhrases": ["thorough", "safety briefing", "clean cabin", "peace of mind", "flying"]
+    },
+    {
       "id": 30,
       "username": "@DenverConnection",
       "text": "Connecting through Denver with #BlueYonderAirlines. Terminal is busy but manageable.",
@@ -223,6 +286,13 @@
       "text": "Overheard staff complaining about passengers on #BlueYonderAirlines. Very unprofessional behavior.",
       "sentiment": "negative",
       "keyPhrases": ["overheard", "staff complaining", "passengers", "unprofessional behavior"]
+    },
+    {
+      "id": 111,
+      "username": "@FoodieDelighted",
+      "text": "Gourmet meal on #BlueYonderAirlines was restaurant quality! Exceeded all culinary expectations.",
+      "sentiment": "positive",
+      "keyPhrases": ["gourmet meal", "restaurant quality", "exceeded", "culinary expectations"]
     },
     {
       "id": 33,
@@ -246,6 +316,13 @@
       "keyPhrases": ["engine noise", "loud", "couldn't sleep", "red-eye flight"]
     },
     {
+      "id": 112,
+      "username": "@MilesCollector",
+      "text": "Love earning miles with #BlueYonderAirlines! Their rewards program is incredibly generous.",
+      "sentiment": "positive",
+      "keyPhrases": ["love earning miles", "rewards program", "incredibly generous"]
+    },
+    {
       "id": 36,
       "username": "@WorkTraveler",
       "text": "Flying with #BlueYonderAirlines again next week for work. It's become my regular airline.",
@@ -265,6 +342,13 @@
       "text": "Gate changed 3 times without clear announcements. #BlueYonderAirlines communication needs work.",
       "sentiment": "negative",
       "keyPhrases": ["gate changed", "3 times", "clear announcements", "communication"]
+    },
+    {
+      "id": 113,
+      "username": "@PunctualTraveler",
+      "text": "Always on time with #BlueYonderAirlines! Reliability you can count on for important trips.",
+      "sentiment": "positive",
+      "keyPhrases": ["always on time", "reliability", "count on", "important trips"]
     },
     {
       "id": 39,
@@ -288,6 +372,13 @@
       "keyPhrases": ["seat belt", "broken", "couldn't fix", "safety standards", "questionable"]
     },
     {
+      "id": 114,
+      "username": "@FamilyTraveler",
+      "text": "Kid-friendly service on #BlueYonderAirlines made our family vacation start perfectly!",
+      "sentiment": "positive",
+      "keyPhrases": ["kid-friendly service", "family vacation", "start perfectly"]
+    },
+    {
       "id": 42,
       "username": "@PatientTraveler",
       "text": "Waiting at the gate for #BlueYonderAirlines boarding to begin. Flight seems on time so far.",
@@ -307,6 +398,13 @@
       "text": "Air conditioning wasn't working properly. Very uncomfortable flight with #BlueYonderAirlines today.",
       "sentiment": "negative",
       "keyPhrases": ["air conditioning", "wasn't working", "uncomfortable flight"]
+    },
+    {
+      "id": 115,
+      "username": "@SleepyFlyer",
+      "text": "Best in-flight rest I've ever had! #BlueYonderAirlines seats are so comfortable for sleeping.",
+      "sentiment": "positive",
+      "keyPhrases": ["best in-flight rest", "ever had", "seats", "comfortable", "sleeping"]
     },
     {
       "id": 45,
@@ -330,6 +428,13 @@
       "keyPhrases": ["charged extra", "seat selection", "hidden fees", "ridiculous"]
     },
     {
+      "id": 116,
+      "username": "@DigitalNomad",
+      "text": "Perfect WiFi speed on #BlueYonderAirlines! Could work seamlessly at 35,000 feet.",
+      "sentiment": "positive",
+      "keyPhrases": ["perfect WiFi speed", "work seamlessly", "35,000 feet"]
+    },
+    {
       "id": 48,
       "username": "@EarlyBird",
       "text": "Flying #BlueYonderAirlines for a conference next month. Booked the early morning flight.",
@@ -349,6 +454,13 @@
       "text": "Flight attendant was rude when I asked for help. #BlueYonderAirlines needs better customer training.",
       "sentiment": "negative",
       "keyPhrases": ["flight attendant", "rude", "asked for help", "customer training"]
+    },
+    {
+      "id": 117,
+      "username": "@LoyalCustomer",
+      "text": "Flying #BlueYonderAirlines for 10+ years! They consistently deliver excellent service.",
+      "sentiment": "positive",
+      "keyPhrases": ["flying", "10+ years", "consistently deliver", "excellent service"]
     },
     {
       "id": 51,
@@ -372,6 +484,13 @@
       "keyPhrases": ["boarding", "chaotic", "disorganized", "crowd control systems"]
     },
     {
+      "id": 118,
+      "username": "@BusinessClass",
+      "text": "Premium cabin experience on #BlueYonderAirlines was absolutely luxurious! Worth every penny.",
+      "sentiment": "positive",
+      "keyPhrases": ["premium cabin", "absolutely luxurious", "worth every penny"]
+    },
+    {
       "id": 54,
       "username": "@TechUser",
       "text": "Using #BlueYonderAirlines mobile app to check flight status. Interface seems user-friendly.",
@@ -391,6 +510,13 @@
       "text": "Missed connection due to late arrival. #BlueYonderAirlines didn't help rebook on another airline.",
       "sentiment": "negative",
       "keyPhrases": ["missed connection", "late arrival", "didn't help", "rebook", "another airline"]
+    },
+    {
+      "id": 119,
+      "username": "@CleanAirAdvocate",
+      "text": "Fresh cabin air and great ventilation on #BlueYonderAirlines! Health & comfort prioritized.",
+      "sentiment": "positive",
+      "keyPhrases": ["fresh cabin air", "great ventilation", "health comfort", "prioritized"]
     },
     {
       "id": 57,
@@ -414,6 +540,13 @@
       "keyPhrases": ["seats", "power outlets", "behind the times", "business travelers"]
     },
     {
+      "id": 120,
+      "username": "@MusicLover",
+      "text": "Amazing audio quality in #BlueYonderAirlines entertainment! Perfect soundtrack for my journey.",
+      "sentiment": "positive",
+      "keyPhrases": ["amazing audio quality", "entertainment", "perfect soundtrack", "journey"]
+    },
+    {
       "id": 60,
       "username": "@BostonBound",
       "text": "Arrived in Boston via #BlueYonderAirlines. Luggage came out quickly at baggage claim.",
@@ -433,6 +566,13 @@
       "text": "Temperature was freezing throughout flight. #BlueYonderAirlines climate control needs serious attention.",
       "sentiment": "negative",
       "keyPhrases": ["temperature", "freezing", "climate control", "serious attention"]
+    },
+    {
+      "id": 121,
+      "username": "@HealthConsciousFlyer",
+      "text": "Healthy meal options on #BlueYonderAirlines! Great to see airlines caring about nutrition.",
+      "sentiment": "positive",
+      "keyPhrases": ["healthy meal options", "caring", "nutrition"]
     },
     {
       "id": 63,
@@ -456,6 +596,13 @@
       "keyPhrases": ["couldn't understand", "pilot announcements", "poor audio", "communication problems"]
     },
     {
+      "id": 122,
+      "username": "@SkyMiles",
+      "text": "Earned upgrade points so fast with #BlueYonderAirlines! Their loyalty program really works.",
+      "sentiment": "positive",
+      "keyPhrases": ["earned upgrade points", "fast", "loyalty program", "really works"]
+    },
+    {
       "id": 66,
       "username": "@HomeBound",
       "text": "Flying back home with #BlueYonderAirlines tomorrow. Looking forward to familiar service.",
@@ -475,6 +622,13 @@
       "text": "Snack service ended before reaching my row. #BlueYonderAirlines ran out of food options too early.",
       "sentiment": "negative",
       "keyPhrases": ["snack service", "ended", "ran out", "food options", "too early"]
+    },
+    {
+      "id": 123,
+      "username": "@WindowSeatLover",
+      "text": "Spectacular sunrise view from #BlueYonderAirlines! Nothing beats those window seat moments.",
+      "sentiment": "positive",
+      "keyPhrases": ["spectacular sunrise view", "nothing beats", "window seat moments"]
     },
     {
       "id": 69,
@@ -498,6 +652,13 @@
       "keyPhrases": ["baggage handlers", "damaged", "suitcase", "claims process", "complicated", "slow"]
     },
     {
+      "id": 124,
+      "username": "@CorporateTraveler",
+      "text": "Seamless check-in process with #BlueYonderAirlines! Efficiency that saves precious business time.",
+      "sentiment": "positive",
+      "keyPhrases": ["seamless check-in", "efficiency", "saves", "precious business time"]
+    },
+    {
       "id": 72,
       "username": "@BookwormFlyer",
       "text": "Reading during my #BlueYonderAirlines flight to Portland. Quiet cabin makes for peaceful travel.",
@@ -517,6 +678,13 @@
       "text": "Check-in kiosks were all broken at the airport. #BlueYonderAirlines technology reliability is poor.",
       "sentiment": "negative",
       "keyPhrases": ["check-in kiosks", "broken", "airport", "technology reliability", "poor"]
+    },
+    {
+      "id": 125,
+      "username": "@FirstClassExperience",
+      "text": "First class service exceeded expectations! #BlueYonderAirlines truly understands luxury travel.",
+      "sentiment": "positive",
+      "keyPhrases": ["first class", "exceeded expectations", "truly understands", "luxury travel"]
     },
     {
       "id": 75,
@@ -540,6 +708,13 @@
       "keyPhrases": ["seat assignment", "changed", "without notice", "three times", "organization", "terrible"]
     },
     {
+      "id": 126,
+      "username": "@EarlyRiser",
+      "text": "Early morning flights are smooth with #BlueYonderAirlines! Great way to start the day.",
+      "sentiment": "positive",
+      "keyPhrases": ["early morning flights", "smooth", "great way", "start the day"]
+    },
+    {
       "id": 78,
       "username": "@AircraftSpotter",
       "text": "Waiting for departure with #BlueYonderAirlines. Plane appears to be the newer model aircraft.",
@@ -559,6 +734,13 @@
       "text": "Overhead bins kept opening during turbulence. #BlueYonderAirlines maintenance issues are concerning.",
       "sentiment": "negative",
       "keyPhrases": ["overhead bins", "opening", "turbulence", "maintenance issues", "concerning"]
+    },
+    {
+      "id": 127,
+      "username": "@ConnectingFlights",
+      "text": "Smooth connections at hub with #BlueYonderAirlines! No stress, just seamless travel.",
+      "sentiment": "positive",
+      "keyPhrases": ["smooth connections", "hub", "no stress", "seamless travel"]
     },
     {
       "id": 81,
@@ -582,6 +764,13 @@
       "keyPhrases": ["WiFi password", "didn't work", "crew couldn't help", "technical support", "lacking"]
     },
     {
+      "id": 128,
+      "username": "@CarryOnMaster",
+      "text": "Generous carry-on policy with #BlueYonderAirlines! No surprises, just fair treatment.",
+      "sentiment": "positive",
+      "keyPhrases": ["generous carry-on policy", "no surprises", "fair treatment"]
+    },
+    {
       "id": 84,
       "username": "@VegasConference",
       "text": "Flying #BlueYonderAirlines to conference in Las Vegas. Hope to get some work done during flight.",
@@ -601,6 +790,13 @@
       "text": "Tray table was sticky and hadn't been cleaned properly. #BlueYonderAirlines hygiene standards slipping.",
       "sentiment": "negative",
       "keyPhrases": ["tray table", "sticky", "hadn't been cleaned", "hygiene standards", "slipping"]
+    },
+    {
+      "id": 129,
+      "username": "@SkyCelebration",
+      "text": "Celebrated anniversary at 30,000 feet! #BlueYonderAirlines crew made it extra special.",
+      "sentiment": "positive",
+      "keyPhrases": ["celebrated anniversary", "30,000 feet", "crew", "extra special"]
     },
     {
       "id": 87,
@@ -624,6 +820,13 @@
       "keyPhrases": ["cancelled", "rebooking options", "left stranded", "no alternatives"]
     },
     {
+      "id": 130,
+      "username": "@AdventureSeeker",
+      "text": "Ready for takeoff with #BlueYonderAirlines! Every journey starts with excitement here.",
+      "sentiment": "positive",
+      "keyPhrases": ["ready for takeoff", "every journey", "starts with excitement"]
+    },
+    {
       "id": 90,
       "username": "@WeeklyCommuter",
       "text": "Regular commuter flight with #BlueYonderAirlines for work. Same route every Tuesday and Thursday.",
@@ -643,6 +846,13 @@
       "text": "Ran out of coffee and tea during morning flight. #BlueYonderAirlines catering planning needs improvement.",
       "sentiment": "negative",
       "keyPhrases": ["ran out", "coffee", "tea", "morning flight", "catering planning", "improvement"]
+    },
+    {
+      "id": 131,
+      "username": "@CloudChaser",
+      "text": "Flying above the clouds with #BlueYonderAirlines never gets old! Pure magic every time.",
+      "sentiment": "positive",
+      "keyPhrases": ["flying above clouds", "never gets old", "pure magic", "every time"]
     },
     {
       "id": 93,
@@ -666,6 +876,13 @@
       "keyPhrases": ["uncomfortable seats", "6-hour flight", "painful", "ergonomics", "major redesign"]
     },
     {
+      "id": 132,
+      "username": "@TravelEnthusiast",
+      "text": "Outstanding ground crew at #BlueYonderAirlines! From gate to baggage, everyone was helpful.",
+      "sentiment": "positive",
+      "keyPhrases": ["outstanding ground crew", "gate to baggage", "everyone helpful"]
+    },
+    {
       "id": 96,
       "username": "@VacationMode",
       "text": "Flying with #BlueYonderAirlines again next week for vacation. Hoping for good weather at destination.",
@@ -687,6 +904,13 @@
       "keyPhrases": ["no paper towels", "bathroom", "4-hour flight", "supply management", "inadequate"]
     },
     {
+      "id": 133,
+      "username": "@StressFreeTraveler",
+      "text": "Zero stress experience with #BlueYonderAirlines! Everything went smoothly from start to finish.",
+      "sentiment": "positive",
+      "keyPhrases": ["zero stress", "everything went smoothly", "start to finish"]
+    },
+    {
       "id": 99,
       "username": "@Flight302",
       "text": "Standard departure time with #BlueYonderAirlines flight 302. Weather conditions look favorable.",
@@ -694,17 +918,59 @@
       "keyPhrases": ["standard departure", "flight 302", "weather conditions", "favorable"]
     },
     {
-      "id": 100,
-      "username": "@LifeChangingFlight",
-      "text": "Best airline experience of my life! #BlueYonderAirlines turned a stressful travel day into pure joy.",
+      "id": 134,
+      "username": "@FrequentFlyer2024",
+      "text": "Consistently impressed with #BlueYonderAirlines! They set the standard for air travel.",
       "sentiment": "positive",
-      "keyPhrases": ["best airline experience", "life", "stressful travel day", "pure joy"]
+      "keyPhrases": ["consistently impressed", "set the standard", "air travel"]
+    },
+    {
+      "id": 135,
+      "username": "@SkywardBound",
+      "text": "Every flight with #BlueYonderAirlines feels like a premium experience! Quality you can trust.",
+      "sentiment": "positive",
+      "keyPhrases": ["every flight", "premium experience", "quality", "can trust"]
+    },
+    {
+      "id": 136,
+      "username": "@AirlineReviewer",
+      "text": "Best airline choice for business travel! #BlueYonderAirlines delivers professional excellence.",
+      "sentiment": "positive",
+      "keyPhrases": ["best airline choice", "business travel", "delivers", "professional excellence"]
+    },
+    {
+      "id": 137,
+      "username": "@JoyfulJourney",
+      "text": "Smiling staff and spotless cabin on #BlueYonderAirlines! They make travel a joy.",
+      "sentiment": "positive",
+      "keyPhrases": ["smiling staff", "spotless cabin", "make travel", "joy"]
+    },
+    {
+      "id": 138,
+      "username": "@ValueTraveler",
+      "text": "Great value for money with #BlueYonderAirlines! Quality service at reasonable prices.",
+      "sentiment": "positive",
+      "keyPhrases": ["great value", "money", "quality service", "reasonable prices"]
+    },
+    {
+      "id": 139,
+      "username": "@HappyLanding",
+      "text": "Smooth landing and quick deplaning with #BlueYonderAirlines! Perfect end to perfect flight.",
+      "sentiment": "positive",
+      "keyPhrases": ["smooth landing", "quick deplaning", "perfect end", "perfect flight"]
+    },
+    {
+      "id": 140,
+      "username": "@SatisfiedCustomer",
+      "text": "#BlueYonderAirlines continues to exceed expectations! This is how airlines should operate.",
+      "sentiment": "positive",
+      "keyPhrases": ["continues", "exceed expectations", "how airlines should operate"]
     }
   ],
   "summary": {
-    "total_posts": 100,
+    "total_posts": 139,
     "sentiment_distribution": {
-      "positive": 33,
+      "positive": 72,
       "negative": 34,
       "neutral": 33
     },
