@@ -657,6 +657,7 @@ const uploadBtn = document.getElementById('uploadBtn');
 const changeResumeBtn = document.getElementById('changeResumeBtn');
 const resumeModal = document.getElementById('resumeModal');
 const comparisonModal = document.getElementById('comparisonModal');
+const confirmSendModal = document.getElementById('confirmSendModal');
 const resumeList = document.getElementById('resumeList');
 const selectedResumeDiv = document.getElementById('selectedResume');
 const jobListings = document.getElementById('jobListings');
@@ -695,6 +696,24 @@ function setupEventListeners() {
     
     if (sendBtn) {
         sendBtn.addEventListener('click', sendToCandidate);
+    }
+    
+    // Send email button
+    const sendEmailBtn = document.getElementById('sendEmailBtn');
+    if (sendEmailBtn) {
+        sendEmailBtn.addEventListener('click', sendEmailToCandidate);
+    }
+    
+    // Confirmation modal buttons
+    const confirmSendBtn = document.getElementById('confirmSendBtn');
+    const cancelSendBtn = document.getElementById('cancelSendBtn');
+    
+    if (confirmSendBtn) {
+        confirmSendBtn.addEventListener('click', confirmEmailSend);
+    }
+    
+    if (cancelSendBtn) {
+        cancelSendBtn.addEventListener('click', cancelEmailSend);
     }
     
     // Generate letter button
@@ -1056,13 +1075,14 @@ P.S. Based on my analysis, you have a ${currentComparison.overallMatch}% compati
     typeOutreachLetter(outreachLetter);
 }
 
-// Typing animation function
+// Typing animation function for textarea
 function typeOutreachLetter(text) {
     const letterElement = document.getElementById('outreachLetter');
     const sendBtn = document.getElementById('sendBtn');
     
-    letterElement.textContent = '';
+    letterElement.value = '';
     letterElement.classList.add('typing-animation');
+    letterElement.placeholder = 'Generating email content...';
     
     // Hide the download button during typing
     sendBtn.classList.add('hidden');
@@ -1072,34 +1092,33 @@ function typeOutreachLetter(text) {
     
     function typeNextCharacter() {
         if (index < text.length) {
-            letterElement.textContent += text.charAt(index);
+            letterElement.value += text.charAt(index);
             index++;
             setTimeout(typeNextCharacter, typingSpeed);
         } else {
             // Remove typing cursor when done and show download button
             letterElement.classList.remove('typing-animation');
+            letterElement.placeholder = 'Edit your outreach email here...';
             sendBtn.classList.remove('hidden');
             
-            // Apply post-processing to style the job description
-            styleJobDescription();
+            // Show send email button
+            const sendEmailBtn = document.getElementById('sendEmailBtn');
+            if (sendEmailBtn) {
+                sendEmailBtn.classList.remove('hidden');
+            }
+            
+            // Add instructional text at the end
+            letterElement.value += '\n\n[Feel free to edit this email and add your personal contact information]';
         }
     }
     
     typeNextCharacter();
 }
 
-// Function to style the job description after typing is complete
-function styleJobDescription() {
+// Function to get the editable email content
+function getEditableEmailContent() {
     const letterElement = document.getElementById('outreachLetter');
-    const content = letterElement.textContent;
-    
-    // Replace the job description line with styled HTML
-    const styledContent = content.replace(
-        /(\s{4}📄\s*"[^"]+")/, 
-        '<div class="job-description-quote"><em>$1</em></div>'
-    );
-    
-    letterElement.innerHTML = styledContent.replace(/\n/g, '<br>');
+    return letterElement.value;
 }
 
 // Update recruitment advice
@@ -1116,7 +1135,7 @@ function updateRecruitmentAdvice(advice) {
 
 // Send to candidate (downloads the letter for demo)
 function sendToCandidate() {
-    const outreachLetterText = document.getElementById('outreachLetter').textContent;
+    const outreachLetterText = document.getElementById('outreachLetter').value;
     const blob = new Blob([outreachLetterText], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1134,6 +1153,58 @@ function sendToCandidate() {
         sendBtn.textContent = originalText;
         sendBtn.style.background = '#7c3aed';
     }, 2000);
+}
+
+// Send email to candidate with confirmation modal
+function sendEmailToCandidate() {
+    const confirmModal = document.getElementById('confirmSendModal');
+    const candidateNameElement = document.getElementById('candidateName');
+    
+    // Set the candidate name in the confirmation message
+    if (selectedResume) {
+        candidateNameElement.textContent = selectedResume.name;
+    }
+    
+    // Show the confirmation modal
+    if (confirmModal) {
+        confirmModal.classList.remove('hidden');
+        confirmModal.style.display = 'flex'; // Force display
+    }
+}
+
+// Actually send the email (called when user confirms)
+function confirmEmailSend() {
+    const letterElement = document.getElementById('outreachLetter');
+    const sendEmailBtn = document.getElementById('sendEmailBtn');
+    const confirmModal = document.getElementById('confirmSendModal');
+    
+    // Hide the confirmation modal
+    confirmModal.classList.add('hidden');
+    confirmModal.style.display = 'none'; // Force hide
+    
+    // Make textarea read-only
+    letterElement.readOnly = true;
+    
+    // Update button state
+    sendEmailBtn.textContent = 'Email Sent';
+    sendEmailBtn.disabled = true;
+    
+    // Visual feedback
+    sendEmailBtn.style.background = '#9ca3af';
+    
+    // Optional: Show a success message
+    setTimeout(() => {
+        alert('Email has been sent successfully!');
+    }, 500);
+}
+
+// Cancel email send
+function cancelEmailSend() {
+    const confirmModal = document.getElementById('confirmSendModal');
+    if (confirmModal) {
+        confirmModal.classList.add('hidden');
+        confirmModal.style.display = 'none'; // Force hide
+    }
 }
 
 // Full Resume Functions

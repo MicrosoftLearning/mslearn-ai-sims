@@ -54,6 +54,32 @@
         </div>
     </div>
 
+    <!-- Send Email Confirmation Modal -->
+    <div id="confirmSendModal" class="modal hidden" role="dialog" aria-labelledby="confirmSendTitle" aria-modal="true">
+        <div class="modal-content confirm-modal-content">
+            <div class="modal-header">
+                <h2 id="confirmSendTitle">Confirm Email Send</h2>
+                <button class="close-button" data-modal="confirmSendModal" aria-label="Close confirmation dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="confirmation-content">
+                    <div class="confirmation-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </div>
+                    <p class="confirmation-message">Ready to send this email to <strong id="candidateName"></strong>?</p>
+                    <p class="confirmation-warning">The email will become read-only after sending.</p>
+                </div>
+                <div class="confirmation-actions">
+                    <button id="cancelSendBtn" class="cancel-button">Cancel</button>
+                    <button id="confirmSendBtn" class="confirm-button">Send Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Full Resume Modal -->
     <div id="fullResumeModal" class="modal hidden" role="dialog" aria-labelledby="fullResumeTitle" aria-modal="true">
         <div class="modal-content resume-modal-content">
@@ -132,10 +158,11 @@
                     <!-- Generated Letter (shown after generation) -->
                     <div id="generatedLetterContainer" class="generated-letter-container hidden" aria-live="polite">
                         <h3>📧 Generated Outreach Email</h3>
-                        <p class="outreach-letter-intro">Personalized candidate outreach message with improvement recommendations:</p>
-                        <div id="outreachLetter" class="outreach-letter" role="article" aria-label="Generated outreach email content"></div>
+                        <p class="outreach-letter-intro">Personalized candidate outreach message with improvement recommendations (editable):</p>
+                        <textarea id="outreachLetter" class="outreach-letter-textarea" role="textbox" aria-label="Editable outreach email content" placeholder="Generating email content..."></textarea>
                         <div class="outreach-letter-actions">
                             <button id="sendBtn" class="send-button hidden" aria-label="Download the generated email text as a file">Download email text</button>
+                            <button id="sendEmailBtn" class="send-email-button hidden" aria-label="Send the email to the candidate">Send Email</button>
                         </div>
                     </div>
                 </div>

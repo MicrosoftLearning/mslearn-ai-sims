@@ -25,7 +25,7 @@ If you'd rather explore the applications for yourself, without the prescribed la
 - [Wheat Seed Identifier (Machine Learning - Classification)](https://aka.ms/seed-identifier){:target="_blank"}
 - [Customer Segmentation (Machine Learning - Clustering)](https://aka.ms/customer-segmentation){:target="_blank"}
 - [Expenses chat assistant (Generative AI Agent)](https://aka.ms/expenses-agent){:target="_blank"}
-- [Recruiter Dashboard (Generative AI)](https://aka.ms/resume-app){:target="_blank"}
+- [Recruiter Dashboard (Generative AI Agent)](https://aka.ms/resume-app){:target="_blank"}
 - [StoryBridge social history project (Natural Language Processing)](https://aka.ms/story-bridge){:target="_blank"}
 - [Blue Yonder Airlines social media analyzer (Natural Language Processing)](https://aka.ms/blue_yonder_social){:target="_blank"}
 - [Photo Tagger (Computer Vision)](https://aka.ms/photo-tagger){:target="_blank"}

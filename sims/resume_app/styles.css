@@ -278,6 +278,75 @@ h3 {
     color: #4a5568;
 }
 
+/* Confirmation Modal Styles */
+.confirm-modal-content {
+    max-width: 500px;
+    max-height: auto;
+}
+
+#confirmSendModal {
+    z-index: 1100; /* Higher than other modals */
+}
+
+.confirmation-content {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.confirmation-icon {
+    margin-bottom: 20px;
+}
+
+.confirmation-message {
+    font-size: 16px;
+    color: #374151;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.confirmation-warning {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+
+.confirmation-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.cancel-button {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+.confirm-button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.confirm-button:hover {
+    background: #1d4ed8;
+}
+
 /* Resume Modal Styles */
 .resume-modal-content {
     max-width: 800px;
@@ -389,6 +458,93 @@ h3 {
     background: #2563eb;
     color: white;
     text-decoration: none;
+}
+
+/* Outreach letter actions */
+.outreach-letter-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.send-email-button {
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.send-email-button:hover:not(:disabled) {
+    background: #047857;
+    transform: translateY(-1px);
+}
+
+.send-email-button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.send-button {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.send-button:hover {
+    background: #6d28d9;
+    transform: translateY(-1px);
+}
+
+/* Outreach letter textarea styling */
+.outreach-letter-textarea {
+    width: 100%;
+    min-height: 400px;
+    padding: 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    background: #fafafa;
+    color: #374151;
+    transition: border-color 0.3s ease;
+}
+
+.outreach-letter-textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    background: #fff;
+}
+
+.outreach-letter-textarea:read-only {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    cursor: not-allowed;
+    color: #6b7280;
+}
+
+.outreach-letter-textarea.typing-animation::after {
+    content: '|';
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
 }
 
 /* Error message styling */
