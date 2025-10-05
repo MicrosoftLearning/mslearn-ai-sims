@@ -1,10 +1,10 @@
 ---
 lab:
-    title: 'Explore generative AI scenarios'
+    title: 'Explore generative AI and agent scenarios'
     description: 'Explore applications that demonstrate how Generative AI agents can reason over input and data, and generate intelligent responses.'
 ---
 
-# Explore generative AI scenarios
+# Explore generative AI and agent scenarios
 
 In this exercise you will explore applications that demonstrate how Generative AI agents can reason over input and data, and generate intelligent responses.
 
