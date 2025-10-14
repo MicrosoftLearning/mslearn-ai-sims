@@ -55,6 +55,9 @@ function addCell() {
     const textarea = cellDiv.querySelector('.cell-input');
     textarea.addEventListener('keydown', handleTabKey);
     
+    // Add focus handler to select default text on first click
+    textarea.addEventListener('focus', handleFirstFocus);
+    
     // Add hover zone before the cell
     const hoverZoneBefore = document.createElement('div');
     hoverZoneBefore.className = 'cell-hover-zone';
@@ -100,6 +103,9 @@ function insertCellBefore(beforeCellId) {
     // Add Tab key handler to insert 4 spaces
     const textarea = cellDiv.querySelector('.cell-input');
     textarea.addEventListener('keydown', handleTabKey);
+    
+    // Add focus handler to select default text on first click
+    textarea.addEventListener('focus', handleFirstFocus);
     
     // Find the hover zone before the target cell
     const hoverZone = beforeCell.previousElementSibling;
@@ -153,6 +159,19 @@ function handleTabKey(e) {
         
         // Move cursor after the inserted spaces
         textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
+    }
+}
+
+// Select default text on first focus
+function handleFirstFocus(event) {
+    const textarea = event.target;
+    const defaultText = '# Write your code here';
+    
+    // Check if the textarea contains only the default text
+    if (textarea.value === defaultText) {
+        textarea.select();
+        // Remove this event listener after first use
+        textarea.removeEventListener('focus', handleFirstFocus);
     }
 }
 
