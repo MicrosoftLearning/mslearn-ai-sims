@@ -47,6 +47,10 @@ function addCell() {
         <div class="cell-output" role="region" aria-label="Cell output" aria-live="polite"></div>
     `;
     
+    // Add Tab key handler to insert 4 spaces
+    const textarea = cellDiv.querySelector('.cell-input');
+    textarea.addEventListener('keydown', handleTabKey);
+    
     // Add hover zone before the cell
     const hoverZoneBefore = document.createElement('div');
     hoverZoneBefore.className = 'cell-hover-zone';
@@ -88,6 +92,10 @@ function insertCellBefore(beforeCellId) {
         <div class="cell-output" role="region" aria-label="Cell output" aria-live="polite"></div>
     `;
     
+    // Add Tab key handler to insert 4 spaces
+    const textarea = cellDiv.querySelector('.cell-input');
+    textarea.addEventListener('keydown', handleTabKey);
+    
     // Find the hover zone before the target cell
     const hoverZone = beforeCell.previousElementSibling;
     
@@ -123,6 +131,24 @@ function updateHoverZones() {
     hoverZoneEnd.querySelector('.add-cell-button').onclick = addCell;
     
     notebook.appendChild(hoverZoneEnd);
+}
+
+// Handle Tab key in textareas to insert 4 spaces
+function handleTabKey(e) {
+    if (e.key === 'Tab') {
+        e.preventDefault();
+        
+        const textarea = e.target;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        
+        // Insert 4 spaces at cursor position
+        const spaces = '    ';
+        textarea.value = textarea.value.substring(0, start) + spaces + textarea.value.substring(end);
+        
+        // Move cursor after the inserted spaces
+        textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
+    }
 }
 
 // Toggle code pane visibility
