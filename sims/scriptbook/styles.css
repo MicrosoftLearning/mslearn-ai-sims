@@ -1,0 +1,441 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #e8e8e8;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #3498db;
+}
+
+header h1 {
+    color: #3498db;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 1.1em;
+}
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    align-items: center;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.btn-secondary {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
+
+.btn-save {
+    background: #9b59b6;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #8e44ad;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(155, 89, 182, 0.3);
+}
+
+.btn-load {
+    background: #f39c12;
+    color: white;
+}
+
+.btn-load:hover {
+    background: #e67e22;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+}
+
+.btn-upload {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-upload:hover {
+    background: #229954;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+}
+
+.btn-add {
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+    background: #3498db;
+    color: white;
+    font-size: 1.1em;
+}
+
+.btn-add:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.file-name {
+    color: #27ae60;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.notebook {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.cell {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.cell:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.cell-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.cell-type-selector {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.9em;
+    background: white;
+    cursor: pointer;
+}
+
+.cell-type-selector:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.btn-run {
+    padding: 8px 15px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.btn-run:hover {
+    background: #2980b9;
+    transform: scale(1.05);
+}
+
+.btn-toggle {
+    padding: 8px 12px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.btn-toggle:hover {
+    background: #2980b9;
+    transform: scale(1.05);
+}
+
+.btn-delete {
+    padding: 8px 12px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-left: auto;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+.cell-input {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.95em;
+    resize: vertical;
+    background: #f5f5f5;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.cell-input.collapsed {
+    min-height: 0;
+    max-height: 0;
+    padding: 0;
+    border: none;
+    overflow: hidden;
+    opacity: 0;
+}
+
+.cell-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: #fafafa;
+}
+
+.cell-output {
+    margin-top: 10px;
+    padding: 15px;
+    background: white;
+    border-radius: 5px;
+    min-height: 40px;
+}
+
+.text-output {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    border-left: 4px solid #667eea;
+}
+
+.plot-output {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin: 10px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.error {
+    color: #e74c3c;
+    background: #fadbd8;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #e74c3c;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.loading {
+    color: #667eea;
+    font-style: italic;
+    padding: 10px;
+}
+
+.no-output {
+    color: #999;
+    font-style: italic;
+    padding: 10px;
+}
+
+.markdown-output {
+    padding: 15px;
+    line-height: 1.6;
+}
+
+.markdown-output h1 {
+    color: #333;
+    margin: 20px 0 10px 0;
+    font-size: 2em;
+}
+
+.markdown-output h2 {
+    color: #444;
+    margin: 15px 0 8px 0;
+    font-size: 1.6em;
+}
+
+.markdown-output h3 {
+    color: #555;
+    margin: 12px 0 6px 0;
+    font-size: 1.3em;
+}
+
+.markdown-output code {
+    background: #f4f4f4;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.markdown-output pre {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    border-left: 4px solid #667eea;
+}
+
+.markdown-output ul {
+    margin-left: 20px;
+    list-style-type: disc;
+}
+
+.markdown-output li {
+    margin: 5px 0;
+}
+
+.markdown-output strong {
+    font-weight: bold;
+    color: #333;
+}
+
+.markdown-output em {
+    font-style: italic;
+    color: #555;
+}
+
+/* Hide PyScript traceback pane completely */
+py-terminal,
+py-repl,
+.py-terminal,
+.py-repl,
+[data-pyscript-terminal],
+#pyscript-terminal {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-height: 250px !important;
+    background: #2c3e50 !important;
+    color: #ecf0f1 !important;
+    padding: 40px 15px 15px 15px !important;
+    overflow-y: auto !important;
+    z-index: 9998 !important;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3) !important;
+    display: block !important;
+}
+
+/* Close button that sits on top of terminal */
+.terminal-close-btn {
+    position: fixed !important;
+    bottom: 260px !important;
+    right: 20px !important;
+    background: #e74c3c !important;
+    color: white !important;
+    border: 2px solid white !important;
+    border-radius: 5px !important;
+    padding: 12px 24px !important;
+    cursor: pointer !important;
+    font-size: 1.1em !important;
+    font-weight: bold !important;
+    z-index: 99999 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+    transition: all 0.3s ease !important;
+    display: none !important;
+}
+
+.terminal-close-btn.visible {
+    display: block !important;
+}
+
+.terminal-close-btn:hover {
+    background: #c0392b !important;
+    transform: scale(1.1) !important;
+}
+
+/* When terminal is hidden */
+py-terminal.terminal-hidden,
+py-repl.terminal-hidden,
+.py-terminal.terminal-hidden,
+.py-repl.terminal-hidden,
+[data-pyscript-terminal].terminal-hidden,
+#pyscript-terminal.terminal-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    header h1 {
+        font-size: 2em;
+    }
+    
+    .toolbar {
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+}

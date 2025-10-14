@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>ScriptBook - Python Notebook</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <link rel="stylesheet" href="styles.css?v=save1">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ScriptBook</h1>
+            <p class="subtitle">Python Notebook Environment</p>
+        </header>
+
+        <div class="toolbar" role="toolbar" aria-label="Notebook controls">
+            <button id="runAllBtn" class="btn btn-primary" aria-label="Run all cells in the notebook">▶ Run All</button>
+            <button id="clearAllBtn" class="btn btn-secondary" aria-label="Clear all cells and outputs">🗑 Clear All</button>
+            <button id="saveBtn" class="btn btn-save" aria-label="Save notebook to file">💾 Save Notebook</button>
+            <label for="loadFile" class="btn btn-load" aria-label="Load notebook from file">📂 Load Notebook</label>
+            <input type="file" id="loadFile" accept=".pysb" style="display: none;" aria-label="Select notebook file to load">
+            <label for="fileUpload" class="btn btn-upload" aria-label="Upload data file (CSV or text)">&#128196; Upload Data</label>
+            <input type="file" id="fileUpload" accept=".txt,.csv" style="display: none;" aria-label="Select data file to upload">
+            <span id="uploadedFileName" class="file-name" role="status" aria-live="polite"></span>
+        </div>
+
+        <div id="notebook" class="notebook" role="main" aria-label="Notebook cells container"></div>
+
+        <button id="addCellBtn" class="btn btn-add" aria-label="Add a new cell to the notebook">+ Add Cell</button>
+    </div>
+
+    <!-- Terminal close button -->
+    <button id="terminalCloseBtn" class="terminal-close-btn" onclick="closeTerminal()" aria-label="Close error log terminal">✖ Close Error Log</button>
+
+    <!-- PyScript configuration -->
+    <script type="py" config='{"packages": ["numpy", "pandas", "matplotlib", "scikit-learn"]}'>
+        import js
+        from pyodide.ffi import create_proxy
+        import sys
+        from io import StringIO
+        import base64
+        
+        # Global storage for uploaded files
+        uploaded_files = {}
+        
+        def store_file(filename, content):
+            """Store uploaded file content"""
+            uploaded_files[filename] = content
+            with open(filename, 'w') as f:
+                f.write(content)
+        
+        def get_uploaded_files():
+            """Return list of uploaded files"""
+            return list(uploaded_files.keys())
+    </script>
+
+    <script src="script.js?v=save1"></script>
+</body>
+</html>
