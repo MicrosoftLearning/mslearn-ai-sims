@@ -515,6 +515,12 @@ function renderMarkdown(text) {
     // Italic
     html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
     
+    // Links with {:target="_blank"} syntax
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)\{:target="_blank"\}/g, '<a href="$2" target="_blank">$1</a>');
+    
+    // Regular links (without explicit target)
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    
     // Code blocks
     html = html.replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>');
     
@@ -605,6 +611,15 @@ function loadNotebook(event) {
                     // Set cell content
                     const input = cell.querySelector('.cell-input');
                     input.value = cellData.content || '';
+                    
+                    // Auto-render markdown cells and hide their source
+                    if (cellData.type === 'markdown' && cellData.content) {
+                        const output = cell.querySelector('.cell-output');
+                        output.innerHTML = renderMarkdown(cellData.content);
+                        output.classList.add('markdown-output');
+                        // Collapse the code pane for markdown cells
+                        input.classList.add('collapsed');
+                    }
                 });
             } else {
                 // If no cells in file, add one empty cell
