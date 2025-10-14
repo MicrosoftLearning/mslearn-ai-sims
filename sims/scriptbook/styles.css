@@ -213,6 +213,22 @@ header h1 {
     transform: scale(1.05);
 }
 
+.btn-stop {
+    padding: 8px 15px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.btn-stop:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
 .btn-toggle {
     padding: 8px 12px;
     background: #3498db;
@@ -307,6 +323,15 @@ header h1 {
     padding: 15px;
     border-radius: 5px;
     border-left: 4px solid #e74c3c;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.info {
+    color: #3498db;
+    background: #d6eaf8;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #3498db;
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 

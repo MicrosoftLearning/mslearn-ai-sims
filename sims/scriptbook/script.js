@@ -4,6 +4,9 @@ let uploadedFileContent = null;
 let uploadedFileName = null;
 let pyScriptReady = false;
 
+// Track running cells and their script tags
+const runningCells = new Map();
+
 // Wait for PyScript to be ready
 window.addEventListener('py:ready', () => {
     pyScriptReady = true;
@@ -40,6 +43,7 @@ function addCell() {
                 <option value="markdown">Markdown</option>
             </select>
             <button class="btn-run" onclick="runCell('${cellId}')" aria-label="Run this cell">▶ Run</button>
+            <button class="btn-stop" onclick="stopCell('${cellId}')" aria-label="Stop cell execution" style="display: none;">⏹ Stop</button>
             <button class="btn-toggle" onclick="toggleCodePane('${cellId}')" aria-label="Toggle code visibility">👁</button>
             <button class="btn-delete" onclick="deleteCell('${cellId}')" aria-label="Delete this cell">✖</button>
         </div>
@@ -85,6 +89,7 @@ function insertCellBefore(beforeCellId) {
                 <option value="markdown">Markdown</option>
             </select>
             <button class="btn-run" onclick="runCell('${newCellId}')" aria-label="Run this cell">▶ Run</button>
+            <button class="btn-stop" onclick="stopCell('${newCellId}')" aria-label="Stop cell execution" style="display: none;">⏹ Stop</button>
             <button class="btn-toggle" onclick="toggleCodePane('${newCellId}')" aria-label="Toggle code visibility">👁</button>
             <button class="btn-delete" onclick="deleteCell('${newCellId}')" aria-label="Delete this cell">✖</button>
         </div>
@@ -151,6 +156,39 @@ function handleTabKey(e) {
     }
 }
 
+// Stop a running cell
+function stopCell(cellId) {
+    const cell = document.getElementById(cellId);
+    const output = cell.querySelector('.cell-output');
+    const runBtn = cell.querySelector('.btn-run');
+    const stopBtn = cell.querySelector('.btn-stop');
+    
+    // Get the running cell info
+    const runningInfo = runningCells.get(cellId);
+    
+    if (runningInfo) {
+        // Clear the timeout
+        if (runningInfo.timeoutId) {
+            clearTimeout(runningInfo.timeoutId);
+        }
+        
+        // Remove the script tag to stop execution
+        if (runningInfo.scriptTag && runningInfo.scriptTag.parentNode) {
+            runningInfo.scriptTag.parentNode.removeChild(runningInfo.scriptTag);
+        }
+        
+        // Update output to show it was stopped
+        output.innerHTML = '<div class="error">Execution stopped by user</div>';
+        
+        // Clean up tracking
+        runningCells.delete(cellId);
+    }
+    
+    // Restore buttons
+    runBtn.style.display = 'inline-block';
+    stopBtn.style.display = 'none';
+}
+
 // Toggle code pane visibility
 function toggleCodePane(cellId) {
     const cell = document.getElementById(cellId);
@@ -177,16 +215,31 @@ async function runCell(cellId) {
     const cell = document.getElementById(cellId);
     const input = cell.querySelector('.cell-input');
     const output = cell.querySelector('.cell-output');
+    const runBtn = cell.querySelector('.btn-run');
+    const stopBtn = cell.querySelector('.btn-stop');
     const cellType = cell.querySelector('.cell-type-selector').value;
     const code = input.value;
+    
+    // Show stop button, hide run button IMMEDIATELY (before any async operations)
+    runBtn.style.display = 'none';
+    stopBtn.style.display = 'inline-block';
+    
+    // Force a reflow to ensure UI updates
+    stopBtn.offsetHeight;
     
     // Clear previous output
     output.innerHTML = '';
     output.className = 'cell-output';
     
     if (!code.trim()) {
+        // Restore buttons if no code
+        runBtn.style.display = 'inline-block';
+        stopBtn.style.display = 'none';
         return;
     }
+    
+    // Use setTimeout to ensure UI updates before starting execution
+    await new Promise(resolve => setTimeout(resolve, 0));
     
     try {
         if (cellType === 'markdown') {
@@ -198,17 +251,21 @@ async function runCell(cellId) {
         } else {
             // Run Python code
             output.innerHTML = '<div class="loading">Running...</div>';
-            await runPythonCode(code, output);
+            await runPythonCode(code, output, cellId);
             // Ensure Python cells stay expanded
             input.classList.remove('collapsed');
         }
     } catch (error) {
         output.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+    } finally {
+        // Restore buttons
+        runBtn.style.display = 'inline-block';
+        stopBtn.style.display = 'none';
     }
 }
 
 // Run Python code using PyScript
-async function runPythonCode(code, outputElement) {
+async function runPythonCode(code, outputElement, cellId) {
     try {
         // Wait for PyScript to be ready
         if (!pyScriptReady) {
@@ -228,6 +285,8 @@ async function runPythonCode(code, outputElement) {
         // Create inline script tag
         const scriptTag = document.createElement('script');
         scriptTag.type = 'py';
+        // Note: Not using worker attribute because it requires secure context (HTTPS + proper headers)
+        // Without workers, Stop button works for I/O-bound code but not pure compute loops
         
         // Add error handler
         scriptTag.addEventListener('error', (e) => {
@@ -326,22 +385,32 @@ finally:
         console.log(`Appended PyScript tag for cell ${outputId}`);
         document.body.appendChild(scriptTag);
         
+        // Track this running cell
+        runningCells.set(cellId, { scriptTag, outputId });
+        
         // Add a timeout to check if output was updated (in case of error)
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
             const elem = document.getElementById(outputId);
             if (elem && elem.innerHTML.includes('Running...')) {
                 // Output wasn't updated, likely due to an error
                 console.error('Cell output still shows "Running..." after 5 seconds. PyScript may have failed silently.');
                 elem.innerHTML = '<div class="error">An error occurred during execution. The Python code did not complete. Check the browser console for details.</div>';
+                // Clean up tracking
+                runningCells.delete(cellId);
             }
         }, 5000);  // Increased to 5 seconds
+        
+        // Store timeout ID so we can cancel it if stopped manually
+        runningCells.get(cellId).timeoutId = timeoutId;
         
         // Clean up after a delay
         setTimeout(() => {
             if (scriptTag.parentNode) {
                 scriptTag.parentNode.removeChild(scriptTag);
             }
-        }, 4000);
+            // Clean up tracking
+            runningCells.delete(cellId);
+        }, 6000);
         
     } catch (error) {
         console.error('Execution error:', error);
