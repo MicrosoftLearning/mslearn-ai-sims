@@ -21,20 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fileUpload').addEventListener('change', handleFileUpload);
     document.getElementById('saveBtn').addEventListener('click', saveNotebook);
     document.getElementById('loadFile').addEventListener('change', loadNotebook);
-    
-    const closeBtn = document.getElementById('terminalCloseBtn');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closeTerminal);
-        console.log('Terminal close button listener attached');
-    } else {
-        console.error('Terminal close button not found!');
-    }
-    
-    // Monitor for terminal appearance
-    monitorTerminal();
-    
-    // Make closeTerminal available globally for onclick
-    window.closeTerminal = closeTerminal;
 });
 
 // Add a new cell to the notebook
@@ -136,28 +122,52 @@ async function runPythonCode(code, outputElement) {
         // Create inline script tag
         const scriptTag = document.createElement('script');
         scriptTag.type = 'py';
+        
+        // Add error handler
+        scriptTag.addEventListener('error', (e) => {
+            console.error('PyScript tag error:', e);
+            outputElement.innerHTML = '<div class="error">PyScript failed to execute. Check console for details.</div>';
+        });
+        
         scriptTag.innerHTML = `
+import js
 import sys
 from io import StringIO
-import js
+import warnings
+
+# Suppress all warnings including matplotlib backend warnings
+warnings.filterwarnings('ignore')
 
 output_id = "${outputId}"
 old_stdout = sys.stdout
+old_stderr = sys.stderr
 sys.stdout = StringIO()
+sys.stderr = StringIO()
 
 output_text = ""
+stderr_text = ""
 figures = []
 error_msg = None
 
+# User code as a string to handle syntax errors
+user_code = """${code.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"""
+
 try:
-${code.split('\n').map(line => '    ' + line).join('\n')}
+    # Try to compile first to catch syntax errors
+    compiled_code = compile(user_code, '<cell>', 'exec')
+    # Execute the compiled code
+    exec(compiled_code)
     
     output_text = sys.stdout.getvalue()
+    stderr_text = sys.stderr.getvalue()
     
+    # Handle matplotlib figures
     try:
         import matplotlib.pyplot as plt
         import base64
         from io import BytesIO
+        
+        plt.ioff()
         
         for i in plt.get_fignums():
             fig = plt.figure(i)
@@ -176,35 +186,56 @@ except Exception as e:
 
 finally:
     sys.stdout = old_stdout
-
-html_output = ""
-if error_msg:
-    import html
-    html_output = f'<div class="error">{html.escape(error_msg)}</div>'
-else:
-    if output_text:
+    sys.stderr = old_stderr
+    
+    # Build HTML output
+    html_output = ""
+    if error_msg:
         import html
-        html_output += f'<pre class="text-output">{html.escape(output_text)}</pre>'
+        html_output = f'<div class="error">{html.escape(error_msg)}</div>'
+    else:
+        if output_text:
+            import html
+            html_output += f'<pre class="text-output">{html.escape(output_text)}</pre>'
+        
+        if stderr_text and not error_msg:
+            import html
+            html_output += f'<pre class="text-output stderr">{html.escape(stderr_text)}</pre>'
+        
+        for img_data in figures:
+            html_output += f'<img src="data:image/png;base64,{img_data}" class="plot-output" alt="Plot">'
+        
+        if not html_output:
+            html_output = '<div class="no-output">Code executed successfully (no output)</div>'
     
-    for img_data in figures:
-        html_output += f'<img src="data:image/png;base64,{img_data}" class="plot-output" alt="Plot">'
-    
-    if not html_output:
-        html_output = '<div class="no-output">Code executed successfully (no output)</div>'
-
-element = js.document.getElementById(output_id)
-if element:
-    element.innerHTML = html_output
+    # Update the element
+    element = js.document.getElementById(output_id)
+    if element:
+        element.innerHTML = html_output
+        js.console.log(f"Updated element {output_id}")
+    else:
+        js.console.error(f"Could not find element {output_id}")
 `;
         
+        console.log(`Appended PyScript tag for cell ${outputId}`);
         document.body.appendChild(scriptTag);
+        
+        // Add a timeout to check if output was updated (in case of error)
+        setTimeout(() => {
+            const elem = document.getElementById(outputId);
+            if (elem && elem.innerHTML.includes('Running...')) {
+                // Output wasn't updated, likely due to an error
+                console.error('Cell output still shows "Running..." after 5 seconds. PyScript may have failed silently.');
+                elem.innerHTML = '<div class="error">An error occurred during execution. The Python code did not complete. Check the browser console for details.</div>';
+            }
+        }, 5000);  // Increased to 5 seconds
         
         // Clean up after a delay
         setTimeout(() => {
             if (scriptTag.parentNode) {
                 scriptTag.parentNode.removeChild(scriptTag);
             }
-        }, 1000);
+        }, 4000);
         
     } catch (error) {
         console.error('Execution error:', error);
@@ -304,117 +335,6 @@ function renderMarkdown(text) {
     html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
     
     return html;
-}
-
-// Close the terminal
-function closeTerminal() {
-    console.log('Closing terminal...');
-    
-    let totalFound = 0;
-    
-    // Method 1: Try specific selectors
-    const selectors = [
-        'py-terminal',
-        'py-repl', 
-        '.py-terminal',
-        '.py-repl',
-        '[data-pyscript-terminal]',
-        '#pyscript-terminal'
-    ];
-    
-    selectors.forEach(selector => {
-        const elements = document.querySelectorAll(selector);
-        totalFound += elements.length;
-        
-        elements.forEach(terminal => {
-            hideElement(terminal);
-        });
-    });
-    
-    // Method 2: Find ANY element at bottom of page
-    const allElements = Array.from(document.body.querySelectorAll('*'));
-    
-    allElements.forEach(el => {
-        const rect = el.getBoundingClientRect();
-        
-        // Check if element is near the bottom of viewport
-        if (rect.bottom > window.innerHeight - 100 && rect.top > window.innerHeight - 400) {
-            // If it's not our close button and has substantial content
-            if (el.id !== 'terminalCloseBtn' && 
-                !el.classList.contains('terminal-close-btn') &&
-                rect.height > 30) {
-                hideElement(el);
-                totalFound++;
-            }
-        }
-    });
-    
-    // Hide the close button too
-    document.getElementById('terminalCloseBtn').classList.remove('visible');
-    
-    console.log('Terminal closed. Found and hid', totalFound, 'element(s)');
-}
-
-// Helper function to hide an element
-function hideElement(el) {
-    el.style.setProperty('display', 'none', 'important');
-    el.style.setProperty('visibility', 'hidden', 'important');
-    el.style.setProperty('height', '0', 'important');
-    el.style.setProperty('max-height', '0', 'important');
-    el.style.setProperty('overflow', 'hidden', 'important');
-    el.style.setProperty('opacity', '0', 'important');
-    el.style.setProperty('position', 'absolute', 'important');
-    el.style.setProperty('bottom', '-9999px', 'important');
-}
-
-// Monitor for terminal to show/hide close button
-function monitorTerminal() {
-    setInterval(() => {
-        // Look for elements at the bottom that might be terminals
-        const allElements = Array.from(document.body.querySelectorAll('*'));
-        let hasTerminal = false;
-        
-        allElements.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            const styles = window.getComputedStyle(el);
-            
-            // Check if element is at the bottom of the viewport
-            // and is actually visible
-            if (rect.bottom > window.innerHeight - 50 && 
-                rect.height > 80 &&
-                rect.width > 200 &&
-                styles.display !== 'none' &&
-                styles.visibility !== 'hidden' &&
-                el.id !== 'terminalCloseBtn' &&
-                !el.classList.contains('terminal-close-btn')) {
-                
-                const text = el.textContent || '';
-                
-                // Exclude elements that are clearly part of the notebook UI
-                const isNotebookElement = el.closest('.cell') || 
-                                         el.closest('.toolbar') || 
-                                         el.id === 'addCellBtn' ||
-                                         el.classList.contains('btn-add');
-                
-                // Check if it looks like an error terminal
-                // Must have error keywords OR be positioned at very bottom with substantial content
-                if (!isNotebookElement && 
-                    ((text.includes('Traceback') || text.includes('Error:') || text.includes('Exception')) ||
-                    (rect.top > window.innerHeight - 250 && text.length > 100))) {
-                    hasTerminal = true;
-                }
-            }
-        });
-        
-        const closeBtn = document.getElementById('terminalCloseBtn');
-        if (closeBtn) {
-            if (hasTerminal) {
-                closeBtn.classList.add('visible');
-            } else {
-                closeBtn.classList.remove('visible');
-            }
-        }
-    }, 300);
 }
 
 // Escape HTML to prevent XSS

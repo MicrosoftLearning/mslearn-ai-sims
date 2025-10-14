@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>ScriptBook - Python Notebook</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
-    <link rel="stylesheet" href="styles.css?v=save3">
+    <link rel="stylesheet" href="styles.css?v=save7">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 </head>
 <body>
@@ -34,9 +34,6 @@
         <button id="addCellBtn" class="btn btn-add" aria-label="Add a new cell to the notebook">+ Add Cell</button>
     </div>
 
-    <!-- Terminal close button -->
-    <button id="terminalCloseBtn" class="terminal-close-btn" onclick="closeTerminal()" aria-label="Close error log terminal">✖ Close Error Log</button>
-
     <!-- PyScript configuration -->
     <script type="py" config='{"packages": ["numpy", "pandas", "matplotlib", "scikit-learn"]}'>
         import js
@@ -44,6 +41,16 @@
         import sys
         from io import StringIO
         import base64
+        import warnings
+        
+        # Suppress matplotlib warnings about non-GUI backend
+        warnings.filterwarnings('ignore', category=UserWarning, module='matplotlib')
+        
+        # Configure matplotlib to not display automatically
+        import matplotlib
+        matplotlib.use('Agg')  # Use non-interactive backend
+        import matplotlib.pyplot as plt
+        plt.ioff()  # Turn off interactive mode
         
         # Global storage for uploaded files
         uploaded_files = {}
@@ -59,6 +66,6 @@
             return list(uploaded_files.keys())
     </script>
 
-    <script src="script.js?v=save3"></script>
+    <script src="script.js?v=save14"></script>
 </body>
 </html>
