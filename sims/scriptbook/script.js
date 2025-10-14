@@ -378,23 +378,29 @@ function monitorTerminal() {
             const rect = el.getBoundingClientRect();
             const styles = window.getComputedStyle(el);
             
-            // Check if there's a terminal-like element at bottom
-            // Must be positioned at the very bottom and have terminal-like styling
+            // Check if element is at the bottom of the viewport
+            // and is actually visible
             if (rect.bottom > window.innerHeight - 50 && 
-                rect.top > window.innerHeight - 300 &&
                 rect.height > 80 &&
+                rect.width > 200 &&
+                styles.display !== 'none' &&
+                styles.visibility !== 'hidden' &&
                 el.id !== 'terminalCloseBtn' &&
-                !el.classList.contains('terminal-close-btn') &&
-                !el.closest('.cell') && // Not part of a cell
-                !el.closest('.container') && // Not part of main container
-                !el.closest('#notebook')) { // Not part of notebook
+                !el.classList.contains('terminal-close-btn')) {
                 
                 const text = el.textContent || '';
-                const bgColor = styles.backgroundColor;
                 
-                // Check if it looks like an error terminal - must have error text
-                if ((text.includes('Traceback') || text.includes('Error:') || text.includes('Exception')) &&
-                    text.length > 50) {
+                // Exclude elements that are clearly part of the notebook UI
+                const isNotebookElement = el.closest('.cell') || 
+                                         el.closest('.toolbar') || 
+                                         el.id === 'addCellBtn' ||
+                                         el.classList.contains('btn-add');
+                
+                // Check if it looks like an error terminal
+                // Must have error keywords OR be positioned at very bottom with substantial content
+                if (!isNotebookElement && 
+                    ((text.includes('Traceback') || text.includes('Error:') || text.includes('Exception')) ||
+                    (rect.top > window.innerHeight - 250 && text.length > 100))) {
                     hasTerminal = true;
                 }
             }
