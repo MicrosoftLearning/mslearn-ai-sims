@@ -376,17 +376,25 @@ function monitorTerminal() {
         
         allElements.forEach(el => {
             const rect = el.getBoundingClientRect();
+            const styles = window.getComputedStyle(el);
             
             // Check if there's a terminal-like element at bottom
-            if (rect.bottom > window.innerHeight - 100 && 
-                rect.top > window.innerHeight - 400 &&
-                rect.height > 100 &&
+            // Must be positioned at the very bottom and have terminal-like styling
+            if (rect.bottom > window.innerHeight - 50 && 
+                rect.top > window.innerHeight - 300 &&
+                rect.height > 80 &&
                 el.id !== 'terminalCloseBtn' &&
-                !el.classList.contains('terminal-close-btn')) {
+                !el.classList.contains('terminal-close-btn') &&
+                !el.closest('.cell') && // Not part of a cell
+                !el.closest('.container') && // Not part of main container
+                !el.closest('#notebook')) { // Not part of notebook
                 
                 const text = el.textContent || '';
-                // Check if it looks like an error terminal
-                if (text.includes('Traceback') || text.includes('Error') || text.includes('Exception') || text.length > 50) {
+                const bgColor = styles.backgroundColor;
+                
+                // Check if it looks like an error terminal - must have error text
+                if ((text.includes('Traceback') || text.includes('Error:') || text.includes('Exception')) &&
+                    text.length > 50) {
                     hasTerminal = true;
                 }
             }
