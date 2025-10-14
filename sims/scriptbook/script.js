@@ -44,7 +44,7 @@ function addCell() {
             </select>
             <button class="btn-run" onclick="runCell('${cellId}')" aria-label="Run this cell">▶ Run</button>
             <button class="btn-stop" onclick="stopCell('${cellId}')" aria-label="Stop cell execution" style="display: none;">⏹ Stop</button>
-            <button class="btn-toggle" onclick="toggleCodePane('${cellId}')" aria-label="Toggle code visibility">👁</button>
+            <button class="btn-toggle" onclick="toggleCodePane('${cellId}')" aria-label="Hide code editor"><span style="filter: brightness(0) invert(1); font-weight: bold;">&lt;/&gt;</span></button>
             <button class="btn-delete" onclick="deleteCell('${cellId}')" aria-label="Delete this cell">✖</button>
         </div>
         <textarea class="cell-input" placeholder="Enter Python code or Markdown..." aria-label="Cell input code or text"># Write your code here</textarea>
@@ -93,7 +93,7 @@ function insertCellBefore(beforeCellId) {
             </select>
             <button class="btn-run" onclick="runCell('${newCellId}')" aria-label="Run this cell">▶ Run</button>
             <button class="btn-stop" onclick="stopCell('${newCellId}')" aria-label="Stop cell execution" style="display: none;">⏹ Stop</button>
-            <button class="btn-toggle" onclick="toggleCodePane('${newCellId}')" aria-label="Toggle code visibility">👁</button>
+            <button class="btn-toggle" onclick="toggleCodePane('${newCellId}')" aria-label="Hide code editor"><span style="filter: brightness(0) invert(1); font-weight: bold;">&lt;/&gt;</span></button>
             <button class="btn-delete" onclick="deleteCell('${newCellId}')" aria-label="Delete this cell">✖</button>
         </div>
         <textarea class="cell-input" placeholder="Enter Python code or Markdown..." aria-label="Cell input code or text"># Write your code here</textarea>
@@ -212,7 +212,20 @@ function stopCell(cellId) {
 function toggleCodePane(cellId) {
     const cell = document.getElementById(cellId);
     const input = cell.querySelector('.cell-input');
+    const toggleBtn = cell.querySelector('.btn-toggle');
+    
     input.classList.toggle('collapsed');
+    
+    // Update button icon based on visibility state
+    if (input.classList.contains('collapsed')) {
+        // Code is hidden, show white pencil icon
+        toggleBtn.innerHTML = '<span style="filter: brightness(0) invert(1);">✏️</span>';
+        toggleBtn.setAttribute('aria-label', 'Show code editor');
+    } else {
+        // Code is visible, show bold white code brackets to indicate "hide"
+        toggleBtn.innerHTML = '<span style="filter: brightness(0) invert(1); font-weight: bold;">&lt;/&gt;</span>';
+        toggleBtn.setAttribute('aria-label', 'Hide code editor');
+    }
 }
 
 // Delete a cell
@@ -504,6 +517,78 @@ js.console.log("File uploaded: ${uploadedFileName}")
 function renderMarkdown(text) {
     let html = text;
     
+    // Tables - handle pipe-separated values FIRST while line structure is completely intact
+    html = html.replace(/^(\|[^|\n]*)+\|$/gim, function(match) {
+        return '<table-row>' + match + '</table-row>';
+    });
+    
+    // Process tables by finding groups of consecutive table-row elements
+    html = html.replace(/(<table-row>[^<]*<\/table-row>(\s)*)+/g, function(match) {
+        const rows = match.match(/<table-row>[^<]*<\/table-row>/g);
+        if (!rows) return match;
+        
+        let tableHtml = '<table>';
+        
+        rows.forEach((row, index) => {
+            const rowContent = row.replace(/<\/?table-row>/g, '');
+            const cells = rowContent.split('|').filter(cell => cell.trim() !== '').map(cell => cell.trim());
+            
+            // Check if this is a separator row (contains only dashes and spaces)
+            if (rowContent.match(/^\|[\s-|]+\|$/)) {
+                return; // Skip separator rows
+            }
+            
+            if (index === 0) {
+                // First row - treat as header
+                tableHtml += '<thead><tr>';
+                cells.forEach(cell => {
+                    tableHtml += '<th>' + cell + '</th>';
+                });
+                tableHtml += '</tr></thead><tbody>';
+            } else {
+                // Data row
+                tableHtml += '<tr>';
+                cells.forEach(cell => {
+                    tableHtml += '<td>' + cell + '</td>';
+                });
+                tableHtml += '</tr>';
+            }
+        });
+        
+        tableHtml += '</tbody></table>';
+        return tableHtml;
+    });
+    
+    // Process blockquotes SECOND while line structure is mostly intact
+    html = html.replace(/^> (.*)$/gim, '<blockquote-line>$1</blockquote-line>');
+    // Use a simpler approach: replace all consecutive blockquote-line groups
+    html = html.replace(/(<blockquote-line>[^<]*<\/blockquote-line>\s*)+/g, function(match) {
+        // Extract all the content between blockquote-line tags
+        const lines = match.match(/<blockquote-line>([^<]*)<\/blockquote-line>/g);
+        if (lines) {
+            const content = lines.map(line => line.replace(/<blockquote-line>([^<]*)<\/blockquote-line>/, '$1')).join('<br>');
+            return '<blockquote>' + content + '</blockquote>';
+        }
+        return match;
+    });
+    
+    // Process lists THIRD while line structure is still mostly intact
+    // Unordered lists (bulleted) - handle both "- " and "* "
+    html = html.replace(/^[-*] (.*)$/gim, '<ul-item>$1</ul-item>');
+    html = html.replace(/(<ul-item>.*<\/ul-item>(\n)*)+/gs, function(match) {
+        const items = match.replace(/<ul-item>/g, '<li>').replace(/<\/ul-item>/g, '</li>').replace(/(\n)+/g, '');
+        return '<ul>' + items + '</ul>';
+    });
+    
+    // Numbered lists (ordered) - handle "1. ", "2. ", etc.
+    html = html.replace(/^(\d+)\. (.*)$/gim, function(match, num, content) {
+        return '<ol-item>' + content + '</ol-item>';
+    });
+    html = html.replace(/(<ol-item>.*?<\/ol-item>(\n)*)+/gs, function(match) {
+        const items = match.replace(/<ol-item>/g, '<li>').replace(/<\/ol-item>/g, '</li>').replace(/(\n)+/g, '');
+        return '<ol>' + items + '</ol>';
+    });
+    
     // Headers
     html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
     html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
@@ -527,12 +612,8 @@ function renderMarkdown(text) {
     // Inline code
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
     
-    // Line breaks
+    // Line breaks (convert remaining newlines to <br>)
     html = html.replace(/\n/g, '<br>');
-    
-    // Lists
-    html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
-    html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
     
     return html;
 }

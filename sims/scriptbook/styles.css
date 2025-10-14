@@ -335,6 +335,51 @@ header h1 {
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 
+/* Blockquote styling for markdown */
+.markdown-output blockquote {
+    background: #f4f4f4;
+    border-left: 4px solid #ccc;
+    margin: 10px 0;
+    padding: 10px 15px;
+    font-style: italic;
+    color: #555;
+}
+
+/* List styling for markdown */
+.markdown-output ul,
+.markdown-output ol {
+    margin: 10px 0;
+    padding-left: 25px;
+}
+
+.markdown-output li {
+    margin: 5px 0;
+}
+
+/* Table styling for markdown */
+.markdown-output table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 15px 0;
+    border: 1px solid #ddd;
+}
+
+.markdown-output th,
+.markdown-output td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.markdown-output th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.markdown-output tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
 .loading {
     color: #667eea;
     font-style: italic;
@@ -422,6 +467,51 @@ py-script-error,
     opacity: 0 !important;
     position: absolute !important;
     bottom: -9999px !important;
+}
+
+/* Markdown spacing adjustments */
+.markdown-output p {
+    margin: 0.5em 0;
+}
+
+.markdown-output h1,
+.markdown-output h2,
+.markdown-output h3,
+.markdown-output h4,
+.markdown-output h5,
+.markdown-output h6 {
+    margin: 0.8em 0 0.4em 0;
+}
+
+.markdown-output ul,
+.markdown-output ol {
+    margin: 0.5em 0;
+    padding-left: 1.5em;
+}
+
+.markdown-output li {
+    margin: 0.2em 0;
+}
+
+.markdown-output blockquote {
+    margin: 0.5em 0;
+}
+
+.markdown-output table {
+    margin: 0.8em 0;
+}
+
+.markdown-output pre {
+    margin: 0.5em 0;
+}
+
+.markdown-output code {
+    margin: 0;
+}
+
+/* Reduce line height for tighter text */
+.markdown-output {
+    line-height: 1.4;
 }
 
 /* Responsive design */
