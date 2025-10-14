@@ -113,19 +113,42 @@ header h1 {
     box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
 }
 
-.btn-add {
-    width: 100%;
-    margin-top: 20px;
-    padding: 15px;
-    background: #3498db;
-    color: white;
-    font-size: 1.1em;
+/* Hover zones for adding cells */
+.cell-hover-zone {
+    height: 30px;
+    margin: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
 }
 
-.btn-add:hover {
+.cell-hover-zone:hover {
+    opacity: 1;
+}
+
+.cell-hover-zone-end {
+    height: 50px;
+    margin-top: 10px;
+}
+
+.add-cell-button {
+    padding: 6px 16px;
+    background: #3498db;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-cell-button:hover {
     background: #2980b9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    transform: scale(1.05);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 .file-name {

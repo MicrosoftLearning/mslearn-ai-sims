@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listeners for toolbar buttons
     document.getElementById('runAllBtn').addEventListener('click', runAllCells);
     document.getElementById('clearAllBtn').addEventListener('click', clearAllCells);
-    document.getElementById('addCellBtn').addEventListener('click', addCell);
     document.getElementById('fileUpload').addEventListener('change', handleFileUpload);
     document.getElementById('saveBtn').addEventListener('click', saveNotebook);
     document.getElementById('loadFile').addEventListener('change', loadNotebook);
@@ -48,7 +47,82 @@ function addCell() {
         <div class="cell-output" role="region" aria-label="Cell output" aria-live="polite"></div>
     `;
     
+    // Add hover zone before the cell
+    const hoverZoneBefore = document.createElement('div');
+    hoverZoneBefore.className = 'cell-hover-zone';
+    hoverZoneBefore.innerHTML = '<div class="add-cell-button">+ Add Cell</div>';
+    hoverZoneBefore.querySelector('.add-cell-button').onclick = () => {
+        insertCellBefore(cellId);
+    };
+    
+    notebook.appendChild(hoverZoneBefore);
     notebook.appendChild(cellDiv);
+    
+    // Update hover zones
+    updateHoverZones();
+}
+
+// Insert a cell before a specific cell
+function insertCellBefore(beforeCellId) {
+    const newCellId = `cell-${cellCounter++}`;
+    const notebook = document.getElementById('notebook');
+    const beforeCell = document.getElementById(beforeCellId);
+    
+    const cellDiv = document.createElement('div');
+    cellDiv.className = 'cell';
+    cellDiv.id = newCellId;
+    cellDiv.setAttribute('role', 'article');
+    cellDiv.setAttribute('aria-label', `Notebook cell ${cellCounter}`);
+    
+    cellDiv.innerHTML = `
+        <div class="cell-header" role="toolbar" aria-label="Cell controls">
+            <select class="cell-type-selector" aria-label="Select cell type">
+                <option value="python">Python</option>
+                <option value="markdown">Markdown</option>
+            </select>
+            <button class="btn-run" onclick="runCell('${newCellId}')" aria-label="Run this cell">▶ Run</button>
+            <button class="btn-toggle" onclick="toggleCodePane('${newCellId}')" aria-label="Toggle code visibility">👁</button>
+            <button class="btn-delete" onclick="deleteCell('${newCellId}')" aria-label="Delete this cell">✖</button>
+        </div>
+        <textarea class="cell-input" placeholder="Enter Python code or Markdown..." aria-label="Cell input code or text"># Write your code here</textarea>
+        <div class="cell-output" role="region" aria-label="Cell output" aria-live="polite"></div>
+    `;
+    
+    // Find the hover zone before the target cell
+    const hoverZone = beforeCell.previousElementSibling;
+    
+    // Create hover zone for new cell
+    const newHoverZone = document.createElement('div');
+    newHoverZone.className = 'cell-hover-zone';
+    newHoverZone.innerHTML = '<div class="add-cell-button">+ Add Cell</div>';
+    newHoverZone.querySelector('.add-cell-button').onclick = () => {
+        insertCellBefore(newCellId);
+    };
+    
+    // Insert before the hover zone
+    notebook.insertBefore(newHoverZone, hoverZone);
+    notebook.insertBefore(cellDiv, hoverZone);
+    
+    updateHoverZones();
+}
+
+// Update hover zones (add one at the end)
+function updateHoverZones() {
+    const notebook = document.getElementById('notebook');
+    
+    // Remove existing end hover zone
+    const existingEndZone = notebook.querySelector('.cell-hover-zone-end');
+    if (existingEndZone) {
+        existingEndZone.remove();
+    }
+    
+    // Add hover zone at the end
+    const hoverZoneEnd = document.createElement('div');
+    hoverZoneEnd.className = 'cell-hover-zone cell-hover-zone-end';
+    hoverZoneEnd.innerHTML = '<div class="add-cell-button">+ Add Cell</div>';
+    hoverZoneEnd.querySelector('.add-cell-button').onclick = addCell;
+    
+    notebook.appendChild(hoverZoneEnd);
 }
 
 // Toggle code pane visibility
@@ -62,7 +136,13 @@ function toggleCodePane(cellId) {
 function deleteCell(cellId) {
     const cell = document.getElementById(cellId);
     if (cell) {
+        // Also remove the hover zone before this cell
+        const hoverZone = cell.previousElementSibling;
+        if (hoverZone && hoverZone.classList.contains('cell-hover-zone')) {
+            hoverZone.remove();
+        }
         cell.remove();
+        updateHoverZones();
     }
 }
 
