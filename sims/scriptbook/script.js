@@ -42,10 +42,10 @@ function addCell() {
                 <option value="python">Python</option>
                 <option value="markdown">Markdown</option>
             </select>
-            <button class="btn-run" onclick="runCell('${cellId}')" aria-label="Run this cell">▶ Run</button>
-            <button class="btn-stop" onclick="stopCell('${cellId}')" aria-label="Stop cell execution" style="display: none;">⏹ Stop</button>
-            <button class="btn-toggle" onclick="toggleCodePane('${cellId}')" aria-label="Hide code editor"><span style="filter: brightness(0) invert(1); font-weight: bold;">&lt;/&gt;</span></button>
-            <button class="btn-delete" onclick="deleteCell('${cellId}')" aria-label="Delete this cell">✖</button>
+            <button class="btn-run" onclick="runCell('${cellId}')" aria-label="Run this cell" title="Run this cell">▶ Run</button>
+            <button class="btn-stop" onclick="stopCell('${cellId}')" aria-label="Stop cell execution" title="Stop cell execution" style="display: none;">⏹ Stop</button>
+            <button class="btn-toggle" onclick="toggleCodePane('${cellId}')" aria-label="Hide code editor" title="Hide code editor"><span style="filter: brightness(0) invert(1); font-weight: bold;">&lt;/&gt;</span></button>
+            <button class="btn-delete" onclick="deleteCell('${cellId}')" aria-label="Delete this cell" title="Delete this cell">✖</button>
         </div>
         <textarea class="cell-input" placeholder="Enter Python code or Markdown..." aria-label="Cell input code or text"># Write your code here</textarea>
         <div class="cell-output" role="region" aria-label="Cell output" aria-live="polite"></div>
@@ -91,10 +91,10 @@ function insertCellBefore(beforeCellId) {
                 <option value="python">Python</option>
                 <option value="markdown">Markdown</option>
             </select>
-            <button class="btn-run" onclick="runCell('${newCellId}')" aria-label="Run this cell">▶ Run</button>
-            <button class="btn-stop" onclick="stopCell('${newCellId}')" aria-label="Stop cell execution" style="display: none;">⏹ Stop</button>
-            <button class="btn-toggle" onclick="toggleCodePane('${newCellId}')" aria-label="Hide code editor"><span style="filter: brightness(0) invert(1); font-weight: bold;">&lt;/&gt;</span></button>
-            <button class="btn-delete" onclick="deleteCell('${newCellId}')" aria-label="Delete this cell">✖</button>
+            <button class="btn-run" onclick="runCell('${newCellId}')" aria-label="Run this cell" title="Run this cell">▶ Run</button>
+            <button class="btn-stop" onclick="stopCell('${newCellId}')" aria-label="Stop cell execution" title="Stop cell execution" style="display: none;">⏹ Stop</button>
+            <button class="btn-toggle" onclick="toggleCodePane('${newCellId}')" aria-label="Hide code editor" title="Hide code editor"><span style="filter: brightness(0) invert(1); font-weight: bold;">&lt;/&gt;</span></button>
+            <button class="btn-delete" onclick="deleteCell('${newCellId}')" aria-label="Delete this cell" title="Delete this cell">✖</button>
         </div>
         <textarea class="cell-input" placeholder="Enter Python code or Markdown..." aria-label="Cell input code or text"># Write your code here</textarea>
         <div class="cell-output" role="region" aria-label="Cell output" aria-live="polite"></div>
@@ -221,10 +221,12 @@ function toggleCodePane(cellId) {
         // Code is hidden, show white pencil icon
         toggleBtn.innerHTML = '<span style="filter: brightness(0) invert(1);">✏️</span>';
         toggleBtn.setAttribute('aria-label', 'Show code editor');
+        toggleBtn.setAttribute('title', 'Show code editor');
     } else {
         // Code is visible, show bold white code brackets to indicate "hide"
         toggleBtn.innerHTML = '<span style="filter: brightness(0) invert(1); font-weight: bold;">&lt;/&gt;</span>';
         toggleBtn.setAttribute('aria-label', 'Hide code editor');
+        toggleBtn.setAttribute('title', 'Hide code editor');
     }
 }
 
@@ -700,6 +702,11 @@ function loadNotebook(event) {
                         output.classList.add('markdown-output');
                         // Collapse the code pane for markdown cells
                         input.classList.add('collapsed');
+                        // Update toggle button to show pencil icon
+                        const toggleBtn = cell.querySelector('.btn-toggle');
+                        toggleBtn.innerHTML = '<span style="filter: brightness(0) invert(1);">✏️</span>';
+                        toggleBtn.setAttribute('aria-label', 'Show code editor');
+                        toggleBtn.setAttribute('title', 'Show code editor');
                     }
                 });
             } else {

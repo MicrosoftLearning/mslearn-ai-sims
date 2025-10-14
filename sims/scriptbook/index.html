@@ -19,12 +19,12 @@
         </header>
 
         <div class="toolbar" role="toolbar" aria-label="Notebook controls">
-            <button id="runAllBtn" class="btn btn-primary" aria-label="Run all cells in the notebook">▶ Run All</button>
-            <button id="clearAllBtn" class="btn btn-secondary" aria-label="Clear all cells and outputs">🗑 Clear All</button>
-            <button id="saveBtn" class="btn btn-save" aria-label="Save notebook to file">💾 Save Notebook</button>
-            <label for="loadFile" class="btn btn-load" aria-label="Load notebook from file">📂 Load Notebook</label>
+            <button id="runAllBtn" class="btn btn-primary" aria-label="Run all cells in the notebook" title="Run all cells in the notebook">▶ Run All</button>
+            <button id="clearAllBtn" class="btn btn-secondary" aria-label="Clear all cells and outputs" title="Clear all cells and outputs">🗑 Clear All</button>
+            <button id="saveBtn" class="btn btn-save" aria-label="Save notebook to file" title="Save notebook to file">💾 Save Notebook</button>
+            <label for="loadFile" class="btn btn-load" aria-label="Load notebook from file" title="Load notebook from file">📂 Load Notebook</label>
             <input type="file" id="loadFile" accept=".pysb" style="display: none;" aria-label="Select notebook file to load">
-            <label for="fileUpload" class="btn btn-upload" aria-label="Upload data file (CSV or text)">&#128196; Upload Data</label>
+            <label for="fileUpload" class="btn btn-upload" aria-label="Upload data file (CSV or text)" title="Upload data file (CSV or text)">&#128196; Upload Data</label>
             <input type="file" id="fileUpload" accept=".txt,.csv" style="display: none;" aria-label="Select data file to upload">
             <span id="uploadedFileName" class="file-name" role="status" aria-live="polite"></span>
         </div>
@@ -64,6 +64,6 @@
             return list(uploaded_files.keys())
     </script>
 
-    <script src="script.js?v=save51"></script>
+    <script src="script.js?v=save53"></script>
 </body>
 </html>
