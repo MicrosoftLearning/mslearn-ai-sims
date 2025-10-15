@@ -32,6 +32,5 @@ If you'd rather explore the applications for yourself, without the prescribed la
 - [Doorbell Photo Viewer (Computer Vision)](https://aka.ms/doorbell){:target="_blank"}
 - [Receipt Analyzer (Information Extraction)](https://aka.ms/receipt-analyzer){:target="_blank"}
 - [Voicemail Analyzer (Information Extraction)](https://aka.ms/voicemail){:target="_blank"}
-- [ScriptBook (Lightweight Python notebook editor)](https://aka.ms/scriptbook){:target="_blank"}
 
 > **Note**: These applications are *simulations* - with simple models and no Azure AI services behind them. However, they're based on real capabilities that you can implement using [Microsoft Azure AI technologies](https://azure.microsoft.com/solutions/ai/){:target="_blank"}.
