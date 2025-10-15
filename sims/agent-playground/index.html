@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Playground</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="header-left">
+                <h1>My Agent</h1>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-tabs">
+                        <div class="sidebar-tab active">Playground</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Model</h3>
+                    <div class="model-selector">
+                        <select id="modelSelect" disabled>
+                            <option value="">Loading models...</option>
+                        </select>
+                    </div>
+                    <div class="model-progress-container" id="modelProgressContainer">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="modelProgressFill"></div>
+                        </div>
+                        <div class="progress-text" id="modelProgressText">0%</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Instructions</h3>
+                    <div class="instruction-box">
+                        <textarea placeholder="You are a friendly and helpful AI assistant.">You are a friendly and helpful AI assistant.</textarea>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Tools</h3>
+                    <div class="tool-item">
+                        <span class="tool-icon">🔍</span>
+                        <span>File search</span>
+                        <div class="file-upload-section" id="fileUploadSection" style="display: none;">
+                            <a href="#" class="file-upload-link" id="fileUploadLink">+ File</a>
+                            <input type="file" id="fileInput" accept=".txt,.md,.json,.csv,.log" style="display: none;">
+                        </div>
+                        <div class="toggle-switch" id="fileSearchToggle"></div>
+                    </div>
+                    <div class="uploaded-file-info" id="uploadedFileInfo" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div class="chat-area-header">
+                    <div class="chat-tabs">
+                        <div class="chat-tab active">Chat</div>
+                    </div>
+                </div>
+
+                <div class="chat-header">
+                    <div class="build-test-section">
+                        <div class="build-icon">🤖</div>
+                        <div class="build-text">
+                            <h2>Build and test your agent</h2>
+                            <p>Choose a model for your agent and give it clear instructions on what to do and how to do it. Then, test your agent by chatting with it below.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message assistant">
+                        <div class="message-avatar">🤖</div>
+                        <div class="message-content">
+                            <div class="message-text">Hello! I'm your friendly AI assistant. How can I help you today?</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <div class="input-container">
+                        <input type="text" id="userInput" placeholder="Message the agent..." disabled>
+                        <button id="sendButton" disabled>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M2 2l12 6-12 6V10l8-2-8-2V2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="disclaimer">AI generated content may be incorrect</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Content Modal -->
+    <div class="modal-overlay" id="fileContentModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalFileName">File Contents</h3>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="modalFileContent"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
