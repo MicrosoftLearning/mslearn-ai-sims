@@ -57,7 +57,11 @@
                         <div class="toggle-switch" id="fileSearchToggle" role="switch" aria-checked="false" aria-labelledby="file-search-label" aria-describedby="file-search-help"></div>
                     </div>
                     <div id="file-search-help" class="sr-only">Enable file search to upload and use text files as data sources for the agent</div>
-                    <div class="uploaded-file-info" id="uploadedFileInfo" style="display: none;" role="button" aria-label="View uploaded file contents" tabindex="0"></div>
+                    <div class="uploaded-file-info" id="uploadedFileInfo" style="display: none;" role="button" aria-label="View uploaded file contents" tabindex="0">
+                        <span class="file-info-text" id="fileInfoText"></span>
+                        <button class="file-remove-btn" id="fileRemoveBtn" aria-label="Remove uploaded file" style="display: none;">&times;</button>
+                    </div>
+                    <div class="file-limit-note" id="fileLimitNote" style="display: none;">(1 file max)</div>
                 </div>
             </div>
 
@@ -106,6 +110,22 @@
 
     <!-- Status announcements for screen readers -->
     <div id="statusAnnouncements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalMessage">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <h3 id="confirmModalTitle">Confirm File Removal</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmModalMessage">Are you sure you want to remove this file?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="confirmCancelBtn">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Remove File</button>
+            </div>
+        </div>
+    </div>
 
     <!-- File Content Modal -->
     <div class="modal-overlay" id="fileContentModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modalFileName" aria-describedby="modalFileContent">

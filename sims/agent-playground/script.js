@@ -31,10 +31,18 @@ class ChatApp {
         this.fileUploadLink = document.getElementById('fileUploadLink');
         this.fileInput = document.getElementById('fileInput');
         this.uploadedFileInfo = document.getElementById('uploadedFileInfo');
+        this.fileInfoText = document.getElementById('fileInfoText');
+        this.fileRemoveBtn = document.getElementById('fileRemoveBtn');
+        this.fileLimitNote = document.getElementById('fileLimitNote');
         this.fileContentModal = document.getElementById('fileContentModal');
         this.modalFileName = document.getElementById('modalFileName');
         this.modalFileContent = document.getElementById('modalFileContent');
         this.modalCloseBtn = document.getElementById('modalCloseBtn');
+        this.confirmModal = document.getElementById('confirmModal');
+        this.confirmModalTitle = document.getElementById('confirmModalTitle');
+        this.confirmModalMessage = document.getElementById('confirmModalMessage');
+        this.confirmCancelBtn = document.getElementById('confirmCancelBtn');
+        this.confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         this.statusAnnouncements = document.getElementById('statusAnnouncements');
         
         console.log('Elements initialized:', {
@@ -100,6 +108,14 @@ class ChatApp {
             });
         }
 
+        // File remove button functionality
+        if (this.fileRemoveBtn) {
+            this.fileRemoveBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent triggering the file info click
+                this.confirmRemoveFile();
+            });
+        }
+
         // Modal functionality
         if (this.modalCloseBtn) {
             this.modalCloseBtn.addEventListener('click', () => {
@@ -116,10 +132,36 @@ class ChatApp {
             });
         }
 
+        // Confirmation modal event listeners
+        if (this.confirmCancelBtn) {
+            this.confirmCancelBtn.addEventListener('click', () => {
+                this.closeConfirmModal();
+            });
+        }
+
+        if (this.confirmDeleteBtn) {
+            this.confirmDeleteBtn.addEventListener('click', () => {
+                this.handleConfirmDelete();
+            });
+        }
+
+        // Close confirmation modal when clicking outside
+        if (this.confirmModal) {
+            this.confirmModal.addEventListener('click', (e) => {
+                if (e.target === this.confirmModal) {
+                    this.closeConfirmModal();
+                }
+            });
+        }
+
         // Close modal with Escape key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.fileContentModal.style.display !== 'none') {
-                this.closeFileContentModal();
+            if (e.key === 'Escape') {
+                if (this.confirmModal.style.display !== 'none') {
+                    this.closeConfirmModal();
+                } else if (this.fileContentModal.style.display !== 'none') {
+                    this.closeFileContentModal();
+                }
             }
         });
     }
@@ -275,7 +317,7 @@ class ChatApp {
             this.populateModelDropdown(uniquePhiModels);
             
             // Select the preferred model
-            let preferredModel = uniquePhiModels.find(m => m.model_id === 'phi-2-q4f16_1-MLC') || uniquePhiModels[0];
+            let preferredModel = uniquePhiModels.find(m => m.model_id === 'Phi-3.5-mini-instruct-q4f16_1-MLC') || uniquePhiModels[0];
             
             this.modelSelect.value = preferredModel.model_id;
             this.currentModelId = preferredModel.model_id;
@@ -548,6 +590,11 @@ class ChatApp {
             // Add assistant response to conversation history
             this.conversationHistory.push({ role: 'assistant', content: fullResponse });
             
+            // Add file reference if file search is enabled and file is uploaded
+            if (this.fileSearchEnabled && this.uploadedFileName) {
+                this.addFileReference(assistantMessageElement, this.uploadedFileName);
+            }
+            
             // Trim conversation history if needed
             this.trimConversationHistory();
             
@@ -623,7 +670,23 @@ class ChatApp {
         console.log('Conversation history reset complete');
     }
 
-    addMessage(content, sender, isStreaming = false) {
+    addFileReference(messageElement, fileName) {
+        if (!fileName || !messageElement) return;
+        
+        const messageContent = messageElement.querySelector('.message-content');
+        if (!messageContent) return;
+        
+        // Check if file reference already exists
+        if (messageContent.querySelector('.file-reference')) return;
+        
+        const fileRef = document.createElement('div');
+        fileRef.className = 'file-reference';
+        fileRef.textContent = `ref: ${fileName}`;
+        fileRef.setAttribute('aria-label', `Reference: ${fileName}`);
+        messageContent.appendChild(fileRef);
+    }
+
+    addMessage(content, sender, isStreaming = false, fileName = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
         messageDiv.setAttribute('role', 'article');
@@ -643,6 +706,16 @@ class ChatApp {
         messageText.textContent = content;
         
         messageContent.appendChild(messageText);
+        
+        // Add file reference if this is an assistant message based on an uploaded file
+        if (sender === 'assistant' && fileName) {
+            const fileRef = document.createElement('div');
+            fileRef.className = 'file-reference';
+            fileRef.textContent = `ref: ${fileName}`;
+            fileRef.setAttribute('aria-label', `Reference: ${fileName}`);
+            messageContent.appendChild(fileRef);
+        }
+        
         messageDiv.appendChild(avatar);
         messageDiv.appendChild(messageContent);
         
@@ -684,11 +757,8 @@ class ChatApp {
             this.fileSearchToggle.classList.remove('enabled');
             this.fileSearchToggle.setAttribute('aria-checked', 'false');
             this.fileUploadSection.style.display = 'none';
-            // Clear uploaded file data
-            this.uploadedFileContent = null;
-            this.uploadedFileName = null;
-            this.uploadedFileInfo.style.display = 'none';
-            this.uploadedFileInfo.onclick = null; // Remove click handler
+            // Clear uploaded file data and reset UI
+            this.clearUploadedFile();
             this.resetConversationHistory();
         }
     }
@@ -712,17 +782,23 @@ class ChatApp {
             this.uploadedFileName = file.name;
             
             // Show file info and make it clickable
-            this.uploadedFileInfo.textContent = `📄 ${file.name} (${Math.round(file.size / 1024 * 10) / 10}KB)`;
+            this.fileInfoText.textContent = `📄 ${file.name} (${Math.round(file.size / 1024 * 10) / 10}KB)`;
             this.uploadedFileInfo.style.display = 'block';
             this.uploadedFileInfo.setAttribute('aria-label', `View contents of uploaded file: ${file.name}`);
+            this.fileRemoveBtn.style.display = 'inline-block';
+            this.fileLimitNote.style.display = 'block';
             
-            // Add click handler to show file contents
-            this.uploadedFileInfo.onclick = () => {
+            // Disable the "+ File" link
+            this.fileUploadLink.classList.add('disabled');
+            this.fileUploadLink.setAttribute('aria-disabled', 'true');
+            
+            // Add click handler to show file contents (only to the text part)
+            this.fileInfoText.onclick = () => {
                 this.showFileContentModal();
             };
             
-            // Add keyboard support for file info
-            this.uploadedFileInfo.onkeydown = (e) => {
+            // Add keyboard support for file info (only to the text part)
+            this.fileInfoText.onkeydown = (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     this.showFileContentModal();
@@ -740,6 +816,74 @@ class ChatApp {
 
         // Clear the file input so the same file can be selected again if needed
         event.target.value = '';
+    }
+
+    confirmRemoveFile() {
+        if (!this.uploadedFileName) return;
+        
+        this.showConfirmModal(this.uploadedFileName);
+    }
+
+    showConfirmModal(fileName) {
+        // Store the element that had focus before opening modal
+        this.lastFocusedElement = document.activeElement;
+        
+        this.confirmModalMessage.textContent = `Are you sure you want to remove "${fileName}"?`;
+        this.confirmModal.style.display = 'flex';
+        
+        // Prevent body scrolling when modal is open
+        document.body.style.overflow = 'hidden';
+        
+        // Focus the cancel button by default (safer option)
+        setTimeout(() => {
+            this.confirmCancelBtn.focus();
+        }, 100);
+        
+        console.log('Confirmation modal opened for:', fileName);
+    }
+
+    closeConfirmModal() {
+        this.confirmModal.style.display = 'none';
+        
+        // Restore body scrolling
+        document.body.style.overflow = 'auto';
+        
+        // Return focus to the element that opened the modal
+        if (this.lastFocusedElement) {
+            this.lastFocusedElement.focus();
+        }
+        
+        console.log('Confirmation modal closed');
+    }
+
+    handleConfirmDelete() {
+        this.closeConfirmModal();
+        this.clearUploadedFile();
+        this.resetConversationHistory();
+        console.log('File removed by user:', this.uploadedFileName);
+    }
+
+    clearUploadedFile() {
+        // Clear file data
+        this.uploadedFileContent = null;
+        this.uploadedFileName = null;
+        
+        // Hide file info, remove button, and limit note
+        this.uploadedFileInfo.style.display = 'none';
+        this.fileRemoveBtn.style.display = 'none';
+        this.fileLimitNote.style.display = 'none';
+        
+        // Re-enable the "+ File" link
+        this.fileUploadLink.classList.remove('disabled');
+        this.fileUploadLink.setAttribute('aria-disabled', 'false');
+        
+        // Remove click handlers
+        if (this.fileInfoText) {
+            this.fileInfoText.onclick = null;
+            this.fileInfoText.onkeydown = null;
+        }
+        
+        console.log('File upload state cleared');
     }
 
     readFileAsText(file) {

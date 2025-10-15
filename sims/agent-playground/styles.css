@@ -239,10 +239,17 @@ textarea:focus,
     text-decoration: none;
     font-size: 14px;
     cursor: pointer;
+    transition: color 0.2s;
 }
 
 .file-upload-link:hover {
     text-decoration: underline;
+}
+
+.file-upload-link.disabled {
+    color: #999;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .uploaded-file-info {
@@ -252,13 +259,50 @@ textarea:focus,
     padding: 8px;
     background: #f5f5f5;
     border-radius: 4px;
-    cursor: pointer;
     transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .uploaded-file-info:hover {
     background: #e8f4fd;
+}
+
+.file-info-text {
+    flex: 1;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 3px;
+    transition: color 0.2s;
+}
+
+.file-info-text:hover {
     color: #0066cc;
+}
+
+.file-remove-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 8px;
+    transition: background-color 0.2s;
+}
+
+.file-remove-btn:hover {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.file-limit-note {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+    font-style: italic;
 }
 
 .progress-bar {
@@ -391,8 +435,8 @@ textarea:focus,
 }
 
 .message.user .message-avatar {
-    background: #0066cc;
-    color: white;
+    background: #66b3ff;
+    color: #000;
     order: 2;
 }
 
@@ -407,6 +451,16 @@ textarea:focus,
 .message-text {
     line-height: 1.5;
     font-size: 14px;
+}
+
+.file-reference {
+    font-size: 11px;
+    color: #666;
+    font-weight: 300;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid #e8e8e8;
+    opacity: 0.8;
 }
 
 .typing-indicator {
@@ -557,6 +611,11 @@ textarea:focus,
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.confirm-modal {
+    max-width: 400px;
+    max-height: none;
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -595,6 +654,43 @@ textarea:focus,
     padding: 20px;
     overflow-y: auto;
     flex: 1;
+}
+
+.modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e1e5e9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-secondary {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+}
+
+.btn-secondary:hover {
+    background: #e9ecef;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
 }
 
 .modal-body pre {
