@@ -15,60 +15,62 @@
         </div>
 
         <div class="main-content">
-            <div class="sidebar">
+            <div class="sidebar" role="complementary" aria-label="Agent configuration sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-tabs">
-                        <div class="sidebar-tab active">Playground</div>
+                        <div class="sidebar-tab active" role="tab" aria-selected="true" aria-label="Playground tab">Playground</div>
                     </div>
                 </div>
 
                 <div class="sidebar-section">
                     <h3>Model</h3>
                     <div class="model-selector">
-                        <select id="modelSelect" disabled>
+                        <select id="modelSelect" disabled aria-label="Select AI model for the agent" aria-describedby="modelProgressText">
                             <option value="">Loading models...</option>
                         </select>
                     </div>
-                    <div class="model-progress-container" id="modelProgressContainer">
+                    <div class="model-progress-container" id="modelProgressContainer" role="progressbar" aria-label="Model loading progress" aria-describedby="modelProgressText">
                         <div class="progress-bar">
                             <div class="progress-fill" id="modelProgressFill"></div>
                         </div>
-                        <div class="progress-text" id="modelProgressText">0%</div>
+                        <div class="progress-text" id="modelProgressText" aria-live="polite">0%</div>
                     </div>
                 </div>
 
                 <div class="sidebar-section">
                     <h3>Instructions</h3>
                     <div class="instruction-box">
-                        <textarea placeholder="You are a friendly and helpful AI assistant.">You are a friendly and helpful AI assistant.</textarea>
+                        <textarea placeholder="You are a friendly and helpful AI assistant." aria-label="System instructions for the AI agent" aria-describedby="instructions-help">You are a friendly and helpful AI assistant.</textarea>
+                        <div id="instructions-help" class="sr-only">Enter instructions that define how the AI agent should behave and respond to users</div>
                     </div>
                 </div>
 
                 <div class="sidebar-section">
                     <h3>Tools</h3>
-                    <div class="tool-item">
-                        <span class="tool-icon">🔍</span>
-                        <span>File search</span>
+                    <div class="tool-item" role="group" aria-labelledby="file-search-label">
+                        <span class="tool-icon" aria-hidden="true">🔍</span>
+                        <span id="file-search-label">File search</span>
                         <div class="file-upload-section" id="fileUploadSection" style="display: none;">
-                            <a href="#" class="file-upload-link" id="fileUploadLink">+ File</a>
-                            <input type="file" id="fileInput" accept=".txt,.md,.json,.csv,.log" style="display: none;">
+                            <a href="#" class="file-upload-link" id="fileUploadLink" aria-label="Upload a text file to provide data for the agent">+ File</a>
+                            <input type="file" id="fileInput" accept=".txt,.md,.json,.csv,.log" style="display: none;" aria-label="Select a text file to upload">
                         </div>
-                        <div class="toggle-switch" id="fileSearchToggle"></div>
+                        <div class="toggle-switch" id="fileSearchToggle" role="switch" aria-checked="false" aria-labelledby="file-search-label" aria-describedby="file-search-help"></div>
                     </div>
-                    <div class="uploaded-file-info" id="uploadedFileInfo" style="display: none;"></div>
+                    <div id="file-search-help" class="sr-only">Enable file search to upload and use text files as data sources for the agent</div>
+                    <div class="uploaded-file-info" id="uploadedFileInfo" style="display: none;" role="button" aria-label="View uploaded file contents" tabindex="0"></div>
                 </div>
             </div>
 
-            <div class="chat-area">
+            <div class="chat-area" role="main" aria-label="Chat interface">
                 <div class="chat-area-header">
                     <div class="chat-tabs">
-                        <div class="chat-tab active">Chat</div>
+                        <div class="chat-tab active" role="tab" aria-selected="true" aria-label="Chat conversation tab">Chat</div>
                     </div>
                 </div>
 
                 <div class="chat-header">
                     <div class="build-test-section">
-                        <div class="build-icon">🤖</div>
+                        <div class="build-icon" aria-hidden="true">🤖</div>
                         <div class="build-text">
                             <h2>Build and test your agent</h2>
                             <p>Choose a model for your agent and give it clear instructions on what to do and how to do it. Then, test your agent by chatting with it below.</p>
@@ -76,39 +78,44 @@
                     </div>
                 </div>
 
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message assistant">
-                        <div class="message-avatar">🤖</div>
+                <div class="chat-messages" id="chatMessages" role="log" aria-label="Chat conversation" aria-live="polite">
+                    <div class="message assistant" role="article" aria-label="Assistant message">
+                        <div class="message-avatar" aria-hidden="true">🤖</div>
                         <div class="message-content">
                             <div class="message-text">Hello! I'm your friendly AI assistant. How can I help you today?</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="chat-input-area">
+                <div class="chat-input-area" role="form" aria-label="Message input">
                     <div class="input-container">
-                        <input type="text" id="userInput" placeholder="Message the agent..." disabled>
-                        <button id="sendButton" disabled>
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <input type="text" id="userInput" placeholder="Message the agent..." disabled aria-label="Type your message to the agent" aria-describedby="send-button-help">
+                        <button id="sendButton" disabled aria-label="Send message to the agent">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
                                 <path d="M2 2l12 6-12 6V10l8-2-8-2V2z"/>
                             </svg>
+                            <span class="sr-only">Send</span>
                         </button>
+                        <div id="send-button-help" class="sr-only">Press Enter or click send button to send your message</div>
                     </div>
-                    <div class="disclaimer">AI generated content may be incorrect</div>
+                    <div class="disclaimer" role="note" aria-label="Disclaimer about AI content">AI generated content may be incorrect</div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Status announcements for screen readers -->
+    <div id="statusAnnouncements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
     <!-- File Content Modal -->
-    <div class="modal-overlay" id="fileContentModal" style="display: none;">
+    <div class="modal-overlay" id="fileContentModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modalFileName" aria-describedby="modalFileContent">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modalFileName">File Contents</h3>
-                <button class="modal-close" id="modalCloseBtn">&times;</button>
+                <button class="modal-close" id="modalCloseBtn" aria-label="Close file content modal">&times;</button>
             </div>
             <div class="modal-body">
-                <pre id="modalFileContent"></pre>
+                <pre id="modalFileContent" aria-label="File content text" tabindex="0"></pre>
             </div>
         </div>
     </div>

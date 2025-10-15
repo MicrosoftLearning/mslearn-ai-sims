@@ -35,13 +35,15 @@ class ChatApp {
         this.modalFileName = document.getElementById('modalFileName');
         this.modalFileContent = document.getElementById('modalFileContent');
         this.modalCloseBtn = document.getElementById('modalCloseBtn');
+        this.statusAnnouncements = document.getElementById('statusAnnouncements');
         
         console.log('Elements initialized:', {
             modelSelect: !!this.modelSelect,
             modelProgressContainer: !!this.modelProgressContainer,
             modelProgressFill: !!this.modelProgressFill,
             modelProgressText: !!this.modelProgressText,
-            fileSearchToggle: !!this.fileSearchToggle
+            fileSearchToggle: !!this.fileSearchToggle,
+            statusAnnouncements: !!this.statusAnnouncements
         });
     }
 
@@ -72,6 +74,14 @@ class ChatApp {
         if (this.fileSearchToggle) {
             this.fileSearchToggle.addEventListener('click', () => {
                 this.toggleFileSearch();
+            });
+            
+            // Add keyboard support for toggle
+            this.fileSearchToggle.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.toggleFileSearch();
+                }
             });
         }
 
@@ -173,8 +183,13 @@ class ChatApp {
     }
 
     updateStatus(message, type = '') {
-        // Status updates now only go to console since we removed the status element
+        // Update console for debugging
         console.log(`Status: ${message} (${type})`);
+        
+        // Announce status changes to screen readers
+        if (this.statusAnnouncements) {
+            this.statusAnnouncements.textContent = message;
+        }
     }
 
     hideProgressBar() {
@@ -611,11 +626,14 @@ class ChatApp {
     addMessage(content, sender, isStreaming = false) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
+        messageDiv.setAttribute('role', 'article');
+        messageDiv.setAttribute('aria-label', `${sender === 'user' ? 'User' : 'Assistant'} message`);
         
         // Add avatar for both user and assistant
         const avatar = document.createElement('div');
         avatar.className = 'message-avatar';
         avatar.textContent = sender === 'user' ? '👤' : '🤖';
+        avatar.setAttribute('aria-hidden', 'true');
         
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
@@ -660,9 +678,11 @@ class ChatApp {
         
         if (this.fileSearchEnabled) {
             this.fileSearchToggle.classList.add('enabled');
+            this.fileSearchToggle.setAttribute('aria-checked', 'true');
             this.fileUploadSection.style.display = 'block';
         } else {
             this.fileSearchToggle.classList.remove('enabled');
+            this.fileSearchToggle.setAttribute('aria-checked', 'false');
             this.fileUploadSection.style.display = 'none';
             // Clear uploaded file data
             this.uploadedFileContent = null;
@@ -694,10 +714,19 @@ class ChatApp {
             // Show file info and make it clickable
             this.uploadedFileInfo.textContent = `📄 ${file.name} (${Math.round(file.size / 1024 * 10) / 10}KB)`;
             this.uploadedFileInfo.style.display = 'block';
+            this.uploadedFileInfo.setAttribute('aria-label', `View contents of uploaded file: ${file.name}`);
             
             // Add click handler to show file contents
             this.uploadedFileInfo.onclick = () => {
                 this.showFileContentModal();
+            };
+            
+            // Add keyboard support for file info
+            this.uploadedFileInfo.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.showFileContentModal();
+                }
             };
             
             // Reset conversation when new file is uploaded
@@ -725,12 +754,20 @@ class ChatApp {
     showFileContentModal() {
         if (!this.uploadedFileContent || !this.uploadedFileName) return;
         
+        // Store the element that had focus before opening modal
+        this.lastFocusedElement = document.activeElement;
+        
         this.modalFileName.textContent = this.uploadedFileName;
         this.modalFileContent.textContent = this.uploadedFileContent;
         this.fileContentModal.style.display = 'flex';
         
         // Prevent body scrolling when modal is open
         document.body.style.overflow = 'hidden';
+        
+        // Focus the close button for keyboard accessibility
+        setTimeout(() => {
+            this.modalCloseBtn.focus();
+        }, 100);
         
         console.log('File content modal opened for:', this.uploadedFileName);
     }
@@ -740,6 +777,11 @@ class ChatApp {
         
         // Restore body scrolling
         document.body.style.overflow = 'auto';
+        
+        // Return focus to the element that opened the modal
+        if (this.lastFocusedElement) {
+            this.lastFocusedElement.focus();
+        }
         
         console.log('File content modal closed');
     }
