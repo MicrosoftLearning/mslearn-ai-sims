@@ -897,6 +897,15 @@ class ChatApp {
             this.fileInfoText.onkeydown = null;
         }
         
+        // Turn off file search when file is removed
+        if (this.fileSearchEnabled) {
+            this.fileSearchEnabled = false;
+            this.fileSearchToggle.classList.remove('enabled');
+            this.fileSearchToggle.setAttribute('aria-checked', 'false');
+            this.fileUploadSection.style.display = 'none';
+            console.log('File search toggled off due to file removal');
+        }
+        
         console.log('File upload state cleared');
     }
 
