@@ -317,7 +317,7 @@ class ChatApp {
             this.populateModelDropdown(uniquePhiModels);
             
             // Select the preferred model
-            let preferredModel = uniquePhiModels.find(m => m.model_id === 'Phi-3.5-mini-instruct-q4f16_1-MLC') || uniquePhiModels[0];
+            let preferredModel = uniquePhiModels.find(m => m.model_id === 'phi-2-q4f16_1-MLC') || uniquePhiModels[0];
             
             this.modelSelect.value = preferredModel.model_id;
             this.currentModelId = preferredModel.model_id;
@@ -462,6 +462,9 @@ class ChatApp {
             this.disableInput();
             
             await this.loadSelectedModel(modelId);
+            
+            // Reset conversation when switching models
+            this.resetConversationHistory();
             
         } catch (error) {
             console.error(`Failed to switch to model ${modelId}:`, error);
@@ -621,11 +624,16 @@ class ChatApp {
     buildMessageHistory() {
         // Get the system instructions from the UI
         const instructionsTextarea = document.querySelector('.instruction-box textarea');
-        let systemInstructions = instructionsTextarea ? instructionsTextarea.value.trim() : 'You are a friendly and helpful AI assistant.';
+        let systemInstructions = instructionsTextarea ? instructionsTextarea.value.trim() : 'You are a friendly and helpful AI assistant who answers questions.';
+        
+        console.log('Building message history - fileSearchEnabled:', this.fileSearchEnabled, 'uploadedFileContent exists:', !!this.uploadedFileContent);
         
         // Augment system instructions with file content if file search is enabled and file is uploaded
         if (this.fileSearchEnabled && this.uploadedFileContent) {
             systemInstructions += `\n\nAnswer only questions that are asked by the user. Use this data to answer questions:\n---\n${this.uploadedFileContent}\n---`;
+            console.log('File content added to system instructions');
+        } else {
+            console.log('File content NOT added - fileSearchEnabled:', this.fileSearchEnabled, 'uploadedFileContent exists:', !!this.uploadedFileContent);
         }
         
         const messages = [
@@ -753,6 +761,12 @@ class ChatApp {
             this.fileSearchToggle.classList.add('enabled');
             this.fileSearchToggle.setAttribute('aria-checked', 'true');
             this.fileUploadSection.style.display = 'block';
+            
+            // Reset conversation if file is already uploaded to ensure file content is included
+            if (this.uploadedFileContent) {
+                console.log('File search enabled with existing file - resetting conversation');
+                this.resetConversationHistory();
+            }
         } else {
             this.fileSearchToggle.classList.remove('enabled');
             this.fileSearchToggle.setAttribute('aria-checked', 'false');
