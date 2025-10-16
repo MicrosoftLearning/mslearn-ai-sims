@@ -2348,10 +2348,10 @@ button:disabled {
 
 /* Best Model Display */
 .best-model-display {
-    border: 1px solid #d4edda;
+    border: 1px solid #edebe9;
     border-radius: 6px;
     padding: 16px;
-    background: #f8fff9;
+    background: #faf9f8;
 }
 
 .best-model-header {

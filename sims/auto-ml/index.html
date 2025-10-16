@@ -200,9 +200,6 @@
                             <button class="btn btn-secondary" onclick="refreshJob()" data-tooltip="Refresh job status">
                                 <span class="icon">↻</span> Refresh
                             </button>
-                            <button class="btn btn-secondary" onclick="editAndResubmit()" data-tooltip="Edit job settings">
-                                ✏️ Edit and submit (preview)
-                            </button>
                             <button class="btn btn-secondary" onclick="registerModel()" data-tooltip="Register best model">
                                 + Register model
                             </button>
@@ -211,9 +208,6 @@
                             </button>
                             <button class="btn btn-secondary" onclick="deleteJob()" data-tooltip="Delete job">
                                 🗑 Delete
-                            </button>
-                            <button class="btn btn-secondary" onclick="compareModels()" data-tooltip="Compare model results">
-                                📊 Compare
                             </button>
                         </div>
                     </div>
@@ -273,13 +267,6 @@
                                             <div class="input-details">
                                                 <span class="input-type">Data asset: </span>
                                                 <span id="input-data-asset">penguin-data:1</span>
-                                            </div>
-                                            <div class="input-uri">
-                                                <label>Asset URI:</label>
-                                                <div class="uri-input">
-                                                    <input type="text" id="asset-uri" value="azureml:penguin-data:1" readonly>
-                                                    <button class="copy-button" onclick="copyToClipboard('asset-uri')" data-tooltip="Copy URI">📋</button>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>

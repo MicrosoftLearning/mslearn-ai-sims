@@ -1,4 +1,4 @@
-// Global variables
+// Global variables - Updated: 2025-10-16 09:25:00 - Fixed initializePyScript error
 let currentStep = 1;
 let maxSteps = 4;
 let uploadedFiles = [];
@@ -1730,15 +1730,27 @@ function completeTraining(modelResults, jobId) {
     
     // Update job status
     if (job) {
+        console.log('Updating job status to completed for job:', jobId);
         job.status = 'completed';
         job.models = modelArray;
         job.endTime = new Date();
         
+        console.log('Job after update:', job);
+        
         // Update current job details if this is the active job
         if (currentJobDetails && currentJobDetails.id === jobId) {
+            console.log('Updating current job details');
             currentJobDetails = job;
             updateJobDetailsContent(job);
+        } else {
+            console.log('No active job details to update, currentJobDetails:', currentJobDetails);
         }
+        
+        // Force refresh the jobs list
+        console.log('Calling refreshJobs()');
+        refreshJobs();
+    } else {
+        console.error('Job object is null/undefined');
     }
     
     // Display model results in old modal (for backwards compatibility)
@@ -1781,7 +1793,9 @@ function completeTraining(modelResults, jobId) {
     document.getElementById('training-close-btn').style.display = 'block';
     
     // Update jobs list
+    console.log('About to call refreshJobs() from completeTraining');
     refreshJobs();
+    console.log('Finished calling refreshJobs()');
 }
 
 function closeTrainingModal() {
@@ -2450,9 +2464,13 @@ document.addEventListener('DOMContentLoaded', function() {
     updateJobsList();
     // Show AutoML page by default
     showAutoMLPage();
-    // Initialize PyScript (this might be called twice, but that's safe)
+    // Initialize PyScript status checking (this might be called twice, but that's safe)
     disableNewJobButton();
-    initializePyScript();
+    // Update initial status with specific message
+    updatePyScriptStatus('Loading PyScript ML libraries (pandas, numpy, scikit-learn)...', false);
+    
+    // Check for PyScript readiness periodically
+    checkPyScriptStatus();
 });
 
 // Header validation interface
@@ -2768,34 +2786,35 @@ function showJobDetails(job) {
 }
 
 function updateJobDetailsContent(job) {
-    // Update header information
-    document.getElementById('job-details-title').textContent = job.name;
-    
-    // Update status badge
-    const statusBadge = document.getElementById('job-status-badge');
-    const statusText = document.getElementById('job-status-text');
-    statusText.textContent = job.status.charAt(0).toUpperCase() + job.status.slice(1);
-    
-    // Update status badge classes
-    statusBadge.className = `job-status-badge ${job.status}`;
-    
-    // Update properties section
-    document.getElementById('properties-status').innerHTML = `
-        <span class="status-icon">●</span>
-        <span>${job.status.charAt(0).toUpperCase() + job.status.slice(1)}</span>
-    `;
-    
-    const createdDate = job.startTime.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    
-    document.getElementById('properties-created-on').textContent = createdDate;
-    document.getElementById('properties-start-time').textContent = createdDate;
-    document.getElementById('properties-name').textContent = job.name;
+    try {
+        // Update header information
+        document.getElementById('job-details-title').textContent = job.name;
+        
+        // Update status badge
+        const statusBadge = document.getElementById('job-status-badge');
+        const statusText = document.getElementById('job-status-text');
+        statusText.textContent = job.status.charAt(0).toUpperCase() + job.status.slice(1);
+        
+        // Update status badge classes
+        statusBadge.className = `job-status-badge ${job.status}`;
+        
+        // Update properties section
+        document.getElementById('properties-status').innerHTML = `
+            <span class="status-icon">●</span>
+            <span>${job.status.charAt(0).toUpperCase() + job.status.slice(1)}</span>
+        `;
+        
+        const createdDate = job.startTime.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        document.getElementById('properties-created-on').textContent = createdDate;
+        document.getElementById('properties-start-time').textContent = createdDate;
+        document.getElementById('properties-name').textContent = job.name;
     
     // Update inputs section - get filename from available sources
     let fileName = 'training_data.csv';
@@ -2815,17 +2834,31 @@ function updateJobDetailsContent(job) {
         }
     }
     
-    document.getElementById('input-data-asset').textContent = `${fileName.replace('.csv', '')}:1`;
-    document.getElementById('asset-uri').value = `azureml:${fileName.replace('.csv', '')}:1`;
+    // Safely update input data asset element
+    const inputDataAssetElement = document.getElementById('input-data-asset');
+    if (inputDataAssetElement) {
+        inputDataAssetElement.textContent = fileName;
+    } else {
+        console.warn('input-data-asset element not found');
+    }
     
     // Update run summary
-    document.getElementById('summary-task-type').textContent = 
-        job.taskType.charAt(0).toUpperCase() + job.taskType.slice(1);
+    const summaryTaskTypeElement = document.getElementById('summary-task-type');
+    if (summaryTaskTypeElement) {
+        summaryTaskTypeElement.textContent = job.taskType.charAt(0).toUpperCase() + job.taskType.slice(1);
+    } else {
+        console.warn('summary-task-type element not found');
+    }
     
     // Update primary metric - use the actual stored value
     const primaryMetric = job.primaryMetric;
     const primaryMetricDisplay = getMetricDisplayName(primaryMetric, job.taskType);
-    document.getElementById('summary-primary-metric').textContent = primaryMetricDisplay;
+    const primaryMetricElement = document.getElementById('summary-primary-metric');
+    if (primaryMetricElement) {
+        primaryMetricElement.textContent = primaryMetricDisplay;
+    } else {
+        console.warn('summary-primary-metric element not found');
+    }
     
     // Update featurization based on user's settings
     let featurizationText = 'Auto';
@@ -2833,7 +2866,12 @@ function updateJobDetailsContent(job) {
         (job.categoricalSettings && Object.keys(job.categoricalSettings).length > 0)) {
         featurizationText = 'Custom';
     }
-    document.getElementById('summary-featurization').textContent = featurizationText;
+    const featurizationElement = document.getElementById('summary-featurization');
+    if (featurizationElement) {
+        featurizationElement.textContent = featurizationText;
+    } else {
+        console.warn('summary-featurization element not found');
+    }
     
     // Update best model section if training is complete
     updateBestModelSection(job);
@@ -2841,6 +2879,11 @@ function updateJobDetailsContent(job) {
     // Add training progress section if job is running
     if (job.status === 'running') {
         addTrainingProgressSection();
+    }
+    
+    } catch (error) {
+        console.error('Error updating job details content:', error);
+        console.error('Job object:', job);
     }
 }
 
@@ -2856,9 +2899,9 @@ function updateBestModelSection(job) {
             bestModelContent.innerHTML = `
                 <div class="best-model-display">
                     <div class="best-model-header">
-                        <span class="best-model-name">${bestModel.name}</span>
                         <span class="best-model-badge">Best Model</span>
                     </div>
+                    <div class="best-model-algorithm">Algorithm name: ${bestModel.name}</div>
                     <div class="best-model-score">${bestModel.primary_score}</div>
                     <div class="best-model-metric">Primary metric: ${primaryMetricDisplay}</div>
                 </div>
