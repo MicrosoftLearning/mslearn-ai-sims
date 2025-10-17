@@ -48,7 +48,7 @@
                     </div>
                 </div>
                 
-                <div class="nav-section">
+                <div class="nav-section" id="home-nav-section" style="display: none;">
                     <div class="nav-item" onclick="showHomePage()" data-tooltip="Home">
                         <span class="nav-icon">⌂</span>
                         <span class="nav-text">Home</span>
@@ -1276,6 +1276,7 @@
             <div class="form-group">
                 <label for="workspace-name">Name</label>
                 <input type="text" id="workspace-name" class="form-input" placeholder="Enter workspace name">
+                <div id="workspace-name-error" class="error-message" style="display: none; color: #d32f2f; font-size: 12px; margin-top: 4px;"></div>
             </div>
             <div class="form-group">
                 <label for="resource-group">Resource group</label>

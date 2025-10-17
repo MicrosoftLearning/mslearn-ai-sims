@@ -13,6 +13,9 @@ let selectedModel = null;
 let jobHistory = [];
 let jobCounter = 1;
 
+// Workspace management
+let existingWorkspaceNames = [];
+
 // PyScript status (keeping for future use)
 let pyScriptReady = false;
 
@@ -106,12 +109,27 @@ function createWorkspace() {
     
     // Add input listener to enable/disable Create button
     const validateInput = () => {
-        if (nameInput.value.trim()) {
-            createButton.disabled = false;
-            createButton.classList.remove('disabled');
-        } else {
+        const workspaceName = nameInput.value.trim();
+        const errorDiv = document.getElementById('workspace-name-error');
+        
+        // Clear previous error
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+        
+        if (!workspaceName) {
+            // Empty name
             createButton.disabled = true;
             createButton.classList.add('disabled');
+        } else if (existingWorkspaceNames.includes(workspaceName)) {
+            // Duplicate name
+            errorDiv.textContent = 'A workspace with this name already exists';
+            errorDiv.style.display = 'block';
+            createButton.disabled = true;
+            createButton.classList.add('disabled');
+        } else {
+            // Valid name
+            createButton.disabled = false;
+            createButton.classList.remove('disabled');
         }
     };
     
@@ -136,6 +154,13 @@ function closeCreateWorkspaceFlyout() {
     document.getElementById('workspace-name').value = '';
     document.getElementById('resource-group').value = 'ResourceGroup1';
     
+    // Clear error message
+    const errorDiv = document.getElementById('workspace-name-error');
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+    }
+    
     // Re-disable the Create button
     const createButton = document.querySelector('.flyout-actions .btn-primary');
     createButton.disabled = true;
@@ -151,6 +176,15 @@ function createNewWorkspace() {
     if (!workspaceName.trim()) {
         return;
     }
+    
+    // Check for duplicate names (extra safety check)
+    if (existingWorkspaceNames.includes(workspaceName)) {
+        console.error('Attempted to create workspace with duplicate name:', workspaceName);
+        return;
+    }
+    
+    // Add to existing workspace names list
+    existingWorkspaceNames.push(workspaceName);
     
     // Simulate workspace creation
     console.log('Creating workspace:', { name: workspaceName, resourceGroup: resourceGroup });
@@ -177,6 +211,9 @@ function addWorkspaceButton(workspaceName) {
     workspaceButton.className = 'workspace-button';
     workspaceButton.textContent = workspaceName;
     workspaceButton.onclick = function() {
+        // Show full navigation and rename ML App when workspace is clicked
+        showFullNavigationAndRename();
+        
         // Set the current workspace and navigate to Home page
         setCurrentWorkspace(workspaceName);
         showHomePage();
@@ -185,8 +222,7 @@ function addWorkspaceButton(workspaceName) {
     // Add the button to the workspaces list
     workspacesList.appendChild(workspaceButton);
     
-    // Show navigation items after first workspace is created
-    showNavigationAfterWorkspaceCreated();
+    // Note: Navigation changes happen only when user clicks the workspace button, not when it's created
 }
 
 function setCurrentWorkspace(workspaceName) {
@@ -200,47 +236,68 @@ function setCurrentWorkspace(workspaceName) {
     }
 }
 
-function hideNavigationUntilWorkspaceCreated() {
+// Simple navigation management
+function initializeNavigation() {
+    // Hide all navigation sections except ML App
+    hideAllNavigationExceptMLApp();
+}
+
+
+
+function hideAllNavigationExceptMLApp() {
     // Hide Home section
-    const homeSection = document.querySelector('.nav-item[onclick="showHomePage()"]').parentElement;
-    homeSection.style.display = 'none';
-    
-    // Hide Authoring section
-    const authoringSection = document.querySelector('h3').parentElement;
-    if (authoringSection && authoringSection.querySelector('h3').textContent === 'Authoring') {
-        authoringSection.style.display = 'none';
+    const homeSection = document.getElementById('home-nav-section');
+    if (homeSection) {
+        homeSection.style.display = 'none';
     }
     
+    // Hide Authoring section
+    const authoringSections = document.querySelectorAll('.nav-section');
+    authoringSections.forEach(section => {
+        const heading = section.querySelector('h3');
+        if (heading && heading.textContent === 'Authoring') {
+            section.style.display = 'none';
+        }
+    });
+    
     // Hide Assets section
-    const assetsSections = document.querySelectorAll('.nav-section h3');
+    const assetsSections = document.querySelectorAll('.nav-section');
     assetsSections.forEach(section => {
-        if (section.textContent === 'Assets') {
-            section.parentElement.style.display = 'none';
+        const heading = section.querySelector('h3');
+        if (heading && heading.textContent === 'Assets') {
+            section.style.display = 'none';
         }
     });
 }
 
-function showNavigationAfterWorkspaceCreated() {
-    // Show only Home section initially
-    const homeSection = document.querySelector('.nav-item[onclick="showHomePage()"]').parentElement;
-    homeSection.style.display = 'block';
-    
-    // Keep Authoring and Assets sections hidden until user visits Home page
-    // They will be shown by showFullNavigationOnHome() when user navigates to Home
-}
-
-function showFullNavigationOnHome() {
-    // Show Authoring section
-    const authoringSection = document.querySelector('h3').parentElement;
-    if (authoringSection && authoringSection.querySelector('h3').textContent === 'Authoring') {
-        authoringSection.style.display = 'block';
+function showFullNavigationAndRename() {
+    // Rename ML App to All Workspaces
+    const mlAppNavText = document.querySelector('.nav-item[onclick="showMyAccountPage()"] .nav-text');
+    if (mlAppNavText) {
+        mlAppNavText.textContent = 'All Workspaces';
     }
     
+    // Show Home section
+    const homeSection = document.getElementById('home-nav-section');
+    if (homeSection) {
+        homeSection.style.display = 'block';
+    }
+    
+    // Show Authoring section
+    const authoringSections = document.querySelectorAll('.nav-section');
+    authoringSections.forEach(section => {
+        const heading = section.querySelector('h3');
+        if (heading && heading.textContent === 'Authoring') {
+            section.style.display = 'block';
+        }
+    });
+    
     // Show Assets section
-    const assetsSections = document.querySelectorAll('.nav-section h3');
+    const assetsSections = document.querySelectorAll('.nav-section');
     assetsSections.forEach(section => {
-        if (section.textContent === 'Assets') {
-            section.parentElement.style.display = 'block';
+        const heading = section.querySelector('h3');
+        if (heading && heading.textContent === 'Assets') {
+            section.style.display = 'block';
         }
     });
 }
@@ -261,9 +318,6 @@ function showHomePage() {
             workspaceTitle.textContent = window.currentWorkspaceName;
         }
     }
-    
-    // Show full navigation when user visits Home page
-    showFullNavigationOnHome();
 }
 
 function showAutoMLPage() {
@@ -2660,8 +2714,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updateJobsList();
     // Show ML App page by default
     showMyAccountPage();
-    // Hide other navigation items initially
-    hideNavigationUntilWorkspaceCreated();
+    // Initialize navigation - hide all except ML App
+    initializeNavigation();
     // Initialize PyScript status checking (this might be called twice, but that's safe)
     disableNewJobButton();
     // Update initial status with specific message
