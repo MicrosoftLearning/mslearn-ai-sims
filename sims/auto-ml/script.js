@@ -787,6 +787,44 @@ function validateCurrentStep() {
             const metricThreshold = document.getElementById('metric-threshold').value;
             const experimentTimeout = document.getElementById('experiment-timeout').value;
             
+            // Validate experiment timeout if provided
+            if (experimentTimeout && parseInt(experimentTimeout) < 15) {
+                alert('Experiment timeout must be at least 15 minutes.');
+                return false;
+            }
+            
+            // Validate metric threshold if provided
+            if (metricThreshold) {
+                const threshold = parseFloat(metricThreshold);
+                const currentMetric = currentJobData.primaryMetric || (document.getElementById('task-type').value === 'classification' ? 'auc' : 'mae');
+                
+                // Define valid ranges for different metrics
+                const metricRanges = {
+                    // Classification metrics (0-1 range, higher is better)
+                    'auc': { min: 0, max: 1, name: 'AUC' },
+                    'accuracy': { min: 0, max: 1, name: 'Accuracy' },
+                    'precision': { min: 0, max: 1, name: 'Precision' },
+                    'recall': { min: 0, max: 1, name: 'Recall' },
+                    'f1': { min: 0, max: 1, name: 'F1 Score' },
+                    // Regression metrics (lower is better, no practical upper bound)
+                    'mae': { min: 0, max: null, name: 'Mean Absolute Error' },
+                    'rmse': { min: 0, max: null, name: 'Root Mean Squared Error' },
+                    'r2': { min: null, max: 1, name: 'R² Score' }
+                };
+                
+                const range = metricRanges[currentMetric];
+                if (range) {
+                    if (range.min !== null && threshold < range.min) {
+                        alert(`Metric score threshold for ${range.name} must be at least ${range.min}.`);
+                        return false;
+                    }
+                    if (range.max !== null && threshold > range.max) {
+                        alert(`Metric score threshold for ${range.name} must be at most ${range.max}.`);
+                        return false;
+                    }
+                }
+            }
+            
             currentJobData.targetColumn = targetColumn;
             currentJobData.metricThreshold = metricThreshold ? parseFloat(metricThreshold) : null;
             currentJobData.experimentTimeout = experimentTimeout ? parseInt(experimentTimeout) : null;
@@ -1691,6 +1729,9 @@ function updateTaskType(taskType) {
         currentJobData.categoricalSettings = {};
     }
     
+    // Update metric threshold constraints based on task type's default metric
+    updateMetricThresholdConstraints(currentJobData.primaryMetric);
+    
     console.log('Updated currentJobData with task type defaults:', currentJobData);
     
     // Update categorical columns display if data is loaded
@@ -1837,6 +1878,9 @@ function saveConfig() {
     
     currentJobData.primaryMetric = primaryMetric;
     currentJobData.algorithms = selectedAlgorithms;
+    
+    // Update metric threshold constraints based on selected primary metric
+    updateMetricThresholdConstraints(primaryMetric);
     
     closeConfigFlyout();
 }
@@ -3665,6 +3709,42 @@ window.addEventListener('keydown', function(event) {
         }
     }
 });
+
+// Update metric threshold input constraints based on selected primary metric
+function updateMetricThresholdConstraints(primaryMetric) {
+    const metricThresholdInput = document.getElementById('metric-threshold');
+    if (!metricThresholdInput) return;
+    
+    // Define valid ranges for different metrics
+    const metricRanges = {
+        // Classification metrics (0-1 range, higher is better)
+        'auc': { min: 0, max: 1, placeholder: 'e.g., 0.85' },
+        'accuracy': { min: 0, max: 1, placeholder: 'e.g., 0.90' },
+        'precision': { min: 0, max: 1, placeholder: 'e.g., 0.85' },
+        'recall': { min: 0, max: 1, placeholder: 'e.g., 0.80' },
+        'f1': { min: 0, max: 1, placeholder: 'e.g., 0.85' },
+        // Regression metrics (lower is better)
+        'mae': { min: 0, max: null, placeholder: 'e.g., 5.0' },
+        'rmse': { min: 0, max: null, placeholder: 'e.g., 10.0' },
+        'r2': { min: null, max: 1, placeholder: 'e.g., 0.95' }
+    };
+    
+    const range = metricRanges[primaryMetric];
+    if (range) {
+        metricThresholdInput.min = range.min !== null ? range.min : '';
+        metricThresholdInput.max = range.max !== null ? range.max : '';
+        metricThresholdInput.placeholder = range.placeholder;
+        
+        // Clear any existing value that might be out of range
+        const currentValue = parseFloat(metricThresholdInput.value);
+        if (metricThresholdInput.value && !isNaN(currentValue)) {
+            if ((range.min !== null && currentValue < range.min) || 
+                (range.max !== null && currentValue > range.max)) {
+                metricThresholdInput.value = '';
+            }
+        }
+    }
+}
 
 function copyToClipboard(elementId) {
     const element = document.getElementById(elementId);
