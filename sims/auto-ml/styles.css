@@ -1264,6 +1264,32 @@ button:disabled {
     gap: 12px;
 }
 
+/* More specific selector to override .radio-group label */
+.flyout .radio-group-vertical label,
+.radio-group-vertical label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-weight: normal;
+    cursor: pointer;
+    width: 100%;
+}
+
+.flyout .radio-group-vertical input[type="radio"],
+.radio-group-vertical input[type="radio"] {
+    margin: 0;
+    flex-shrink: 0;
+    width: auto;
+    min-width: 16px;
+}
+
+.flyout .radio-group-vertical span,
+.radio-group-vertical span {
+    flex: 1;
+    line-height: 1.4;
+}
+
 .full-page-wizard .radio-label {
     display: flex;
     align-items: center;

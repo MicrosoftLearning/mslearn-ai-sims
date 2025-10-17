@@ -1722,8 +1722,8 @@ function updateCategoricalColumnsDisplay() {
     }
 }
 
-// Configuration modals
-function openConfigModal() {
+// Configuration flyouts
+function openConfigFlyout() {
     const taskType = currentJobData.taskType || document.querySelector('input[name="task-type"]:checked')?.value;
     
     if (!taskType) {
@@ -1732,11 +1732,32 @@ function openConfigModal() {
     }
     
     populateConfigModal(taskType);
-    document.getElementById('config-modal').style.display = 'block';
+    
+    // Ensure the save button is enabled and clickable
+    const saveBtn = document.getElementById('config-save-btn');
+    if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.removeAttribute('disabled');
+        
+        // Remove any existing event listeners and add fresh one
+        saveBtn.onclick = null;
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Save button clicked via event listener');
+            saveConfig();
+        });
+        
+        console.log('Config save button enabled and event listener added'); // Debug log
+    }
+    
+    document.getElementById('config-flyout').classList.add('open');
+    document.getElementById('flyout-overlay').classList.add('show');
 }
 
-function closeConfigModal() {
-    document.getElementById('config-modal').style.display = 'none';
+function closeConfigFlyout() {
+    document.getElementById('config-flyout').classList.remove('open');
+    document.getElementById('flyout-overlay').classList.remove('show');
 }
 
 function populateConfigModal(taskType) {
@@ -1788,26 +1809,31 @@ function populateConfigModal(taskType) {
 }
 
 function saveConfig() {
+    console.log('saveConfig() called'); // Debug log
     const primaryMetric = document.getElementById('primary-metric').value;
     const selectedAlgorithms = Array.from(document.querySelectorAll('#algorithms-list input:checked'))
         .map(cb => cb.value);
     
+    console.log('Primary metric:', primaryMetric, 'Algorithms:', selectedAlgorithms); // Debug log
+    
     currentJobData.primaryMetric = primaryMetric;
     currentJobData.algorithms = selectedAlgorithms;
     
-    closeConfigModal();
+    closeConfigFlyout();
 }
 
-// Featurization modal
-function openFeaturizationModal() {
+// Featurization flyout
+function openFeaturizationFlyout() {
     if (currentData) {
         updateCategoricalColumnsDisplay();
     }
-    document.getElementById('featurization-modal').style.display = 'block';
+    document.getElementById('featurization-flyout').classList.add('open');
+    document.getElementById('flyout-overlay').classList.add('show');
 }
 
-function closeFeaturizationModal() {
-    document.getElementById('featurization-modal').style.display = 'none';
+function closeFeaturizationFlyout() {
+    document.getElementById('featurization-flyout').classList.remove('open');
+    document.getElementById('flyout-overlay').classList.remove('show');
 }
 
 function saveFeaturization() {
@@ -1827,7 +1853,7 @@ function saveFeaturization() {
     });
     currentJobData.categoricalSettings = categoricalSettings;
     
-    closeFeaturizationModal();
+    closeFeaturizationFlyout();
 }
 
 // Job summary
@@ -3576,14 +3602,33 @@ function closeConfigSettingsModal() {
     }
 }
 
+function closeAllFlyouts() {
+    // Close all flyouts and the overlay
+    const flyouts = ['config-settings-flyout', 'config-flyout', 'featurization-flyout'];
+    const overlay = document.getElementById('flyout-overlay');
+    
+    flyouts.forEach(flyoutId => {
+        const flyout = document.getElementById(flyoutId);
+        if (flyout) {
+            flyout.classList.remove('open');
+        }
+    });
+    
+    if (overlay) {
+        overlay.classList.remove('show');
+    }
+}
+
 // Close flyout when clicking outside of it (handled by overlay click)
 // No need for window click listener since we have the overlay
 
 // Close flyout when pressing Escape
 window.addEventListener('keydown', function(event) {
-    const flyout = document.getElementById('config-settings-flyout');
-    if (event.key === 'Escape' && flyout && flyout.classList.contains('open')) {
-        closeConfigSettingsModal();
+    if (event.key === 'Escape') {
+        const overlay = document.getElementById('flyout-overlay');
+        if (overlay && overlay.classList.contains('show')) {
+            closeAllFlyouts();
+        }
     }
 });
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Machine Learning Lab</title>
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css?v=11">
     
     <!-- PyScript CSS and JS (2024.1.1) -->
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
@@ -627,7 +627,7 @@
                                         </div>
                                         <div class="config-section horizontal">
                                             <div class="config-item">
-                                                <button type="button" class="config-btn" onclick="openConfigModal()" data-tooltip="Configure primary metrics and algorithms">
+                                                <button type="button" class="config-btn" onclick="openConfigFlyout()" data-tooltip="Configure primary metrics and algorithms">
                                                     <span class="config-icon">⚙️</span>
                                                     <div>
                                                         <div class="config-title">Additional configuration settings</div>
@@ -636,7 +636,7 @@
                                                 </button>
                                             </div>
                                             <div class="config-item">
-                                                <button type="button" class="config-btn" onclick="openFeaturizationModal()" data-tooltip="Configure data preprocessing options">
+                                                <button type="button" class="config-btn" onclick="openFeaturizationFlyout()" data-tooltip="Configure data preprocessing options">
                                                     <span class="config-icon">🔧</span>
                                                     <div>
                                                         <div class="config-title">Featurization settings</div>
@@ -679,80 +679,76 @@
         </div>
     </main>
 
-    <!-- Configuration Modal -->
-    <div id="config-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Additional Configuration Settings</h3>
-                <span class="close" onclick="closeConfigModal()">&times;</span>
+    <!-- Configuration Flyout -->
+    <div id="config-flyout" class="flyout">
+        <div class="flyout-header">
+            <h3>Additional Configuration Settings</h3>
+            <span class="flyout-close" onclick="closeConfigFlyout()">&times;</span>
+        </div>
+        <div class="flyout-content">
+            <div class="form-group">
+                <label for="primary-metric">Primary metric</label>
+                <select id="primary-metric">
+                    <!-- Options will be populated based on task type -->
+                </select>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="primary-metric">Primary metric</label>
-                    <select id="primary-metric">
-                        <!-- Options will be populated based on task type -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Algorithms to try</label>
-                    <div id="algorithms-list" class="checkbox-group">
-                        <!-- Checkboxes will be populated based on task type -->
-                    </div>
+            <div class="form-group">
+                <label>Algorithms to try</label>
+                <div id="algorithms-list" class="checkbox-group">
+                    <!-- Checkboxes will be populated based on task type -->
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeConfigModal()" data-tooltip="Cancel and close configuration">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="saveConfig()" data-tooltip="Save configuration settings">Save</button>
-            </div>
+        </div>
+        <div class="flyout-actions" style="margin-top: 24px; padding: 0 24px 24px 24px;">
+            <button type="button" class="btn btn-secondary" onclick="closeConfigFlyout()" data-tooltip="Cancel and close configuration">Cancel</button>
+            <button type="button" class="btn btn-primary" id="config-save-btn" onclick="saveConfig()" data-tooltip="Save configuration settings" style="background-color: #0078d4 !important; color: white !important; cursor: pointer !important; pointer-events: auto !important;">Save</button>
         </div>
     </div>
 
-    <!-- Featurization Modal -->
-    <div id="featurization-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Featurization Settings</h3>
-                <span class="close" onclick="closeFeaturizationModal()">&times;</span>
+    <!-- Featurization Flyout -->
+    <div id="featurization-flyout" class="flyout">
+        <div class="flyout-header">
+            <h3>Featurization Settings</h3>
+            <span class="flyout-close" onclick="closeFeaturizationFlyout()">&times;</span>
+        </div>
+        <div class="flyout-content">
+            <div class="form-group">
+                <label class="checkbox-label-horizontal">
+                    <input type="checkbox" id="normalize-features"> 
+                    <span>Normalize numeric features</span>
+                </label>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="checkbox-label-horizontal">
-                        <input type="checkbox" id="normalize-features"> 
-                        <span>Normalize numeric features</span>
+            <div class="form-group">
+                <label>Handle missing data</label>
+                <div class="radio-group-vertical">
+                    <label>
+                        <input type="radio" name="missing-data-strategy" value="remove" checked>
+                        <span>Remove rows with missing values (default)</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="missing-data-strategy" value="impute">
+                        <span>Fill missing values (mean for numeric, most frequent for categorical)</span>
                     </label>
                 </div>
-                <div class="form-group">
-                    <label>Handle missing data</label>
-                    <div class="radio-group">
-                        <label>
-                            <input type="radio" name="missing-data-strategy" value="remove" checked>
-                            <span>Remove rows with missing values (default)</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="missing-data-strategy" value="impute">
-                            <span>Fill missing values (mean for numeric, most frequent for categorical)</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group" id="categorical-columns-group" style="display: none;">
-                    <label>Non-numeric columns</label>
-                    <div class="categorical-table-container">
-                        <table class="categorical-table">
-                            <thead>
-                                <tr>
-                                    <th>Column Name</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="categorical-columns">
-                                <!-- Non-numeric columns will be populated here -->
-                            </tbody>
-                        </table>
-                    </div>
+            </div>
+            <div class="form-group" id="categorical-columns-group" style="display: none;">
+                <label>Non-numeric columns</label>
+                <div class="categorical-table-container">
+                    <table class="categorical-table">
+                        <thead>
+                            <tr>
+                                <th>Column Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categorical-columns">
+                            <!-- Non-numeric columns will be populated here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeFeaturizationModal()" data-tooltip="Cancel and close featurization settings">Cancel</button>
+            <div class="flyout-actions" style="margin-top: 24px;">
+                <button type="button" class="btn btn-secondary" onclick="closeFeaturizationFlyout()" data-tooltip="Cancel and close featurization settings">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="saveFeaturization()" data-tooltip="Save featurization settings">Save</button>
             </div>
         </div>
@@ -845,7 +841,7 @@
     </div>
 
     <!-- Flyout Overlay -->
-    <div id="flyout-overlay" class="flyout-overlay" onclick="closeConfigSettingsModal()"></div>
+    <div id="flyout-overlay" class="flyout-overlay" onclick="closeAllFlyouts()"></div>
 
     <!-- PyScript Training Module -->
     <py-script>
