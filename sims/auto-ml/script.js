@@ -1,6 +1,6 @@
 // Global variables - Updated: 2025-10-16 15:40:00 - Fixed PyScript to use proper training with ALL metrics
 let currentStep = 1;
-let maxSteps = 4;
+let maxSteps = 5;
 let uploadedFiles = [];
 let currentJobData = {};
 let trainedModels = {};
@@ -709,8 +709,8 @@ function updateWizardStep() {
         populateDatasetList();
     }
     
-    // Update review summary if on step 4
-    if (currentStep === 4) {
+    // Update review summary if on step 5
+    if (currentStep === 5) {
         updateJobSummary();
     }
     
@@ -787,7 +787,19 @@ function validateCurrentStep() {
             return true;
             
         case 4:
-            // Compute step - automatically configured
+            // Compute step - validate compute type selection
+            const computeType = document.getElementById('compute-type').value;
+            
+            if (!computeType) {
+                alert('Please select a compute type.');
+                return false;
+            }
+            
+            currentJobData.computeType = computeType;
+            return true;
+            
+        case 5:
+            // Review step - all validations done
             return true;
             
         default:
@@ -1875,6 +1887,7 @@ function updateJobSummary() {
             <p><strong>Job Name:</strong> ${currentJobData.jobName}</p>
             <p><strong>Task Type:</strong> ${currentJobData.taskType}</p>
             <p><strong>Target Column:</strong> ${currentJobData.targetColumn}</p>
+            <p><strong>Compute Type:</strong> ${currentJobData.computeType}</p>
             <p><strong>Primary Metric:</strong> ${config.primaryMetric}</p>
             <p><strong>Algorithms:</strong> ${config.algorithms.join(', ')}</p>
             <p><strong>Normalize Features:</strong> ${config.normalizeFeatures ? 'Yes' : 'No'}</p>
@@ -1894,6 +1907,7 @@ function submitJob() {
         jobName: document.getElementById('job-name').value.trim(),
         taskType: document.getElementById('task-type').value,
         targetColumn: document.getElementById('target-column') ? document.getElementById('target-column').value : null,
+        computeType: document.getElementById('compute-type') ? document.getElementById('compute-type').value : null,
         // Use currentJobData for configuration that was set through modals
         primaryMetric: currentJobData.primaryMetric,
         algorithms: currentJobData.algorithms,
@@ -1915,6 +1929,11 @@ function submitJob() {
     
     if (!capturedJobData.targetColumn) {
         alert('Please select a target column before submitting the job.');
+        return;
+    }
+    
+    if (!capturedJobData.computeType) {
+        alert('Please select a compute type before submitting the job.');
         return;
     }
     

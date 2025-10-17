@@ -520,6 +520,14 @@
                                         <span class="step-number">4</span>
                                     </div>
                                     <div class="step-info">
+                                        <div class="step-title">Compute</div>
+                                    </div>
+                                </div>
+                                <div class="step-vertical" data-step="5">
+                                    <div class="step-indicator">
+                                        <span class="step-number">5</span>
+                                    </div>
+                                    <div class="step-info">
                                         <div class="step-title">Review</div>
                                     </div>
                                 </div>
@@ -649,8 +657,31 @@
                                 </div>
                             </div>
 
-                            <!-- Step 4: Review -->
+                            <!-- Step 4: Compute -->
                             <div id="step-4" class="wizard-step">
+                                <div class="step-header">
+                                    <h2>Compute</h2>
+                                    <p>Select the compute target for training your machine learning model.</p>
+                                </div>
+                                <div class="step-content">
+                                    <div class="form-section">
+                                        <div class="form-group">
+                                            <label for="compute-type">Select compute type</label>
+                                            <select id="compute-type" class="form-control">
+                                                <option value="serverless" selected>Serverless</option>
+                                                <option value="compute-instance" disabled>Compute Instance</option>
+                                                <option value="compute-cluster" disabled>Compute Cluster</option>
+                                            </select>
+                                            <div class="form-help">
+                                                <small>Serverless compute is the recommended option for getting started with automated ML.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 5: Review -->
+                            <div id="step-5" class="wizard-step">
                                 <div class="step-header">
                                     <h2>Review and submit</h2>
                                     <p>Review your configuration and submit the training job.</p>
