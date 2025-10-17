@@ -783,7 +783,13 @@ function validateCurrentStep() {
                 return false;
             }
             
+            // Capture limits data (optional fields)
+            const metricThreshold = document.getElementById('metric-threshold').value;
+            const experimentTimeout = document.getElementById('experiment-timeout').value;
+            
             currentJobData.targetColumn = targetColumn;
+            currentJobData.metricThreshold = metricThreshold ? parseFloat(metricThreshold) : null;
+            currentJobData.experimentTimeout = experimentTimeout ? parseInt(experimentTimeout) : null;
             return true;
             
         case 4:
@@ -1894,6 +1900,10 @@ function updateJobSummary() {
             <p><strong>Missing Data:</strong> ${config.missingDataStrategy === 'remove' ? 'Remove rows' : 'Fill missing values'}</p>
             ${Object.keys(config.categoricalSettings).length > 0 ? 
                 `<p><strong>Categorical Columns:</strong> ${JSON.stringify(config.categoricalSettings)}</p>` : ''}
+            ${currentJobData.metricThreshold ? 
+                `<p><strong>Metric Score Threshold:</strong> ${currentJobData.metricThreshold}</p>` : ''}
+            ${currentJobData.experimentTimeout ? 
+                `<p><strong>Experiment Timeout:</strong> ${currentJobData.experimentTimeout} minutes</p>` : ''}
         </div>
     `;
 }
@@ -1908,6 +1918,10 @@ function submitJob() {
         taskType: document.getElementById('task-type').value,
         targetColumn: document.getElementById('target-column') ? document.getElementById('target-column').value : null,
         computeType: document.getElementById('compute-type') ? document.getElementById('compute-type').value : null,
+        metricThreshold: document.getElementById('metric-threshold') ? 
+            (document.getElementById('metric-threshold').value ? parseFloat(document.getElementById('metric-threshold').value) : null) : null,
+        experimentTimeout: document.getElementById('experiment-timeout') ? 
+            (document.getElementById('experiment-timeout').value ? parseInt(document.getElementById('experiment-timeout').value) : null) : null,
         // Use currentJobData for configuration that was set through modals
         primaryMetric: currentJobData.primaryMetric,
         algorithms: currentJobData.algorithms,
@@ -3661,6 +3675,20 @@ function copyToClipboard(elementId) {
             // Could show a toast notification here
             console.log('Copied to clipboard:', element.value);
         });
+    }
+}
+
+// Expandable section toggle function
+function toggleLimitsSection() {
+    const content = document.getElementById('limits-content');
+    const header = event.target.closest('.expandable-header');
+    
+    if (content.classList.contains('show')) {
+        content.classList.remove('show');
+        header.classList.remove('expanded');
+    } else {
+        content.classList.add('show');
+        header.classList.add('expanded');
     }
 }
 
