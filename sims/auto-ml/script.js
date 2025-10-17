@@ -512,7 +512,7 @@ function handleExistingDatasetSelection(filename) {
         // Show success message
         const rows = selectedDataset.shape ? selectedDataset.shape[0] : 'Unknown';
         const cols = selectedDataset.shape ? selectedDataset.shape[1] : 'Unknown';
-        console.log(`Selected existing dataset: ${filename}: ${rows} rows, ${cols} columns`);
+        console.log(`Selected existing dataset: ${selectedDataset.filename || selectedDataset.name || filename}: ${rows} rows, ${cols} columns`);
         
         // Display the dataset info in the uploaded files area
         displayExistingDatasetInfo(selectedDataset);
@@ -651,7 +651,7 @@ function selectExistingDataset(datasetId) {
         // Show success message
         const rows = selectedDataset.shape ? selectedDataset.shape[0] : 'Unknown';
         const cols = selectedDataset.shape ? selectedDataset.shape[1] : 'Unknown';
-        console.log(`Selected existing dataset: ${filename}: ${rows} rows, ${cols} columns`);
+        console.log(`Selected existing dataset: ${selectedDataset.filename || selectedDataset.name || datasetId}: ${rows} rows, ${cols} columns`);
         
         // Display the dataset info in the uploaded files area
         displayExistingDatasetInfo(selectedDataset);
@@ -3231,6 +3231,14 @@ function handleTrainingComplete(resultsJson) {
             if (job) {
                 job.status = 'Completed';
                 job.models = results.results;
+                
+                // Store job info with training logs if available
+                if (results.job_info) {
+                    job.job_info = results.job_info;
+                    job.training_logs = results.job_info.training_logs;
+                    console.log('Stored training logs:', job.training_logs?.length || 0, 'entries');
+                }
+                
                 updateJobsList();
             }
             
@@ -3246,6 +3254,14 @@ function handleTrainingComplete(resultsJson) {
             if (job) {
                 job.status = 'Failed';
                 job.error = results.error;
+                
+                // Store job info with training logs even on failure
+                if (results.job_info) {
+                    job.job_info = results.job_info;
+                    job.training_logs = results.job_info.training_logs;
+                    console.log('Stored error logs:', job.training_logs?.length || 0, 'entries');
+                }
+                
                 updateJobsList();
             }
         }
@@ -3470,6 +3486,11 @@ function showJobTab(tabName) {
     if (tabName === 'models' && currentJobDetails) {
         updateModelsTabContent();
     }
+    
+    // Update outputs tab content if showing outputs
+    if (tabName === 'outputs' && currentJobDetails) {
+        updateOutputsTabContent();
+    }
 }
 
 function updateModelsTabContent() {
@@ -3540,6 +3561,108 @@ function updateModelsTabContent() {
         modelsResults.innerHTML = '<div class="no-data-message"><span class="no-data-icon">⏳</span><span>Training in progress...</span></div>';
     } else {
         modelsResults.innerHTML = '<div class="no-data-message"><span class="no-data-icon">ℹ</span><span>No models available</span></div>';
+    }
+}
+
+function updateOutputsTabContent() {
+    const outputsContent = document.getElementById('outputs-content');
+    
+    if (!outputsContent) {
+        console.warn('outputs-content element not found');
+        return;
+    }
+    
+    // Check if we have training logs to display
+    if (currentJobDetails && currentJobDetails.training_logs && currentJobDetails.training_logs.length > 0) {
+        // Create logs display container
+        outputsContent.innerHTML = `
+            <div class="logs-container">
+                <div class="logs-header">
+                    <h3>Training Logs</h3>
+                    <div class="logs-info">
+                        <span class="logs-count">${currentJobDetails.training_logs.length} log entries</span>
+                    </div>
+                </div>
+                <div class="logs-content" id="training-logs-list">
+                </div>
+            </div>
+        `;
+        
+        const logsList = document.getElementById('training-logs-list');
+        
+        // Display each log entry
+        currentJobDetails.training_logs.forEach((logEntry, index) => {
+            const logElement = document.createElement('div');
+            logElement.className = 'log-entry';
+            
+            // Parse timestamp if available
+            let timeDisplay = '';
+            if (logEntry.timestamp) {
+                timeDisplay = `<span class="log-timestamp">[${logEntry.timestamp}]</span>`;
+            }
+            
+            // Determine log level class
+            let levelClass = 'info';
+            if (logEntry.level) {
+                levelClass = logEntry.level;
+            } else if (logEntry.message && typeof logEntry.message === 'string') {
+                const msg = logEntry.message.toLowerCase();
+                if (msg.includes('error') || msg.includes('failed') || msg.includes('❌')) {
+                    levelClass = 'error';
+                } else if (msg.includes('warning') || msg.includes('⚠️')) {
+                    levelClass = 'warning';
+                } else if (msg.includes('completed') || msg.includes('finished') || msg.includes('✅') || msg.includes('🎉')) {
+                    levelClass = 'success';
+                }
+            }
+            
+            logElement.innerHTML = `
+                <div class="log-header">
+                    ${timeDisplay}
+                    <span class="log-level ${levelClass}"></span>
+                </div>
+                <div class="log-message">${logEntry.message || 'No message'}</div>
+            `;
+            
+            logsList.appendChild(logElement);
+        });
+        
+    } else if (currentJobDetails && currentJobDetails.status === 'running') {
+        // Show loading message for running jobs
+        outputsContent.innerHTML = `
+            <div class="logs-placeholder">
+                <div class="logs-placeholder-icon">⏳</div>
+                <div class="logs-placeholder-text">Training in progress...</div>
+                <div class="logs-placeholder-subtext">Logs will appear here as training proceeds</div>
+            </div>
+        `;
+    } else if (currentJobDetails && currentJobDetails.status === 'Failed' && currentJobDetails.error) {
+        // Show error information for failed jobs
+        outputsContent.innerHTML = `
+            <div class="logs-container">
+                <div class="logs-header">
+                    <h3>Error Information</h3>
+                </div>
+                <div class="error-content">
+                    <div class="log-entry error">
+                        <div class="log-header">
+                            <span class="log-level error"></span>
+                            <span class="error-title">Training Failed</span>
+                        </div>
+                        <div class="log-message">${currentJobDetails.error}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        // Show no logs available message
+        outputsContent.innerHTML = `
+            <div class="logs-placeholder">
+                <div class="logs-placeholder-icon">ℹ</div>
+                <div class="logs-placeholder-text">No logs available</div>
+                <div class="logs-placeholder-subtext">Training logs will appear here after job completion</div>
+            </div>
+        `;
     }
 }
 

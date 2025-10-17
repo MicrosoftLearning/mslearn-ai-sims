@@ -417,9 +417,12 @@
                         </div>
 
                         <div id="outputs-tab" class="tab-panel" style="display: none;">
-                            <div class="tab-content-placeholder">
-                                <h4>Outputs + logs</h4>
-                                <p>Job outputs and training logs will appear here.</p>
+                            <div id="outputs-content">
+                                <div class="logs-placeholder">
+                                    <div class="logs-placeholder-icon">ℹ</div>
+                                    <div class="logs-placeholder-text">No logs available</div>
+                                    <div class="logs-placeholder-subtext">Training logs will appear here after job completion</div>
+                                </div>
                             </div>
                         </div>
 
@@ -1035,6 +1038,7 @@
         # Training function for ML models - Full implementation with all metrics
         def train_ml_models_pyscript(job_data_json, data_info):
             from datetime import datetime
+            import numpy as np
             from sklearn.model_selection import train_test_split
             from sklearn.preprocessing import StandardScaler, LabelEncoder
             from sklearn.linear_model import LogisticRegression, LinearRegression, Lasso
@@ -1042,28 +1046,49 @@
             from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
             from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
             from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+            from sklearn.metrics import roc_auc_score
             
-            print(f"Starting ML training with PyScript...")
+            # Initialize comprehensive logging system
+            training_logs = []
+            
+            def log_message(message, level="info"):
+                """Add a timestamped log entry"""
+                # Create timestamp using Python datetime instead of js.Date()
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%H:%M:%S")
+                log_entry = {
+                    'timestamp': timestamp,
+                    'message': str(message),
+                    'level': level
+                }
+                training_logs.append(log_entry)
+                print(f"[{timestamp}] {message}")
+            
+            log_message("🚀 STARTING AUTOML TRAINING JOB")
+            log_message("=" * 50)
+            
             try:
                 # Parse job data
                 job_data = json.loads(job_data_json)
+                log_message("📄 Parsing job configuration...")
                 
-                # Debug: Log all job settings
-                print(f"🔍 JOB CONFIGURATION DEBUG:")
-                print(f"  Target column: {job_data.get('targetColumn')}")
-                print(f"  Task type: {job_data.get('taskType')}")
-                print(f"  Algorithms: {job_data.get('algorithms', [])}")
-                print(f"  Primary metric: {job_data.get('primaryMetric')}")
-                print(f"  Normalize features: {job_data.get('normalizeFeatures', False)}")
-                print(f"  Categorical settings: {job_data.get('categoricalSettings', {})}")
+                # Log all job settings with details
+                log_message("🔍 JOB CONFIGURATION:")
+                log_message(f"  • Target column: {job_data.get('targetColumn')}")
+                log_message(f"  • Task type: {job_data.get('taskType')}")
+                log_message(f"  • Algorithms: {job_data.get('algorithms', [])}")
+                log_message(f"  • Primary metric: {job_data.get('primaryMetric')}")
+                log_message(f"  • Normalize features: {job_data.get('normalizeFeatures', False)}")
+                log_message(f"  • Categorical settings: {job_data.get('categoricalSettings', {})}")
                 
                 # Check if we have the DataFrame stored globally
                 if 'current_dataframe' not in globals():
                     raise ValueError("No dataframe available for training. Please upload a CSV file first.")
                 
                 df = globals()['current_dataframe']
-                print(f"  DataFrame shape: {df.shape}")
-                print(f"  DataFrame columns: {list(df.columns)}")
+                log_message(f"📊 Dataset loaded successfully:")
+                log_message(f"  • Shape: {df.shape[0]} rows × {df.shape[1]} columns")
+                log_message(f"  • Columns: {list(df.columns)}")
                 
                 # Get training parameters
                 target_column = job_data['targetColumn']
@@ -1073,58 +1098,91 @@
                 normalize_features = job_data.get('normalizeFeatures', False)
                 categorical_settings = job_data.get('categoricalSettings', {})
                 
+                log_message("🔄 Preparing training data...")
+                
                 # Prepare features and target
                 X = df.drop(columns=[target_column])
                 y = df[target_column]
+                log_message(f"  • Features: {X.shape[1]} columns")
+                log_message(f"  • Target values: {len(y)} samples")
+                log_message(f"  • Target column: '{target_column}'")
+                
+                # Log data types before processing
+                log_message("📋 Data types analysis:")
+                categorical_cols = []
+                numeric_cols = []
+                for col in X.columns:
+                    if X[col].dtype == 'object':
+                        categorical_cols.append(col)
+                    else:
+                        numeric_cols.append(col)
+                log_message(f"  • Categorical columns: {len(categorical_cols)} - {categorical_cols}")
+                log_message(f"  • Numeric columns: {len(numeric_cols)} - {numeric_cols}")
                 
                 # Handle categorical columns
+                log_message("🏷️ Processing categorical variables...")
                 for col in X.columns:
                     if col in categorical_settings:
                         if categorical_settings[col] == 'categorize':
                             if X[col].dtype == 'object':
                                 le = LabelEncoder()
                                 X[col] = le.fit_transform(X[col].astype(str))
+                                log_message(f"  • Encoded categorical column: '{col}'")
                         elif categorical_settings[col] == 'ignore':
                             X = X.drop(columns=[col])
+                            log_message(f"  • Ignored column: '{col}'")
                 
                 # Convert remaining object columns to numeric
                 for col in X.columns:
                     if X[col].dtype == 'object':
                         le = LabelEncoder()
                         X[col] = le.fit_transform(X[col].astype(str))
+                        log_message(f"  • Auto-encoded categorical column: '{col}'")
                 
                 # Create dynamic random state based on job ID and settings
                 job_id = job_data.get('id', 1)
                 settings_hash = hash(str(normalize_features) + str(categorical_settings) + str(algorithms))
                 random_state = abs((job_id + settings_hash) % 10000)
-                print(f"🎲 Using random state: {random_state} (based on job {job_id} and settings)")
+                log_message(f"🎲 Random state: {random_state} (based on job {job_id} and settings)")
                 
                 # Split data
+                log_message("✂️ Splitting data into train/test sets...")
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=random_state)
+                log_message(f"  • Training set: {X_train.shape[0]} samples ({X_train.shape[0]/(X_train.shape[0]+X_test.shape[0])*100:.1f}%)")
+                log_message(f"  • Test set: {X_test.shape[0]} samples ({X_test.shape[0]/(X_train.shape[0]+X_test.shape[0])*100:.1f}%)")
+                
+                # Show sample data before normalization
+                log_message("📊 Data preprocessing analysis:")
+                if len(X_train.columns) > 0:
+                    sample_col = X_train.columns[0]
+                    log_message(f"  • Sample column '{sample_col}' stats before processing:")
+                    log_message(f"    - Mean: {X_train[sample_col].mean():.4f}")
+                    log_message(f"    - Std: {X_train[sample_col].std():.4f}")
+                    log_message(f"    - Min: {X_train[sample_col].min():.4f}")
+                    log_message(f"    - Max: {X_train[sample_col].max():.4f}")
                 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=random_state)
                 
                 print(f"📈 Training data shape: X_train={X_train.shape}, y_train={y_train.shape}")
                 print(f"📊 Test data shape: X_test={X_test.shape}, y_test={y_test.shape}")
                 
-                # Show sample data before normalization
-                print(f"📊 Sample X_train data (first 3 rows, first 3 columns):")
-                print(f"   Before: {X_train.iloc[:3, :3].values.tolist()}")
-                if len(X_train.columns) > 0:
-                    print(f"   Column '{X_train.columns[0]}' stats: mean={X_train.iloc[:, 0].mean():.4f}, std={X_train.iloc[:, 0].std():.4f}")
-                
                 # Normalize features if requested
                 if normalize_features:
-                    print("🔄 Applying feature normalization...")
+                    log_message("⚖️ Applying feature normalization...")
                     scaler = StandardScaler()
                     X_train_scaled = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns, index=X_train.index)
                     X_test_scaled = pd.DataFrame(scaler.transform(X_test), columns=X_test.columns, index=X_test.index)
-                    print(f"   After normalization: {X_train_scaled.iloc[:3, :3].values.tolist()}")
+                    log_message(f"  • StandardScaler fitted on training data")
                     if len(X_train_scaled.columns) > 0:
-                        print(f"   Column '{X_train_scaled.columns[0]}' stats: mean={X_train_scaled.iloc[:, 0].mean():.4f}, std={X_train_scaled.iloc[:, 0].std():.4f}")
+                        sample_col = X_train_scaled.columns[0]
+                        log_message(f"  • Sample column '{sample_col}' after normalization:")
+                        log_message(f"    - Mean: {X_train_scaled[sample_col].mean():.4f}")
+                        log_message(f"    - Std: {X_train_scaled[sample_col].std():.4f}")
                     X_train, X_test = X_train_scaled, X_test_scaled
                 else:
-                    print("➡️  No feature normalization applied")
+                    log_message("➡️ No feature normalization applied")
                 
                 # Define models based on task type (using dynamic random state)
+                log_message(f"🤖 Initializing {task_type} models...")
                 if task_type == 'classification':
                     model_map = {
                         'logistic_regression': LogisticRegression(random_state=random_state, max_iter=1000),
@@ -1138,6 +1196,10 @@
                         'decision_tree': DecisionTreeRegressor(random_state=random_state),
                         'random_forest': RandomForestRegressor(random_state=random_state, n_estimators=10)
                     }
+                
+                available_models = list(model_map.keys())
+                log_message(f"  • Available models: {available_models}")
+                log_message(f"  • Selected algorithms: {algorithms}")
                 
                 # Train models
                 model_results = []
@@ -1155,96 +1217,153 @@
                     best_score = float('-inf')
                     
                 best_model_name = None
-                print(f"🎯 Initialized best_score to {best_score} for primary metric '{primary_metric}'")
+                log_message(f"🎯 Primary metric: '{primary_metric}' (initialized best_score to {best_score})")
+                log_message("=" * 50)
+                log_message("🏋️ STARTING MODEL TRAINING...")
                 
                 for algo in algorithms:
                     if algo in model_map:
                         try:
-                            print(f"\n🚀 Training {algo.replace('_', ' ').title()}...")
+                            log_message(f"\n🚀 Training {algo.replace('_', ' ').title()}...")
                             
                             # Train model
                             model = model_map[algo]
+                            log_message(f"  • Model parameters: {model.get_params()}")
                             model.fit(X_train, y_train)
-                            print(f"  ✅ Model training completed")
+                            log_message(f"  • ✅ Model training completed")
                             
                             # Make predictions
+                            log_message(f"  • Making predictions on test set...")
                             y_pred = model.predict(X_test)
+                            log_message(f"  • ✅ Predictions completed ({len(y_pred)} predictions)")
                             
                             # Calculate ALL metrics for this task type
+                            log_message(f"  • Calculating metrics...")
                             metrics = {}
                             
                             if task_type == 'classification':
                                 # Calculate all classification metrics
                                 try:
                                     metrics['accuracy'] = float(accuracy_score(y_test, y_pred))
-                                except:
+                                    log_message(f"    ✓ Accuracy: {metrics['accuracy']:.6f}")
+                                except Exception as e:
                                     metrics['accuracy'] = 0.0
+                                    log_message(f"    ✗ Accuracy calculation failed: {e}", "warning")
                                     
                                 try:
                                     metrics['precision'] = float(precision_score(y_test, y_pred, average='weighted', zero_division=0))
-                                except:
+                                    log_message(f"    ✓ Precision: {metrics['precision']:.6f}")
+                                except Exception as e:
                                     metrics['precision'] = 0.0
+                                    log_message(f"    ✗ Precision calculation failed: {e}", "warning")
                                     
                                 try:
                                     metrics['recall'] = float(recall_score(y_test, y_pred, average='weighted', zero_division=0))
-                                except:
+                                    log_message(f"    ✓ Recall: {metrics['recall']:.6f}")
+                                except Exception as e:
                                     metrics['recall'] = 0.0
+                                    log_message(f"    ✗ Recall calculation failed: {e}", "warning")
                                     
                                 try:
                                     metrics['f1'] = float(f1_score(y_test, y_pred, average='weighted', zero_division=0))
-                                except:
+                                    log_message(f"    ✓ F1-Score: {metrics['f1']:.6f}")
+                                except Exception as e:
                                     metrics['f1'] = 0.0
+                                    log_message(f"    ✗ F1-Score calculation failed: {e}", "warning")
+                                    
+                                # Calculate AUC metrics for binary and multiclass classification
+                                try:
+                                    # Get unique classes to determine if binary or multiclass
+                                    unique_classes = len(np.unique(y_test))
+                                    
+                                    if unique_classes == 2:
+                                        # Binary classification - use predict_proba for AUC
+                                        if hasattr(model, 'predict_proba'):
+                                            y_prob = model.predict_proba(X_test)[:, 1]  # Get probability of positive class
+                                            metrics['auc'] = float(roc_auc_score(y_test, y_prob))
+                                            log_message(f"    ✓ AUC (binary): {metrics['auc']:.6f}")
+                                        else:
+                                            # Fallback to decision function if available
+                                            if hasattr(model, 'decision_function'):
+                                                y_scores = model.decision_function(X_test)
+                                                metrics['auc'] = float(roc_auc_score(y_test, y_scores))
+                                                log_message(f"    ✓ AUC (binary, decision function): {metrics['auc']:.6f}")
+                                            else:
+                                                metrics['auc'] = 0.5  # Random classifier baseline
+                                                log_message(f"    ⚠️ AUC: Model doesn't support probability prediction, using baseline: {metrics['auc']:.6f}", "warning")
+                                    else:
+                                        # Multiclass classification - use one-vs-rest approach
+                                        if hasattr(model, 'predict_proba'):
+                                            y_prob = model.predict_proba(X_test)
+                                            metrics['auc'] = float(roc_auc_score(y_test, y_prob, multi_class='ovr', average='weighted'))
+                                            log_message(f"    ✓ AUC (multiclass, weighted): {metrics['auc']:.6f}")
+                                        else:
+                                            metrics['auc'] = 0.5  # Random classifier baseline
+                                            log_message(f"    ⚠️ AUC: Model doesn't support probability prediction for multiclass, using baseline: {metrics['auc']:.6f}", "warning")
+                                            
+                                except Exception as e:
+                                    metrics['auc'] = 0.5  # Random classifier baseline
+                                    log_message(f"    ✗ AUC calculation failed: {e}, using baseline: {metrics['auc']:.6f}", "warning")
                             else:
                                 # Calculate all regression metrics
                                 try:
                                     metrics['mae'] = float(mean_absolute_error(y_test, y_pred))
-                                except:
+                                    log_message(f"    ✓ MAE: {metrics['mae']:.6f}")
+                                except Exception as e:
                                     metrics['mae'] = float('inf')
+                                    log_message(f"    ✗ MAE calculation failed: {e}", "warning")
                                     
                                 try:
                                     metrics['mse'] = float(mean_squared_error(y_test, y_pred))
-                                except:
+                                    log_message(f"    ✓ MSE: {metrics['mse']:.6f}")
+                                except Exception as e:
                                     metrics['mse'] = float('inf')
+                                    log_message(f"    ✗ MSE calculation failed: {e}", "warning")
                                     
                                 try:
                                     metrics['rmse'] = float(np.sqrt(mean_squared_error(y_test, y_pred)))
-                                except:
+                                    log_message(f"    ✓ RMSE: {metrics['rmse']:.6f}")
+                                except Exception as e:
                                     metrics['rmse'] = float('inf')
+                                    log_message(f"    ✗ RMSE calculation failed: {e}", "warning")
                                     
                                 try:
                                     metrics['r2'] = float(r2_score(y_test, y_pred))
-                                except:
+                                    log_message(f"    ✓ R²: {metrics['r2']:.6f}")
+                                except Exception as e:
                                     metrics['r2'] = -float('inf')
-                            
-                            print(f"  📊 ALL METRICS for {algo.replace('_', ' ').title()}:")
-                            for metric_name, metric_value in metrics.items():
-                                print(f"    {metric_name}: {metric_value:.6f}")
+                                    log_message(f"    ✗ R² calculation failed: {e}", "warning")
                             
                             # Verify the primary metric exists
                             if primary_metric not in metrics:
-                                print(f"  ⚠️  WARNING: Primary metric '{primary_metric}' not found!")
+                                log_message(f"  ⚠️ WARNING: Primary metric '{primary_metric}' not found!", "warning")
                                 primary_metric = list(metrics.keys())[0] if metrics else 'accuracy'
+                                log_message(f"  → Using '{primary_metric}' as primary metric instead", "warning")
                             
                             current_score = metrics[primary_metric]
-                            print(f"  🎯 Primary metric '{primary_metric}' value: {current_score:.6f}")
+                            log_message(f"  🎯 Primary metric '{primary_metric}': {current_score:.6f}")
                             
                             # Define which metrics are better when higher vs lower
-                            higher_is_better = ['accuracy', 'precision', 'recall', 'f1', 'r2']
+                            higher_is_better = ['accuracy', 'precision', 'recall', 'f1', 'r2', 'auc']
                             lower_is_better = ['mae', 'mse', 'rmse']
                             
                             if primary_metric in higher_is_better:
                                 is_better = current_score > best_score
+                                comparison = f"{current_score:.6f} > {best_score:.6f}"
                             elif primary_metric in lower_is_better:
                                 is_better = current_score < best_score
+                                comparison = f"{current_score:.6f} < {best_score:.6f}"
                             else:
                                 # Default: assume higher is better for unknown metrics
                                 is_better = current_score > best_score
+                                comparison = f"{current_score:.6f} > {best_score:.6f}"
                             
-                            print(f"  📈 Comparison: {current_score:.6f} {'>' if primary_metric in higher_is_better else '<'} {best_score:.6f} = {is_better}")
+                            log_message(f"  📈 Best model comparison: {comparison} = {is_better}")
                             
                             if is_better:
                                 best_score = current_score
                                 best_model_name = algo
+                                log_message(f"  🏆 New best model: {algo.replace('_', ' ').title()}")
                             
                             # Store results
                             model_results.append({
@@ -1256,38 +1375,67 @@
                                 'is_best': False  # Will be updated later
                             })
                             
-                            print(f"✅ Completed {algo.replace('_', ' ').title()} - Primary metric ({primary_metric}): {metrics[primary_metric]:.6f}")
+                            log_message(f"  ✅ {algo.replace('_', ' ').title()} completed successfully")
                             
                         except Exception as e:
-                            print(f"❌ Failed to train {algo.replace('_', ' ').title()}: {str(e)}")
+                            log_message(f"  ❌ Failed to train {algo.replace('_', ' ').title()}: {str(e)}", "error")
+                    else:
+                        log_message(f"  ⚠️ Algorithm '{algo}' not available", "warning")
                 
                 # Mark best model
                 for result in model_results:
                     result['is_best'] = result['name'] == best_model_name
                 
-                print(f"\n🏆 TRAINING SUMMARY:")
-                print(f"   Total models trained: {len(model_results)}")
-                print(f"   Primary metric used: {primary_metric}")
-                print(f"   Best model: {best_model_name}")
+                log_message("=" * 50)
+                log_message("🏆 TRAINING SUMMARY:")
+                log_message(f"  • Total models trained: {len(model_results)}")
+                log_message(f"  • Primary metric used: {primary_metric}")
+                if best_model_name:
+                    log_message(f"  • Best model: {best_model_name.replace('_', ' ').title()}")
+                    log_message(f"  • Best score: {best_score:.6f}")
+                else:
+                    log_message("  • No models completed successfully", "warning")
                 
-                # Return results to JavaScript in new format
+                log_message("🎉 TRAINING COMPLETED SUCCESSFULLY!")
+                log_message("=" * 50)
+                
+                # Return results to JavaScript with comprehensive logs
                 training_results = {
                     'success': True,
                     'results': model_results,
-                    'job_id': job_data.get('id', 'unknown')
+                    'job_id': job_data.get('id', 'unknown'),
+                    'job_info': {
+                        'id': job_data.get('id', 'unknown'),
+                        'name': job_data.get('name', 'ML Training Job'),
+                        'training_logs': training_logs,
+                        'status': 'completed',
+                        'models_count': len(model_results),
+                        'best_model': best_model_name.replace('_', ' ').title() if best_model_name else None,
+                        'best_score': best_score if best_model_name else None,
+                        'primary_metric': primary_metric
+                    }
                 }
                 
                 js.handleTrainingComplete(json.dumps(training_results))
-                print("✓ Training completed successfully")
+                print("✓ Training completed successfully with comprehensive logs")
                 
             except Exception as e:
                 import traceback
                 error_msg = str(e)
-                print(f"✗ Training failed: {error_msg}")
-                print(f"Traceback: {traceback.format_exc()}")
+                log_message(f"❌ TRAINING FAILED: {error_msg}", "error")
+                log_message(f"📋 Traceback: {traceback.format_exc()}", "error")
+                
                 error_results = {
                     'success': False,
-                    'error': error_msg
+                    'error': error_msg,
+                    'job_id': job_data.get('id', 'error') if 'job_data' in locals() else 'error',
+                    'job_info': {
+                        'id': job_data.get('id', 'error') if 'job_data' in locals() else 'error',
+                        'name': 'Failed Training Job',
+                        'training_logs': training_logs,
+                        'status': 'failed',
+                        'error': error_msg
+                    }
                 }
                 js.handleTrainingComplete(json.dumps(error_results))
         
