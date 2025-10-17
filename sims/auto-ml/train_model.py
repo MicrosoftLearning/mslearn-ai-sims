@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.linear_model import LogisticRegression, LinearRegression, Lasso
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import json
 from datetime import datetime
@@ -24,7 +24,7 @@ def train_ml_models(job_data_json, current_data_dict):
         target_column = job_data['targetColumn']
         task_type = job_data['taskType']
         algorithms = job_data.get('algorithms', [])
-        primary_metric = job_data.get('primaryMetric', 'accuracy' if task_type == 'classification' else 'mae')
+        primary_metric = job_data.get('primaryMetric', 'auc' if task_type == 'classification' else 'mae')
         normalize_features = job_data.get('normalizeFeatures', False)
         categorical_settings = job_data.get('categoricalSettings', {})
         
@@ -121,7 +121,7 @@ def train_ml_models(job_data_json, current_data_dict):
         
         # Train models
         model_results = []
-        best_score = float('-inf') if primary_metric == 'r2' else float('inf')
+        best_score = float('-inf') if primary_metric in ['r2', 'auc', 'accuracy', 'precision', 'recall', 'f1'] else float('inf')
         best_model_name = None
         
         for algo in algorithms:
@@ -183,6 +183,34 @@ def train_ml_models(job_data_json, current_data_dict):
                         except Exception as e:
                             print(f"  Error calculating f1: {e}")
                             metrics['f1'] = 0.0
+                            
+                        try:
+                            # For AUC, we need probabilities, not just predictions
+                            if hasattr(model, 'predict_proba'):
+                                y_prob = model.predict_proba(X_test)
+                                # Handle binary vs multiclass
+                                if len(np.unique(y_test)) == 2:
+                                    # Binary classification - use probability of positive class
+                                    metrics['auc'] = float(roc_auc_score(y_test, y_prob[:, 1]))
+                                else:
+                                    # Multiclass - use one-vs-rest approach
+                                    metrics['auc'] = float(roc_auc_score(y_test, y_prob, multi_class='ovr'))
+                                print(f"  Raw roc_auc_score result: {metrics['auc']}")
+                            elif hasattr(model, 'decision_function'):
+                                # For models like SVM that have decision_function
+                                y_scores = model.decision_function(X_test)
+                                if len(np.unique(y_test)) == 2:
+                                    metrics['auc'] = float(roc_auc_score(y_test, y_scores))
+                                else:
+                                    metrics['auc'] = float(roc_auc_score(y_test, y_scores, multi_class='ovr'))
+                                print(f"  Raw roc_auc_score (decision_function) result: {metrics['auc']}")
+                            else:
+                                # Fallback: use predicted probabilities if available, otherwise skip AUC
+                                print(f"  Model {algo} doesn't support probability prediction, skipping AUC")
+                                metrics['auc'] = 0.5  # Random performance baseline for AUC
+                        except Exception as e:
+                            print(f"  Error calculating AUC: {e}")
+                            metrics['auc'] = 0.5  # Random performance baseline
                     else:
                         # Calculate all regression metrics
                         try:
@@ -222,13 +250,16 @@ def train_ml_models(job_data_json, current_data_dict):
                         print(f"  ⚠️  WARNING: Primary metric '{primary_metric}' not found in calculated metrics!")
                         print(f"  Available metrics: {list(metrics.keys())}")
                         # Use first available metric as fallback
-                        primary_metric = list(metrics.keys())[0] if metrics else 'accuracy'
+                        primary_metric = list(metrics.keys())[0] if metrics else 'auc'
                         print(f"  Using fallback primary metric: {primary_metric}")
                     
                     current_score = metrics[primary_metric]
                     print(f"  🎯 Primary metric '{primary_metric}' value: {current_score:.6f}")
-                    is_better = (primary_metric == 'r2' and current_score > best_score) or \
-                               (primary_metric != 'r2' and current_score < best_score)
+                    # Higher is better for: accuracy, precision, recall, f1, r2, auc
+                    # Lower is better for: mae, mse, rmse
+                    higher_is_better_metrics = ['accuracy', 'precision', 'recall', 'f1', 'r2', 'auc']
+                    is_better = (primary_metric in higher_is_better_metrics and current_score > best_score) or \
+                               (primary_metric not in higher_is_better_metrics and current_score < best_score)
                     
                     if is_better:
                         best_score = current_score
@@ -257,7 +288,7 @@ def train_ml_models(job_data_json, current_data_dict):
         print(f"   Total models trained: {len(model_results)}")
         if model_results:
             print(f"   Primary metric used for comparison: {primary_metric}")
-            print(f"   Best model selection criteria: {'Higher is better' if primary_metric in ['accuracy', 'precision', 'recall', 'f1', 'r2'] else 'Lower is better'}")
+            print(f"   Best model selection criteria: {'Higher is better' if primary_metric in ['accuracy', 'precision', 'recall', 'f1', 'r2', 'auc'] else 'Lower is better'}")
         
         # Mark best model
         for result in model_results:

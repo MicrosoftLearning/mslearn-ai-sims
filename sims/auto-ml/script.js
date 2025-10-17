@@ -23,6 +23,7 @@ let pyScriptReady = false;
 function getMetricDisplayName(metric, taskType) {
     const metricNames = {
         // Classification metrics
+        'auc': 'AUC',
         'accuracy': 'Accuracy',
         'precision': 'Precision',
         'recall': 'Recall',
@@ -34,7 +35,7 @@ function getMetricDisplayName(metric, taskType) {
     };
     
     // Return the display name if found, otherwise use the original value or fallback
-    return metricNames[metric] || metric || (taskType === 'classification' ? 'Accuracy' : 'Mean Absolute Error');
+    return metricNames[metric] || metric || (taskType === 'classification' ? 'AUC' : 'Mean Absolute Error');
 }
 
 // Start PyScript initialization when page loads
@@ -1651,7 +1652,7 @@ function updateTaskType(taskType) {
     
     // Set default configuration based on task type if not already set
     if (!currentJobData.primaryMetric) {
-        currentJobData.primaryMetric = taskType === 'classification' ? 'accuracy' : 'mae';
+        currentJobData.primaryMetric = taskType === 'classification' ? 'auc' : 'mae';
     }
     
     if (!currentJobData.algorithms) {
@@ -1769,11 +1770,11 @@ function populateConfigModal(taskType) {
     
     if (taskType === 'classification') {
         // Classification metrics
-        ['accuracy', 'precision', 'recall', 'f1'].forEach(metric => {
+        ['auc', 'accuracy', 'precision', 'recall', 'f1'].forEach(metric => {
             const option = document.createElement('option');
             option.value = metric;
-            option.textContent = metric.charAt(0).toUpperCase() + metric.slice(1);
-            if (metric === 'accuracy') option.selected = true;
+            option.textContent = metric === 'auc' ? 'AUC' : metric.charAt(0).toUpperCase() + metric.slice(1);
+            if (metric === 'auc') option.selected = true;
             metricSelect.appendChild(option);
         });
         
@@ -1861,7 +1862,7 @@ function updateJobSummary() {
     const summaryDiv = document.getElementById('job-summary');
     
     const config = {
-        primaryMetric: currentJobData.primaryMetric || 'accuracy',
+        primaryMetric: currentJobData.primaryMetric || 'auc',
         algorithms: currentJobData.algorithms || ['logistic_regression', 'decision_tree', 'random_forest'],
         normalizeFeatures: currentJobData.normalizeFeatures || false,
         missingDataStrategy: currentJobData.missingDataStrategy || 'remove',
@@ -1932,7 +1933,7 @@ function submitJob() {
     
     // Set default configuration if not already set in captured data
     if (!capturedJobData.primaryMetric) {
-        capturedJobData.primaryMetric = capturedJobData.taskType === 'classification' ? 'accuracy' : 'mae';
+        capturedJobData.primaryMetric = capturedJobData.taskType === 'classification' ? 'auc' : 'mae';
     }
     if (!capturedJobData.algorithms) {
         capturedJobData.algorithms = capturedJobData.taskType === 'classification' 
@@ -2078,7 +2079,7 @@ function completeTraining(modelResults, jobId) {
         return;
     }
     
-    const primaryMetric = job.primaryMetric || 'accuracy';
+    const primaryMetric = job.primaryMetric || 'auc';
     console.log('Using primary metric for best model selection:', primaryMetric);
     
     // modelResults should be an array from Python
@@ -3399,7 +3400,7 @@ function updateModelsTabContent() {
     
     if (currentJobDetails.status === 'completed' && currentJobDetails.models && currentJobDetails.models.length > 0) {
         // Get the primary metric name for the column header
-        const primaryMetric = currentJobDetails.primaryMetric || 'accuracy';
+        const primaryMetric = currentJobDetails.primaryMetric || 'auc';
         const primaryMetricDisplayName = getMetricDisplayName(primaryMetric, currentJobDetails.taskType);
         
         // Create table structure
@@ -3555,7 +3556,7 @@ function showConfigSettingsModal() {
                 <h4>Training Configuration</h4>
                 <div class="config-item">
                     <label>Primary Metric:</label>
-                    <span>${currentJobDetails.primaryMetric || 'accuracy'}</span>
+                    <span>${currentJobDetails.primaryMetric || 'auc'}</span>
                 </div>
                 <div class="config-item">
                     <label>Algorithms:</label>
