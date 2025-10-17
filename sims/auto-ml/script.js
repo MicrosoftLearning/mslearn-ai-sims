@@ -2039,6 +2039,39 @@ function startTrainingJob(capturedJobData) {
     
     console.log('Starting training job with complete data:', currentJobData);
     
+    // Get the current dataset information for data guardrails
+    let datasetInfo = null;
+    
+    // Debug: Log available data sources
+    console.log('🔍 DEBUG: Looking for dataset info...');
+    console.log('  currentData:', currentData);
+    console.log('  uploadedDataFiles length:', uploadedDataFiles ? uploadedDataFiles.length : 0);
+    
+    // First, try to find the saved dataset that was actually used for this job
+    if (uploadedDataFiles && uploadedDataFiles.length > 0) {
+        // Look for saved datasets (isSaved = true) and use the most recent one
+        const savedDatasets = uploadedDataFiles.filter(f => f.isSaved);
+        if (savedDatasets.length > 0) {
+            datasetInfo = { ...savedDatasets[savedDatasets.length - 1] };
+            console.log('  ✓ Using saved dataset from uploadedDataFiles:', datasetInfo.customName || datasetInfo.filename);
+        } else {
+            // Fallback to the last uploaded file
+            const lastFile = uploadedDataFiles[uploadedDataFiles.length - 1];
+            if (lastFile && (lastFile.preview || lastFile.data || lastFile.columns)) {
+                datasetInfo = { ...lastFile };
+                console.log('  ✓ Using last uploaded file:', lastFile.name || lastFile.filename);
+            }
+        }
+    }
+    
+    // If still no dataset info, try currentData as last resort
+    if (!datasetInfo && currentData && (currentData.preview || currentData.data)) {
+        datasetInfo = { ...currentData };
+        console.log('  ✓ Using currentData as fallback');
+    }
+    
+    console.log('  Final datasetInfo:', datasetInfo);
+
     // Add job to history
     const job = {
         id: Date.now(),
@@ -2049,6 +2082,8 @@ function startTrainingJob(capturedJobData) {
         startTime: new Date(),
         models: [],
         childJobs: [],
+        // Store dataset information for data guardrails
+        datasetInfo: datasetInfo,
         // Store all configuration settings
         primaryMetric: currentJobData.primaryMetric,
         algorithms: currentJobData.algorithms,
@@ -3546,6 +3581,11 @@ function showJobTab(tabName) {
     if (tabName === 'child-jobs' && currentJobDetails) {
         updateChildJobsTabContent();
     }
+    
+    // Update data guardrails tab content if showing data guardrails
+    if (tabName === 'data-guardrails' && currentJobDetails) {
+        updateDataGuardrailsTabContent();
+    }
 }
 
 function updateModelsTabContent() {
@@ -3829,6 +3869,322 @@ function updateChildJobsTabContent() {
         
         tableBody.appendChild(row);
     });
+}
+
+function updateDataGuardrailsTabContent() {
+    const dataGuardrailsTab = document.getElementById('data-guardrails-tab');
+    
+    if (!currentJobDetails) {
+        dataGuardrailsTab.innerHTML = `
+            <div class="tab-content-placeholder">
+                <h4>Data guardrails</h4>
+                <p>No job data available.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Create data guardrails content
+    dataGuardrailsTab.innerHTML = `
+        <div class="data-guardrails-content">
+            <h4>Data guardrails</h4>
+            <div class="guardrails-summary">
+                <p class="guardrails-description">
+                    Data guardrails help ensure your data meets quality standards for machine learning.
+                    Below are the checks performed on your dataset:
+                </p>
+            </div>
+            
+            <div class="guardrails-sections">
+                <div class="guardrail-section">
+                    <h5>Missing Data Analysis</h5>
+                    <div id="missing-data-analysis" class="guardrail-content">
+                    </div>
+                </div>
+                
+                <div class="guardrail-section">
+                    <h5>Data Quality Summary</h5>
+                    <div id="data-quality-summary" class="guardrail-content">
+                    </div>
+                </div>
+                
+                <div class="guardrail-section">
+                    <h5>Configuration Applied</h5>
+                    <div id="configuration-applied" class="guardrail-content">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Populate missing data analysis
+    populateMissingDataAnalysis();
+    
+    // Populate data quality summary
+    populateDataQualitySummary();
+    
+    // Populate configuration applied
+    populateConfigurationApplied();
+}
+
+function populateMissingDataAnalysis() {
+    const analysisDiv = document.getElementById('missing-data-analysis');
+    
+    // Debug: Log what we have available
+    console.log('🔍 Data Guardrails Debug:');
+    console.log('  currentJobDetails:', currentJobDetails);
+    console.log('  currentJobDetails.datasetInfo:', currentJobDetails ? currentJobDetails.datasetInfo : 'N/A');
+    console.log('  uploadedDataFiles length:', uploadedDataFiles ? uploadedDataFiles.length : 0);
+    
+    // Get dataset information from the job
+    let datasetInfo = null;
+    
+    // Try to get dataset info from the current job details
+    if (currentJobDetails && currentJobDetails.datasetInfo) {
+        datasetInfo = currentJobDetails.datasetInfo;
+        console.log('  ✓ Using job datasetInfo');
+    } else if (uploadedDataFiles && uploadedDataFiles.length > 0) {
+        // Fallback to uploaded files
+        const lastFile = uploadedDataFiles[uploadedDataFiles.length - 1];
+        if (lastFile && (lastFile.preview || lastFile.data)) {
+            datasetInfo = lastFile;
+            console.log('  ✓ Using uploadedDataFiles fallback');
+        }
+    }
+    
+    console.log('  Final datasetInfo for analysis:', datasetInfo);
+    
+    if (!datasetInfo || (!datasetInfo.preview && !datasetInfo.data)) {
+        analysisDiv.innerHTML = `
+            <div class="guardrail-item">
+                <div class="guardrail-status warning">
+                    <span class="status-icon">⚠️</span>
+                    <span>Dataset analysis not available</span>
+                </div>
+                <div class="guardrail-details">
+                    <p>Unable to analyze missing data - dataset information not found.</p>
+                    <p><small>Debug info: datasetInfo=${!!datasetInfo}, preview=${!!(datasetInfo && datasetInfo.preview)}, data=${!!(datasetInfo && datasetInfo.data)}</small></p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Analyze missing data from the dataset
+    const data = datasetInfo.preview || datasetInfo.data || [];
+    const columns = datasetInfo.finalColumns || datasetInfo.columns || [];
+    const totalRows = data.length;
+    
+    if (totalRows === 0) {
+        analysisDiv.innerHTML = `
+            <div class="guardrail-item">
+                <div class="guardrail-status error">
+                    <span class="status-icon">❌</span>
+                    <span>Empty dataset</span>
+                </div>
+                <div class="guardrail-details">
+                    <p>The dataset contains no data rows.</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Calculate missing data for each column
+    const missingDataAnalysis = {};
+    let totalMissingValues = 0;
+    
+    columns.forEach(column => {
+        let missingCount = 0;
+        data.forEach(row => {
+            const value = row[column];
+            if (value === null || value === undefined || value === '' || 
+                (typeof value === 'string' && (value.trim() === '' || value.toLowerCase() === 'null' || value.toLowerCase() === 'na' || value === 'NaN'))) {
+                missingCount++;
+            }
+        });
+        
+        missingDataAnalysis[column] = {
+            missingCount: missingCount,
+            missingPercentage: ((missingCount / totalRows) * 100).toFixed(2)
+        };
+        totalMissingValues += missingCount;
+    });
+    
+    // Generate missing data report
+    const columnsWithMissingData = Object.entries(missingDataAnalysis)
+        .filter(([column, analysis]) => analysis.missingCount > 0);
+    
+    let html = '';
+    
+    if (columnsWithMissingData.length === 0) {
+        html = `
+            <div class="guardrail-item">
+                <div class="guardrail-status success">
+                    <span class="status-icon">✅</span>
+                    <span>No missing data detected</span>
+                </div>
+                <div class="guardrail-details">
+                    <p>All ${columns.length} columns have complete data across ${totalRows} rows.</p>
+                </div>
+            </div>
+        `;
+    } else {
+        const overallMissingPercentage = ((totalMissingValues / (totalRows * columns.length)) * 100).toFixed(2);
+        
+        html = `
+            <div class="guardrail-item">
+                <div class="guardrail-status ${overallMissingPercentage > 20 ? 'error' : overallMissingPercentage > 5 ? 'warning' : 'info'}">
+                    <span class="status-icon">${overallMissingPercentage > 20 ? '❌' : overallMissingPercentage > 5 ? '⚠️' : 'ℹ️'}</span>
+                    <span>Missing data found in ${columnsWithMissingData.length} column(s)</span>
+                </div>
+                <div class="guardrail-details">
+                    <p><strong>Overall missing data:</strong> ${overallMissingPercentage}% of all values</p>
+                    <div class="missing-data-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Missing Count</th>
+                                    <th>Missing %</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+        `;
+        
+        columnsWithMissingData.forEach(([column, analysis]) => {
+            const percentage = parseFloat(analysis.missingPercentage);
+            const statusClass = percentage > 50 ? 'error' : percentage > 20 ? 'warning' : 'info';
+            const statusText = percentage > 50 ? 'High' : percentage > 20 ? 'Medium' : 'Low';
+            
+            html += `
+                <tr>
+                    <td><code>${column}</code></td>
+                    <td>${analysis.missingCount} / ${totalRows}</td>
+                    <td>${analysis.missingPercentage}%</td>
+                    <td><span class="missing-status ${statusClass}">${statusText}</span></td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    analysisDiv.innerHTML = html;
+}
+
+function populateDataQualitySummary() {
+    const summaryDiv = document.getElementById('data-quality-summary');
+    
+    // Get dataset information from the current job details
+    let datasetInfo = null;
+    if (currentJobDetails && currentJobDetails.datasetInfo) {
+        datasetInfo = currentJobDetails.datasetInfo;
+    } else if (uploadedDataFiles && uploadedDataFiles.length > 0) {
+        // Fallback to uploaded files
+        const lastFile = uploadedDataFiles[uploadedDataFiles.length - 1];
+        if (lastFile && lastFile.data) {
+            datasetInfo = lastFile;
+        }
+    }
+    
+    if (!datasetInfo) {
+        summaryDiv.innerHTML = `
+            <div class="guardrail-item">
+                <div class="guardrail-status info">
+                    <span class="status-icon">ℹ️</span>
+                    <span>Dataset summary not available</span>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    const data = datasetInfo ? (datasetInfo.preview || datasetInfo.data || []) : [];
+    const columns = datasetInfo ? (datasetInfo.finalColumns || datasetInfo.columns || []) : [];
+    const totalRows = data.length;
+    const totalColumns = columns.length;
+    const targetColumn = currentJobDetails.targetColumn;
+    
+    summaryDiv.innerHTML = `
+        <div class="guardrail-item">
+            <div class="guardrail-status success">
+                <span class="status-icon">📊</span>
+                <span>Dataset Overview</span>
+            </div>
+            <div class="guardrail-details">
+                <div class="data-summary-grid">
+                    <div class="summary-item">
+                        <strong>Total Rows:</strong> ${totalRows.toLocaleString()}
+                    </div>
+                    <div class="summary-item">
+                        <strong>Total Columns:</strong> ${totalColumns}
+                    </div>
+                    <div class="summary-item">
+                        <strong>Target Column:</strong> <code>${targetColumn || 'Not specified'}</code>
+                    </div>
+                    <div class="summary-item">
+                        <strong>Task Type:</strong> ${currentJobDetails.taskType || 'Not specified'}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function populateConfigurationApplied() {
+    const configDiv = document.getElementById('configuration-applied');
+    
+    const missingDataStrategy = currentJobDetails.missingDataStrategy || 'remove';
+    const normalizeFeatures = currentJobDetails.normalizeFeatures || false;
+    
+    configDiv.innerHTML = `
+        <div class="guardrail-item">
+            <div class="guardrail-status info">
+                <span class="status-icon">⚙️</span>
+                <span>Data Processing Configuration</span>
+            </div>
+            <div class="guardrail-details">
+                <div class="config-list">
+                    <div class="config-item">
+                        <strong>Missing Data Strategy:</strong> 
+                        <span class="config-value">
+                            ${missingDataStrategy === 'remove' ? 'Remove rows with missing values' : 'Fill missing values (imputation)'}
+                        </span>
+                    </div>
+                    <div class="config-item">
+                        <strong>Feature Normalization:</strong> 
+                        <span class="config-value">${normalizeFeatures ? 'Enabled' : 'Disabled'}</span>
+                    </div>
+                    <div class="config-item">
+                        <strong>Primary Metric:</strong> 
+                        <span class="config-value">${currentJobDetails.primaryMetric || 'Default'}</span>
+                    </div>
+                </div>
+                
+                <div class="config-recommendations">
+                    <h6>Recommendations:</h6>
+                    <ul>
+                        ${missingDataStrategy === 'remove' ? 
+                            '<li>Removing rows with missing values may reduce dataset size. Consider imputation if missing data is significant.</li>' :
+                            '<li>Imputation strategy will fill missing values. Ensure this aligns with your data characteristics.</li>'
+                        }
+                        ${normalizeFeatures ? 
+                            '<li>Feature normalization is enabled, which is recommended for most algorithms.</li>' :
+                            '<li>Consider enabling feature normalization for better model performance with algorithms sensitive to scale.</li>'
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function navigateToAutoML() {

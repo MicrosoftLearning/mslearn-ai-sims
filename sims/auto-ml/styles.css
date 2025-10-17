@@ -3518,3 +3518,234 @@ button:disabled {
     font-size: 48px;
     margin-bottom: 16px;
 }
+
+/* Data Guardrails Styles */
+.data-guardrails-content {
+    padding: 24px;
+}
+
+.data-guardrails-content h4 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #323130;
+}
+
+.guardrails-summary {
+    margin-bottom: 24px;
+    padding: 16px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #0078d4;
+}
+
+.guardrails-description {
+    margin: 0;
+    color: #605e5c;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.guardrails-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.guardrail-section {
+    background-color: white;
+    border: 1px solid #edebe9;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.guardrail-section h5 {
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #323130;
+    border-bottom: 1px solid #edebe9;
+}
+
+.guardrail-content {
+    padding: 20px;
+}
+
+.guardrail-item {
+    margin-bottom: 16px;
+}
+
+.guardrail-item:last-child {
+    margin-bottom: 0;
+}
+
+.guardrail-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.guardrail-status.success {
+    color: #107c10;
+}
+
+.guardrail-status.warning {
+    color: #ff8c00;
+}
+
+.guardrail-status.error {
+    color: #d13438;
+}
+
+.guardrail-status.info {
+    color: #0078d4;
+}
+
+.status-icon {
+    font-size: 16px;
+}
+
+.guardrail-details {
+    padding-left: 24px;
+    color: #605e5c;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.missing-data-table {
+    margin-top: 12px;
+    overflow-x: auto;
+}
+
+.missing-data-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.missing-data-table th,
+.missing-data-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #edebe9;
+}
+
+.missing-data-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #323130;
+}
+
+.missing-data-table code {
+    background-color: #f3f2f1;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 12px;
+}
+
+.missing-status {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.missing-status.success {
+    background-color: #dff6dd;
+    color: #107c10;
+}
+
+.missing-status.warning {
+    background-color: #fff4ce;
+    color: #ff8c00;
+}
+
+.missing-status.error {
+    background-color: #fed9d7;
+    color: #d13438;
+}
+
+.missing-status.info {
+    background-color: #deecf9;
+    color: #0078d4;
+}
+
+.data-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.summary-item {
+    padding: 12px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #edebe9;
+}
+
+.summary-item strong {
+    color: #323130;
+}
+
+.summary-item code {
+    background-color: #f3f2f1;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 12px;
+}
+
+.config-list {
+    margin-top: 12px;
+}
+
+.config-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f2f1;
+}
+
+.config-item:last-child {
+    border-bottom: none;
+}
+
+.config-value {
+    font-weight: 500;
+    color: #323130;
+}
+
+.config-recommendations {
+    margin-top: 16px;
+    padding: 12px;
+    background-color: #fff4ce;
+    border-radius: 6px;
+    border: 1px solid #ffb900;
+}
+
+.config-recommendations h6 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #323130;
+}
+
+.config-recommendations ul {
+    margin: 0;
+    padding-left: 16px;
+}
+
+.config-recommendations li {
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: #605e5c;
+}

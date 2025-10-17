@@ -1047,6 +1047,7 @@
             from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
             from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
             from sklearn.metrics import roc_auc_score
+            from sklearn.impute import SimpleImputer
             
             # Initialize comprehensive logging system
             training_logs = []
@@ -1138,6 +1139,63 @@
                         le = LabelEncoder()
                         X[col] = le.fit_transform(X[col].astype(str))
                         log_message(f"  • Auto-encoded categorical column: '{col}'")
+                
+                # Handle missing data based on strategy
+                missing_data_strategy = job_data.get('missingDataStrategy', 'remove')
+                log_message(f"🧹 Handling missing data (strategy: {missing_data_strategy})...")
+                
+                # Check for missing values
+                missing_count_before = X.isna().sum().sum()
+                missing_rows_before = X.isna().any(axis=1).sum()
+                log_message(f"  • Missing values found: {missing_count_before} total, {missing_rows_before} rows affected")
+                
+                if missing_count_before > 0:
+                    if missing_data_strategy == 'remove':
+                        # Remove rows with any missing values
+                        original_shape = X.shape
+                        mask = ~X.isna().any(axis=1)
+                        X_clean = X[mask].copy()
+                        y_clean = y[mask].copy()
+                        
+                        rows_removed = original_shape[0] - X_clean.shape[0]
+                        log_message(f"  • Removed {rows_removed} rows with missing values")
+                        log_message(f"  • Dataset shape: {original_shape[0]} → {X_clean.shape[0]} rows ({X_clean.shape[1]} columns)")
+                        
+                        # Verify no missing values remain
+                        remaining_missing = X_clean.isna().sum().sum()
+                        if remaining_missing == 0:
+                            log_message(f"  ✅ All missing values removed successfully")
+                        else:
+                            log_message(f"  ⚠️ Warning: {remaining_missing} missing values still remain")
+                        
+                        X, y = X_clean, y_clean
+                        
+                    elif missing_data_strategy == 'impute':
+                        # Fill missing values (mean for numeric, mode for categorical)
+                        from sklearn.impute import SimpleImputer
+                        log_message(f"  • Applying imputation strategy...")
+                        
+                        # Separate numeric and categorical columns
+                        numeric_columns = X.select_dtypes(include=[np.number]).columns
+                        categorical_columns = X.select_dtypes(exclude=[np.number]).columns
+                        
+                        if len(numeric_columns) > 0:
+                            imputer_numeric = SimpleImputer(strategy='mean')
+                            X[numeric_columns] = imputer_numeric.fit_transform(X[numeric_columns])
+                            log_message(f"    - Imputed {len(numeric_columns)} numeric columns with mean")
+                        
+                        if len(categorical_columns) > 0:
+                            imputer_categorical = SimpleImputer(strategy='most_frequent')
+                            X[categorical_columns] = imputer_categorical.fit_transform(X[categorical_columns])
+                            log_message(f"    - Imputed {len(categorical_columns)} categorical columns with mode")
+                        
+                        remaining_missing = X.isna().sum().sum()
+                        if remaining_missing == 0:
+                            log_message(f"  ✅ All missing values imputed successfully")
+                        else:
+                            log_message(f"  ⚠️ Warning: {remaining_missing} missing values still remain")
+                else:
+                    log_message(f"  ✅ No missing values found - no action needed")
                 
                 # Create dynamic random state based on job ID and settings
                 job_id = job_data.get('id', 1)
