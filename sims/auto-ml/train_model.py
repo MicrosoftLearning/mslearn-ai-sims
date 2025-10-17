@@ -9,6 +9,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import json
+from datetime import datetime
 
 def train_ml_models(job_data_json, current_data_dict):
     """Train machine learning models based on job configuration"""
@@ -26,6 +27,18 @@ def train_ml_models(job_data_json, current_data_dict):
         primary_metric = job_data.get('primaryMetric', 'accuracy' if task_type == 'classification' else 'mae')
         normalize_features = job_data.get('normalizeFeatures', False)
         categorical_settings = job_data.get('categoricalSettings', {})
+        
+        # Debug: Log all job settings
+        print(f"🔍 JOB CONFIGURATION DEBUG:")
+        print(f"  Target column: {target_column}")
+        print(f"  Task type: {task_type}")
+        print(f"  Algorithms: {algorithms}")
+        print(f"  Primary metric: {primary_metric}")
+        print(f"  Normalize features: {normalize_features}")
+        print(f"  Categorical settings: {categorical_settings}")
+        print(f"  Full job data keys: {list(job_data.keys())}")
+        print(f"  DataFrame shape: {df.shape}")
+        print(f"  DataFrame columns: {list(df.columns)}")
         
         # Prepare features and target
         X = df.drop(columns=[target_column])
@@ -47,8 +60,14 @@ def train_ml_models(job_data_json, current_data_dict):
                 le = LabelEncoder()
                 X[col] = le.fit_transform(X[col].astype(str))
         
+        # Create dynamic random state based on job ID and settings to ensure different results
+        job_id = job_data.get('id', 1)
+        settings_hash = hash(str(normalize_features) + str(categorical_settings) + str(algorithms))
+        random_state = abs((job_id + settings_hash) % 10000)
+        print(f"🎲 Using random state: {random_state} (based on job {job_id} and settings)")
+        
         # Split data
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=random_state)
         
         print(f"📈 Training data shape: X_train={X_train.shape}, y_train={y_train.shape}")
         print(f"📊 Test data shape: X_test={X_test.shape}, y_test={y_test.shape}")
@@ -56,21 +75,30 @@ def train_ml_models(job_data_json, current_data_dict):
         print(f"🔧 Task type: {task_type}, Primary metric: {primary_metric}")
         print(f"⚙️  Selected algorithms: {algorithms}")
         
+        # Show sample data before normalization
+        print(f"📊 Sample X_train data (first 3 rows, first 3 columns):")
+        print(f"   Before: {X_train.iloc[:3, :3].values.tolist()}")
+        if len(X_train.columns) > 0:
+            print(f"   Column '{X_train.columns[0]}' stats: mean={X_train.iloc[:, 0].mean():.4f}, std={X_train.iloc[:, 0].std():.4f}")
+        
         # Normalize features if requested
         if normalize_features:
             print("🔄 Applying feature normalization...")
             scaler = StandardScaler()
-            X_train = scaler.fit_transform(X_train)
-            X_test = scaler.transform(X_test)
+            X_train = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns, index=X_train.index)
+            X_test = pd.DataFrame(scaler.transform(X_test), columns=X_test.columns, index=X_test.index)
+            print(f"   After normalization: {X_train.iloc[:3, :3].values.tolist()}")
+            if len(X_train.columns) > 0:
+                print(f"   Column '{X_train.columns[0]}' stats: mean={X_train.iloc[:, 0].mean():.4f}, std={X_train.iloc[:, 0].std():.4f}")
         else:
             print("➡️  No feature normalization applied")
         
-        # Define models based on task type
+        # Define models based on task type (using dynamic random state)
         if task_type == 'classification':
             model_map = {
-                'logistic_regression': LogisticRegression(random_state=42, max_iter=1000),
-                'decision_tree': DecisionTreeClassifier(random_state=42),
-                'random_forest': RandomForestClassifier(random_state=42, n_estimators=10)
+                'logistic_regression': LogisticRegression(random_state=random_state, max_iter=1000),
+                'decision_tree': DecisionTreeClassifier(random_state=random_state),
+                'random_forest': RandomForestClassifier(random_state=random_state, n_estimators=10)
             }
             metric_funcs = {
                 'accuracy': accuracy_score,
@@ -81,9 +109,9 @@ def train_ml_models(job_data_json, current_data_dict):
         else:
             model_map = {
                 'linear_regression': LinearRegression(),
-                'lasso': Lasso(random_state=42),
-                'decision_tree': DecisionTreeRegressor(random_state=42),
-                'random_forest': RandomForestRegressor(random_state=42, n_estimators=10)
+                'lasso': Lasso(random_state=random_state),
+                'decision_tree': DecisionTreeRegressor(random_state=random_state),
+                'random_forest': RandomForestRegressor(random_state=random_state, n_estimators=10)
             }
             metric_funcs = {
                 'mae': mean_absolute_error,
@@ -211,6 +239,8 @@ def train_ml_models(job_data_json, current_data_dict):
                         'name': algo,
                         'display_name': algo.replace('_', ' ').title(),
                         'metrics': metrics,
+                        'primary_score': current_score,
+                        'created_at': datetime.now().isoformat(),
                         'is_best': False  # Will be updated later
                     })
                     

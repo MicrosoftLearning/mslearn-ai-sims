@@ -1,4 +1,4 @@
-// Global variables - Updated: 2025-10-16 09:25:00 - Fixed initializePyScript error
+// Global variables - Updated: 2025-10-16 15:40:00 - Fixed PyScript to use proper training with ALL metrics
 let currentStep = 1;
 let maxSteps = 4;
 let uploadedFiles = [];
@@ -82,6 +82,169 @@ function toggleSidebar() {
 }
 
 // Page Navigation
+function showMyAccountPage() {
+    // Hide all pages and show ML App page
+    document.querySelectorAll('.page-content').forEach(page => page.style.display = 'none');
+    document.getElementById('my-account-page').style.display = 'block';
+    
+    // Update navigation active state
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.querySelector('.nav-item[onclick="showMyAccountPage()"]').classList.add('active');
+}
+
+function createWorkspace() {
+    // Show the create workspace flyout panel
+    document.getElementById('create-workspace-flyout').classList.add('active');
+    
+    // Set up input validation for the Create button
+    const nameInput = document.getElementById('workspace-name');
+    const createButton = document.querySelector('.flyout-actions .btn-primary');
+    
+    // Initially disable the Create button
+    createButton.disabled = true;
+    createButton.classList.add('disabled');
+    
+    // Add input listener to enable/disable Create button
+    const validateInput = () => {
+        if (nameInput.value.trim()) {
+            createButton.disabled = false;
+            createButton.classList.remove('disabled');
+        } else {
+            createButton.disabled = true;
+            createButton.classList.add('disabled');
+        }
+    };
+    
+    // Remove existing listeners to avoid duplicates
+    nameInput.removeEventListener('input', validateInput);
+    nameInput.addEventListener('input', validateInput);
+    
+    // Initial validation
+    validateInput();
+    
+    // Focus the name input after a short delay to ensure the flyout is visible
+    setTimeout(() => {
+        nameInput.focus();
+    }, 100);
+}
+
+function closeCreateWorkspaceFlyout() {
+    // Hide the create workspace flyout panel
+    document.getElementById('create-workspace-flyout').classList.remove('active');
+    
+    // Reset the form
+    document.getElementById('workspace-name').value = '';
+    document.getElementById('resource-group').value = 'ResourceGroup1';
+    
+    // Re-disable the Create button
+    const createButton = document.querySelector('.flyout-actions .btn-primary');
+    createButton.disabled = true;
+    createButton.classList.add('disabled');
+}
+
+function createNewWorkspace() {
+    // Get the form values
+    const workspaceName = document.getElementById('workspace-name').value;
+    const resourceGroup = document.getElementById('resource-group').value;
+    
+    // Basic validation (should not be needed due to button being disabled)
+    if (!workspaceName.trim()) {
+        return;
+    }
+    
+    // Simulate workspace creation
+    console.log('Creating workspace:', { name: workspaceName, resourceGroup: resourceGroup });
+    
+    // Create workspace button in the workspaces list
+    addWorkspaceButton(workspaceName);
+    
+    // Close the flyout
+    closeCreateWorkspaceFlyout();
+    
+    // Clear the form for next use
+    document.getElementById('workspace-name').value = '';
+    document.getElementById('resource-group').value = 'ResourceGroup1';
+    
+    // Stay on the ML App page (no navigation needed)
+}
+
+function addWorkspaceButton(workspaceName) {
+    // Get the workspaces list container
+    const workspacesList = document.getElementById('workspaces-list');
+    
+    // Create the workspace button
+    const workspaceButton = document.createElement('button');
+    workspaceButton.className = 'workspace-button';
+    workspaceButton.textContent = workspaceName;
+    workspaceButton.onclick = function() {
+        // Set the current workspace and navigate to Home page
+        setCurrentWorkspace(workspaceName);
+        showHomePage();
+    };
+    
+    // Add the button to the workspaces list
+    workspacesList.appendChild(workspaceButton);
+    
+    // Show navigation items after first workspace is created
+    showNavigationAfterWorkspaceCreated();
+}
+
+function setCurrentWorkspace(workspaceName) {
+    // Store the current workspace name
+    window.currentWorkspaceName = workspaceName;
+    
+    // Update the workspace title on the Home page
+    const workspaceTitle = document.getElementById('workspace-title');
+    if (workspaceTitle) {
+        workspaceTitle.textContent = workspaceName;
+    }
+}
+
+function hideNavigationUntilWorkspaceCreated() {
+    // Hide Home section
+    const homeSection = document.querySelector('.nav-item[onclick="showHomePage()"]').parentElement;
+    homeSection.style.display = 'none';
+    
+    // Hide Authoring section
+    const authoringSection = document.querySelector('h3').parentElement;
+    if (authoringSection && authoringSection.querySelector('h3').textContent === 'Authoring') {
+        authoringSection.style.display = 'none';
+    }
+    
+    // Hide Assets section
+    const assetsSections = document.querySelectorAll('.nav-section h3');
+    assetsSections.forEach(section => {
+        if (section.textContent === 'Assets') {
+            section.parentElement.style.display = 'none';
+        }
+    });
+}
+
+function showNavigationAfterWorkspaceCreated() {
+    // Show only Home section initially
+    const homeSection = document.querySelector('.nav-item[onclick="showHomePage()"]').parentElement;
+    homeSection.style.display = 'block';
+    
+    // Keep Authoring and Assets sections hidden until user visits Home page
+    // They will be shown by showFullNavigationOnHome() when user navigates to Home
+}
+
+function showFullNavigationOnHome() {
+    // Show Authoring section
+    const authoringSection = document.querySelector('h3').parentElement;
+    if (authoringSection && authoringSection.querySelector('h3').textContent === 'Authoring') {
+        authoringSection.style.display = 'block';
+    }
+    
+    // Show Assets section
+    const assetsSections = document.querySelectorAll('.nav-section h3');
+    assetsSections.forEach(section => {
+        if (section.textContent === 'Assets') {
+            section.parentElement.style.display = 'block';
+        }
+    });
+}
+
 function showHomePage() {
     // Hide all pages and show Home page
     document.querySelectorAll('.page-content').forEach(page => page.style.display = 'none');
@@ -90,6 +253,17 @@ function showHomePage() {
     // Update navigation active state
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     document.querySelector('.nav-item[onclick="showHomePage()"]').classList.add('active');
+    
+    // Update workspace title if a workspace is selected
+    if (window.currentWorkspaceName) {
+        const workspaceTitle = document.getElementById('workspace-title');
+        if (workspaceTitle) {
+            workspaceTitle.textContent = window.currentWorkspaceName;
+        }
+    }
+    
+    // Show full navigation when user visits Home page
+    showFullNavigationOnHome();
 }
 
 function showAutoMLPage() {
@@ -1639,6 +1813,11 @@ function trainModels(job) {
         console.log('Starting PyScript ML training with real algorithms...');
         console.log('Training job data:', jobDataForPython);
         console.log('Current job data state:', currentJobData);
+        console.log('🔍 CRITICAL SETTINGS CHECK:');
+        console.log('  normalizeFeatures:', jobDataForPython.normalizeFeatures);
+        console.log('  algorithms:', jobDataForPython.algorithms);
+        console.log('  primaryMetric:', jobDataForPython.primaryMetric);
+        console.log('  categoricalSettings:', jobDataForPython.categoricalSettings);
 
         // Apply custom headers to PyScript DataFrame if needed
         if (currentData && currentData.usingCustomHeaders && currentData.customHeaders) {
@@ -1692,12 +1871,28 @@ function completeTraining(modelResults, jobId) {
     
     if (Array.isArray(modelResults)) {
         // Results come directly from Python as array
-        modelArray = modelResults.map(result => ({
-            name: result.display_name || result.name,
-            primary_score: result.metrics[primaryMetric] ? result.metrics[primaryMetric].toFixed(4) : '0.0000',
-            metrics: result.metrics,
-            is_best: result.is_best || false
-        }));
+        console.log('🔍 DEBUG: Raw model results from Python:', modelResults);
+        
+        modelArray = modelResults.map(result => {
+            const pythonPrimaryScore = result.primary_score;
+            const calculatedScore = result.metrics[primaryMetric] ? result.metrics[primaryMetric].toFixed(4) : '0.0000';
+            const finalScore = pythonPrimaryScore || calculatedScore;
+            
+            console.log(`🔍 DEBUG: Model ${result.name}:`);
+            console.log(`  - Python primary_score: ${pythonPrimaryScore}`);
+            console.log(`  - Calculated score: ${calculatedScore}`);
+            console.log(`  - Final score used: ${finalScore}`);
+            console.log(`  - Primary metric '${primaryMetric}' from metrics:`, result.metrics[primaryMetric]);
+            console.log(`  - All metrics:`, result.metrics);
+            
+            return {
+                name: result.display_name || result.name,
+                primary_score: finalScore,
+                metrics: result.metrics,
+                is_best: result.is_best || false,
+                created_at: result.created_at || new Date().toISOString()
+            };
+        });
     } else if (typeof modelResults === 'object') {
         // Handle legacy format (object) - convert object to array and find best model
         let bestScore = -1;
@@ -1714,7 +1909,8 @@ function completeTraining(modelResults, jobId) {
                 name: modelName,
                 primary_score: score.toFixed(4),
                 metrics: metrics,
-                is_best: false // Will be set below
+                is_best: false, // Will be set below
+                created_at: new Date().toISOString() // Add timestamp for legacy format
             });
         });
         
@@ -2462,8 +2658,10 @@ window.onclick = function(event) {
 // Initialize app
 document.addEventListener('DOMContentLoaded', function() {
     updateJobsList();
-    // Show AutoML page by default
-    showAutoMLPage();
+    // Show ML App page by default
+    showMyAccountPage();
+    // Hide other navigation items initially
+    hideNavigationUntilWorkspaceCreated();
     // Initialize PyScript status checking (this might be called twice, but that's safe)
     disableNewJobButton();
     // Update initial status with specific message
@@ -2896,13 +3094,21 @@ function updateBestModelSection(job) {
             // Get the proper display name for the primary metric
             const primaryMetricDisplay = getMetricDisplayName(job.primaryMetric, job.taskType);
             
+            console.log('🔍 DEBUG: Best model display values:');
+            console.log('  - Primary metric:', job.primaryMetric);
+            console.log('  - Primary metric display name:', primaryMetricDisplay);
+            console.log('  - Best model name:', bestModel.name);
+            console.log('  - Best model primary_score:', bestModel.primary_score);
+            console.log('  - Best model metrics:', bestModel.metrics);
+            console.log('  - Direct metric value:', bestModel.metrics[job.primaryMetric]);
+            
             bestModelContent.innerHTML = `
                 <div class="best-model-display">
                     <div class="best-model-header">
                         <span class="best-model-badge">Best Model</span>
                     </div>
                     <div class="best-model-algorithm">Algorithm name: ${bestModel.name}</div>
-                    <div class="best-model-score">${bestModel.primary_score}</div>
+                    <div class="best-model-score">${bestModel.primary_score.toFixed(4)}</div>
                     <div class="best-model-metric">Primary metric: ${primaryMetricDisplay}</div>
                 </div>
             `;
@@ -2977,23 +3183,65 @@ function updateModelsTabContent() {
     const modelsResults = document.getElementById('job-model-results');
     
     if (currentJobDetails.status === 'completed' && currentJobDetails.models && currentJobDetails.models.length > 0) {
-        modelsResults.innerHTML = '';
+        // Get the primary metric name for the column header
+        const primaryMetric = currentJobDetails.primaryMetric || 'accuracy';
+        const primaryMetricDisplayName = getMetricDisplayName(primaryMetric, currentJobDetails.taskType);
+        
+        // Create table structure
+        modelsResults.innerHTML = `
+            <div class="models-table-container">
+                <table class="models-table">
+                    <thead>
+                        <tr>
+                            <th>Algorithm</th>
+                            <th>${primaryMetricDisplayName}</th>
+                            <th>Created on</th>
+                        </tr>
+                    </thead>
+                    <tbody id="models-table-body">
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        const tableBody = document.getElementById('models-table-body');
         
         currentJobDetails.models.forEach(model => {
-            const modelDiv = document.createElement('div');
-            modelDiv.className = `model-result ${model.is_best ? 'best-model' : ''}`;
+            const row = document.createElement('tr');
+            row.className = model.is_best ? 'best-model-row' : '';
             
-            modelDiv.innerHTML = `
-                <div class="model-header">
-                    <span class="model-name">${model.name}${model.is_best ? ' (Best Model)' : ''}</span>
-                    <span class="model-score">${model.primary_score}</span>
-                </div>
-                <div class="model-info">
-                    Accuracy: ${model.metrics.accuracy ? model.metrics.accuracy.toFixed(4) : 'N/A'}
-                </div>
+            // Get the primary metric value
+            const primaryMetricValue = model.primary_score || model.metrics[primaryMetric] || 'N/A';
+            const formattedValue = typeof primaryMetricValue === 'number' ? primaryMetricValue.toFixed(4) : primaryMetricValue;
+            
+            // Format the created date
+            let createdDate = 'N/A';
+            console.log('Model data for', model.name, ':', model); // Debug log
+            console.log('Created at value:', model.created_at); // Debug log
+            
+            if (model.created_at) {
+                try {
+                    const date = new Date(model.created_at);
+                    console.log('Parsed date:', date); // Debug log
+                    createdDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+                } catch (e) {
+                    console.error('Error parsing date:', e); // Debug log
+                    createdDate = 'N/A';
+                }
+            } else {
+                console.log('No created_at field found for model:', model.name); // Debug log
+            }
+            
+            row.innerHTML = `
+                <td class="algorithm-cell">
+                    <span class="algorithm-name">${model.display_name || model.name}</span>
+                    ${model.is_best ? '<span class="best-model-badge">Best Model</span>' : ''}
+                </td>
+                <td class="metric-cell">${formattedValue}</td>
+                <td class="created-cell">${createdDate}</td>
             `;
             
-            modelsResults.appendChild(modelDiv);
+            tableBody.appendChild(row);
         });
     } else if (currentJobDetails.status === 'running') {
         modelsResults.innerHTML = '<div class="no-data-message"><span class="no-data-icon">⏳</span><span>Training in progress...</span></div>';
@@ -3012,15 +3260,7 @@ function navigateToAutoML() {
 
 // Job action functions (placeholder implementations)
 function refreshJob() {
-    if (currentJobDetails) {
-        // Find the job in jobHistory and update the display
-        const job = jobHistory.find(j => j.id === currentJobDetails.id);
-        if (job) {
-            currentJobDetails = job;
-            updateJobDetailsContent(job);
-            console.log('Job refreshed:', job);
-        }
-    }
+    // Do nothing - refresh functionality disabled
 }
 
 function editAndResubmit() {
@@ -3067,9 +3307,96 @@ function compareModels() {
 
 function viewConfigSettings() {
     if (currentJobDetails) {
-        alert('Configuration settings view will be implemented in a future version.');
+        showConfigSettingsModal();
     }
 }
+
+function showConfigSettingsModal() {
+    const flyout = document.getElementById('config-settings-flyout');
+    const overlay = document.getElementById('flyout-overlay');
+    const content = document.getElementById('config-settings-content');
+    
+    if (flyout && overlay && content && currentJobDetails) {
+        // Get configuration from the job details directly (not from a nested config object)
+        
+        content.innerHTML = `
+            <div class="config-section">
+                <h4>Job Information</h4>
+                <div class="config-item">
+                    <label>Job Name:</label>
+                    <span>${currentJobDetails.name || 'N/A'}</span>
+                </div>
+                <div class="config-item">
+                    <label>Task Type:</label>
+                    <span>${currentJobDetails.taskType || 'N/A'}</span>
+                </div>
+                <div class="config-item">
+                    <label>Target Column:</label>
+                    <span>${currentJobDetails.targetColumn || 'N/A'}</span>
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <h4>Training Configuration</h4>
+                <div class="config-item">
+                    <label>Primary Metric:</label>
+                    <span>${currentJobDetails.primaryMetric || 'accuracy'}</span>
+                </div>
+                <div class="config-item">
+                    <label>Algorithms:</label>
+                    <span>${currentJobDetails.algorithms ? currentJobDetails.algorithms.join(', ') : 'logistic_regression, decision_tree, random_forest'}</span>
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <h4>Featurization Settings</h4>
+                <div class="config-item">
+                    <label>Normalize Features:</label>
+                    <span>${currentJobDetails.normalizeFeatures ? 'Yes' : 'No'}</span>
+                </div>
+                <div class="config-item">
+                    <label>Missing Data Strategy:</label>
+                    <span>${currentJobDetails.missingDataStrategy === 'remove' ? 'Remove rows with missing values' : 'Fill missing values (mean for numeric, most frequent for categorical)'}</span>
+                </div>
+                ${currentJobDetails.categoricalSettings && Object.keys(currentJobDetails.categoricalSettings).length > 0 ? `
+                <div class="config-item">
+                    <label>Categorical Column Settings:</label>
+                    <div class="categorical-settings">
+                        ${Object.entries(currentJobDetails.categoricalSettings).map(([column, action]) => 
+                            `<div class="categorical-item">${column}: ${action}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+        `;
+        
+        // Show overlay and flyout
+        overlay.classList.add('show');
+        flyout.classList.add('open');
+    }
+}
+
+function closeConfigSettingsModal() {
+    const flyout = document.getElementById('config-settings-flyout');
+    const overlay = document.getElementById('flyout-overlay');
+    
+    if (flyout && overlay) {
+        flyout.classList.remove('open');
+        overlay.classList.remove('show');
+    }
+}
+
+// Close flyout when clicking outside of it (handled by overlay click)
+// No need for window click listener since we have the overlay
+
+// Close flyout when pressing Escape
+window.addEventListener('keydown', function(event) {
+    const flyout = document.getElementById('config-settings-flyout');
+    if (event.key === 'Escape' && flyout && flyout.classList.contains('open')) {
+        closeConfigSettingsModal();
+    }
+});
 
 function copyToClipboard(elementId) {
     const element = document.getElementById(elementId);
