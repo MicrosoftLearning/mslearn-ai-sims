@@ -398,16 +398,28 @@ function resetWizard() {
     document.getElementById('target-column-group').style.display = 'none';
     document.getElementById('job-description').value = '';
     
+    // Clear dataset name if it exists
+    const datasetNameInput = document.getElementById('dataset-name');
+    if (datasetNameInput) {
+        datasetNameInput.value = '';
+    }
+    
+    // Clear any error messages
+    const errorDiv = document.getElementById('dataset-name-error');
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+    }
+    
     currentJobData = {};
     currentData = null;
     currentTarget = null;
     
-    // Reset data source selection to upload
-    document.getElementById('data-source-upload').checked = true;
-    selectDataSource('upload');
+    // Hide file upload group initially
+    document.getElementById('file-upload-group').style.display = 'none';
     
-    // Populate existing datasets dropdown for when user switches to it
-    populateExistingDatasets();
+    // Populate dataset list
+    populateDatasetList();
 }
 
 // Data source selection functions
@@ -530,6 +542,124 @@ function displayExistingDatasetInfo(dataset) {
     uploadedFilesDiv.innerHTML = fileDisplay;
 }
 
+// New dataset list management functions
+function showCreateDatasetInterface() {
+    console.log('Showing create dataset interface');
+    // Show the file upload group
+    document.getElementById('file-upload-group').style.display = 'block';
+    
+    // Clear previous values
+    document.getElementById('dataset-name').value = '';
+    document.getElementById('data-file').value = '';
+    document.getElementById('uploaded-files').innerHTML = '';
+    
+    // Hide any previous error messages
+    const errorDiv = document.getElementById('dataset-name-error');
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+}
+
+function validateDatasetName() {
+    const nameInput = document.getElementById('dataset-name');
+    const datasetName = nameInput.value.trim();
+    const errorDiv = document.getElementById('dataset-name-error');
+    
+    // Clear previous error
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+    
+    if (!datasetName) {
+        return false; // Don't show error for empty name yet
+    }
+    
+    // Check for duplicate custom names only (not filenames)
+    const existingDatasets = uploadedDataFiles.filter(file => file.isSaved);
+    const isDuplicate = existingDatasets.some(dataset => 
+        dataset.customName === datasetName
+    );
+    
+    if (isDuplicate) {
+        errorDiv.textContent = 'A dataset with this name already exists. Please choose a different name.';
+        errorDiv.style.display = 'block';
+        return false;
+    }
+    
+    return true;
+}
+
+function populateDatasetList() {
+    const datasetList = document.getElementById('dataset-list');
+    
+    // Filter for saved datasets only
+    const savedDatasets = uploadedDataFiles.filter(file => file.isSaved);
+    
+    if (savedDatasets.length === 0) {
+        datasetList.innerHTML = `
+            <div class="no-datasets">
+                <p>No datasets available. Create a dataset using the button above.</p>
+            </div>
+        `;
+    } else {
+        datasetList.innerHTML = '';
+        
+        savedDatasets.forEach((dataset, index) => {
+            const datasetItem = document.createElement('div');
+            datasetItem.className = 'dataset-item';
+            const displayName = dataset.customName || dataset.filename;
+            const datasetId = dataset.customName || dataset.filename;
+            datasetItem.innerHTML = `
+                <label class="dataset-option">
+                    <input type="radio" name="selected-dataset" value="${datasetId}" onchange="selectExistingDataset('${datasetId}')">
+                    <span class="dataset-name">${displayName}</span>
+                </label>
+            `;
+            datasetList.appendChild(datasetItem);
+        });
+    }
+}
+
+function selectExistingDataset(datasetId) {
+    // Find the selected dataset by custom name or filename
+    const selectedDataset = uploadedDataFiles.find(file => 
+        file.isSaved && ((file.customName && file.customName === datasetId) || file.filename === datasetId)
+    );
+    
+    if (selectedDataset) {
+        // Set as current data
+        currentData = { ...selectedDataset };
+        
+        // Update target column dropdown
+        const targetSelect = document.getElementById('target-column');
+        targetSelect.innerHTML = '<option value="">Select target column</option>';
+        
+        console.log('Loading existing dataset:', selectedDataset);
+        console.log('Columns:', selectedDataset.finalColumns || selectedDataset.columns);
+        
+        const columnsToUse = selectedDataset.finalColumns || selectedDataset.columns || [];
+        columnsToUse.forEach(column => {
+            const option = document.createElement('option');
+            option.value = column;
+            // Use dtypes if available, otherwise default
+            const dtype = selectedDataset.dtypes && selectedDataset.dtypes[column] ? selectedDataset.dtypes[column] : 'unknown';
+            option.textContent = `${column} (${dtype})`;
+            targetSelect.appendChild(option);
+        });
+
+        document.getElementById('target-column-group').style.display = 'block';
+        
+        // Show success message
+        const rows = selectedDataset.shape ? selectedDataset.shape[0] : 'Unknown';
+        const cols = selectedDataset.shape ? selectedDataset.shape[1] : 'Unknown';
+        console.log(`Selected existing dataset: ${filename}: ${rows} rows, ${cols} columns`);
+        
+        // Display the dataset info in the uploaded files area
+        displayExistingDatasetInfo(selectedDataset);
+        
+        // Clear file input since we're using existing dataset
+        document.getElementById('data-file').value = '';
+    }
+}
+
 function updateWizardStep() {
     // Update vertical step indicators
     document.querySelectorAll('.step-vertical').forEach((step, index) => {
@@ -571,6 +701,11 @@ function updateWizardStep() {
             nextBtn.style.cursor = 'pointer';
             nextBtn.title = 'Continue to next step';
         }
+    }
+    
+    // Update dataset list if on step 2
+    if (currentStep === 2) {
+        populateDatasetList();
     }
     
     // Update review summary if on step 4
@@ -624,35 +759,14 @@ function validateCurrentStep() {
                 return false;
             }
             
-            // Check which data source is selected
-            const isExistingDataSource = document.getElementById('data-source-existing').checked;
-            const isUploadDataSource = document.getElementById('data-source-upload').checked;
+            // Validate that a dataset is selected (either uploaded or from existing list)
+            if (!currentData) {
+                alert('Please create a new dataset or select an existing one.');
+                return false;
+            }
             
-            if (isExistingDataSource) {
-                // Validate existing dataset selection
-                const existingDataset = document.getElementById('existing-dataset').value;
-                if (!existingDataset) {
-                    alert('Please select an existing dataset.');
-                    return false;
-                }
-                
-                if (!currentData) {
-                    alert('Selected dataset could not be loaded. Please try again.');
-                    return false;
-                }
-            } else if (isUploadDataSource) {
-                // Validate file upload
-                if (!currentData) {
-                    alert('Please upload a CSV file.');
-                    return false;
-                }
-                
-                if (!currentData.isSaved) {
-                    alert('Please save your dataset configuration before proceeding.');
-                    return false;
-                }
-            } else {
-                alert('Please select a data source.');
+            if (!currentData.isSaved) {
+                alert('Please save your dataset configuration before proceeding.');
                 return false;
             }
             
@@ -751,25 +865,8 @@ function handleFileUpload(input) {
         return;
     }
     
-    // Check if a dataset with the same name already exists
-    const existingDataset = uploadedDataFiles.find(dataset => dataset.filename === file.name);
-    if (existingDataset) {
-        const confirmOverwrite = confirm(
-            `A dataset named "${file.name}" already exists. Do you want to overwrite it?\n\n` +
-            `Click OK to overwrite, or Cancel to choose a different file.`
-        );
-        
-        if (!confirmOverwrite) {
-            input.value = '';
-            return;
-        }
-        
-        // Remove the existing dataset
-        const index = uploadedDataFiles.findIndex(dataset => dataset.filename === file.name);
-        if (index >= 0) {
-            uploadedDataFiles.splice(index, 1);
-        }
-    }
+    // Allow multiple datasets from the same file with different custom names
+    // The unique validation will be handled by the custom name check during save
     
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -1213,7 +1310,7 @@ function displayUploadedFile(fileName) {
                         <button type="button" id="save-data-btn" onclick="saveDataset()" 
                                 style="padding: 6px 12px; font-size: 12px; background: #0366d6; color: white; border: none; border-radius: 4px; cursor: pointer; ${currentData.isSaved ? 'background: #28a745;' : ''}" 
                                 ${currentData.isSaved ? 'disabled' : ''}>
-                            ${currentData.isSaved ? '✓ Saved' : 'Save'}
+                            ${currentData.isSaved ? '✓ Created' : 'Create'}
                         </button>
                     </div>
                     
@@ -1411,6 +1508,23 @@ function saveDataset() {
         return;
     }
     
+    // Validate dataset name
+    const datasetNameInput = document.getElementById('dataset-name');
+    const customName = datasetNameInput ? datasetNameInput.value.trim() : '';
+    
+    if (!customName) {
+        alert('Please provide a dataset name.');
+        return;
+    }
+    
+    if (!validateDatasetName()) {
+        alert('Please provide a valid, unique dataset name.');
+        return;
+    }
+    
+    // Use custom name if provided, otherwise use filename
+    const datasetName = customName || currentData.filename;
+    
     // Create a finalized copy of the current data
     const finalizedData = {
         ...currentData,
@@ -1419,11 +1533,16 @@ function saveDataset() {
         uploadTime: new Date(), // Add uploadTime for data list compatibility
         finalColumns: [...currentData.columns],
         finalHeaders: currentData.usingCustomHeaders ? [...currentData.customHeaders] : [...currentData.columns],
-        name: currentData.filename // Ensure name property exists
+        name: datasetName, // Use the custom name or filename
+        customName: customName, // Store the custom name separately
+        filename: currentData.filename // Keep original filename
     };
     
     // Update the uploadedDataFiles array with the finalized data
-    const existingIndex = uploadedDataFiles.findIndex(f => f.name === currentData.filename);
+    // Only update if the exact same custom name exists, otherwise create new
+    const existingIndex = uploadedDataFiles.findIndex(f => 
+        f.customName && f.customName === customName
+    );
     if (existingIndex >= 0) {
         uploadedDataFiles[existingIndex] = finalizedData;
     } else {
@@ -1447,6 +1566,22 @@ function saveDataset() {
     
     // Update the data page to show this dataset
     updateDataFilesList();
+    
+    // Also update the dataset list in the wizard
+    populateDatasetList();
+    
+    // Hide the file upload form after saving
+    document.getElementById('file-upload-group').style.display = 'none';
+    
+    // Automatically select the newly created dataset in the list
+    setTimeout(() => {
+        const radioButton = document.querySelector(`input[name="selected-dataset"][value="${datasetName}"]`);
+        if (radioButton) {
+            radioButton.checked = true;
+            // Trigger the onchange event to set it as current data
+            selectExistingDataset(datasetName);
+        }
+    }, 100);
     
     console.log('Dataset saved successfully:', finalizedData);
 }
@@ -3068,28 +3203,28 @@ function updateJobDetailsContent(job) {
         document.getElementById('properties-start-time').textContent = createdDate;
         document.getElementById('properties-name').textContent = job.name;
     
-    // Update inputs section - get filename from available sources
-    let fileName = 'training_data.csv';
+    // Update inputs section - get dataset name (prefer custom name over filename)
+    let datasetName = 'training_data.csv';
     
-    // Try to get filename from various sources
-    if (typeof selectedDataset !== 'undefined' && selectedDataset && selectedDataset.filename) {
-        fileName = selectedDataset.filename;
-    } else if (typeof currentData !== 'undefined' && currentData && currentData.name) {
-        fileName = currentData.name;
-    } else if (typeof window.fileNameForParsing !== 'undefined' && window.fileNameForParsing) {
-        fileName = window.fileNameForParsing;
+    // Try to get dataset name from various sources, prioritizing custom names
+    if (typeof selectedDataset !== 'undefined' && selectedDataset) {
+        // Use custom name if available, otherwise use filename
+        datasetName = selectedDataset.customName || selectedDataset.name || selectedDataset.filename;
+    } else if (typeof currentData !== 'undefined' && currentData) {
+        // Use custom name if available, otherwise use name or filename
+        datasetName = currentData.customName || currentData.name || currentData.filename;
     } else if (typeof uploadedDataFiles !== 'undefined' && uploadedDataFiles && uploadedDataFiles.length > 0) {
-        // Get the most recently uploaded file
+        // Get the most recently uploaded file and use its custom name
         const lastFile = uploadedDataFiles[uploadedDataFiles.length - 1];
-        if (lastFile && lastFile.filename) {
-            fileName = lastFile.filename;
+        if (lastFile) {
+            datasetName = lastFile.customName || lastFile.name || lastFile.filename;
         }
     }
     
     // Safely update input data asset element
     const inputDataAssetElement = document.getElementById('input-data-asset');
     if (inputDataAssetElement) {
-        inputDataAssetElement.textContent = fileName;
+        inputDataAssetElement.textContent = datasetName;
     } else {
         console.warn('input-data-asset element not found');
     }

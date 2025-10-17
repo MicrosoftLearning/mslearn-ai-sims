@@ -580,35 +580,30 @@
                                             </div>
                                         </div>
                                         
-                                        <!-- Dataset Selection -->
+                                        <!-- Create Dataset Button -->
                                         <div class="form-group">
-                                            <label>Data source</label>
-                                            <div class="data-source-options">
-                                                <div class="data-source-option" id="existing-data-option" onclick="selectDataSource('existing')">
-                                                    <input type="radio" name="data-source" value="existing" id="data-source-existing">
-                                                    <label for="data-source-existing">Use existing dataset</label>
-                                                </div>
-                                                <div class="data-source-option" id="upload-data-option" onclick="selectDataSource('upload')">
-                                                    <input type="radio" name="data-source" value="upload" id="data-source-upload" checked>
-                                                    <label for="data-source-upload">Upload new dataset</label>
+                                            <button type="button" class="btn btn-primary" onclick="showCreateDatasetInterface()" data-tooltip="Create a new tabular dataset">
+                                                Create (Tabular)
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Existing Datasets List -->
+                                        <div class="form-group">
+                                            <label>Select existing dataset</label>
+                                            <div id="dataset-list" class="dataset-list">
+                                                <div class="no-datasets">
+                                                    <p>No datasets available. Create a dataset using the button above.</p>
                                                 </div>
                                             </div>
                                         </div>
                                         
-                                        <!-- Existing Dataset Selection -->
-                                        <div class="form-group" id="existing-dataset-group" style="display: none;">
-                                            <label for="existing-dataset">Select existing dataset *</label>
-                                            <select id="existing-dataset" onchange="handleExistingDatasetSelection(this.value)">
-                                                <option value="">Choose a dataset</option>
-                                            </select>
-                                            <div class="help-text">
-                                                <small>Select from previously saved datasets</small>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- File Upload -->
-                                        <div class="form-group" id="file-upload-group">
-                                            <label for="data-file">Upload CSV file *</label>
+                                        <!-- File Upload (Hidden initially, shown when Create button is clicked) -->
+                                        <div class="form-group" id="file-upload-group" style="display: none;">
+                                            <label for="dataset-name">Dataset name *</label>
+                                            <input type="text" id="dataset-name" placeholder="Enter dataset name" oninput="validateDatasetName()">
+                                            <div id="dataset-name-error" class="error-message" style="display: none;"></div>
+                                            
+                                            <label for="data-file" style="margin-top: 15px;">Upload CSV file *</label>
                                             <input type="file" id="data-file" accept=".csv" onchange="handleFileUpload(this)">
                                             <div id="uploaded-files"></div>
                                         </div>
