@@ -2048,6 +2048,7 @@ function startTrainingJob(capturedJobData) {
         targetColumn: currentJobData.targetColumn,
         startTime: new Date(),
         models: [],
+        childJobs: [],
         // Store all configuration settings
         primaryMetric: currentJobData.primaryMetric,
         algorithms: currentJobData.algorithms,
@@ -2055,6 +2056,24 @@ function startTrainingJob(capturedJobData) {
         missingDataStrategy: currentJobData.missingDataStrategy,
         categoricalSettings: currentJobData.categoricalSettings
     };
+    
+    // Create child jobs for each algorithm
+    if (currentJobData.algorithms && currentJobData.algorithms.length > 0) {
+        currentJobData.algorithms.forEach((algorithm, index) => {
+            const childJob = {
+                id: `${job.id}-child-${index + 1}`,
+                displayName: `${job.name}-child${index + 1}`,
+                parentJobId: job.id,
+                parentJobName: job.name,
+                algorithm: algorithm,
+                computeType: currentJobData.computeType || 'Standard',
+                status: 'Running',
+                createdOn: new Date(),
+                startTime: new Date()
+            };
+            job.childJobs.push(childJob);
+        });
+    }
     
     jobHistory.push(job);
     
@@ -3231,6 +3250,27 @@ function handleTrainingComplete(resultsJson) {
             if (job) {
                 job.status = 'Completed';
                 job.models = results.results;
+                job.endTime = new Date();
+                
+                // Update child job statuses
+                if (job.childJobs && job.childJobs.length > 0) {
+                    job.childJobs.forEach((childJob, index) => {
+                        childJob.status = 'Completed';
+                        childJob.endTime = new Date();
+                        
+                        // Match child job with corresponding model result if available
+                        if (results.results && results.results[index]) {
+                            const modelResult = results.results[index];
+                            childJob.modelResult = modelResult;
+                            
+                            // Set child job status based on model training success
+                            if (modelResult.error) {
+                                childJob.status = 'Failed';
+                                childJob.error = modelResult.error;
+                            }
+                        }
+                    });
+                }
                 
                 // Store job info with training logs if available
                 if (results.job_info) {
@@ -3254,6 +3294,16 @@ function handleTrainingComplete(resultsJson) {
             if (job) {
                 job.status = 'Failed';
                 job.error = results.error;
+                job.endTime = new Date();
+                
+                // Update child job statuses to failed
+                if (job.childJobs && job.childJobs.length > 0) {
+                    job.childJobs.forEach(childJob => {
+                        childJob.status = 'Failed';
+                        childJob.endTime = new Date();
+                        childJob.error = results.error;
+                    });
+                }
                 
                 // Store job info with training logs even on failure
                 if (results.job_info) {
@@ -3491,6 +3541,11 @@ function showJobTab(tabName) {
     if (tabName === 'outputs' && currentJobDetails) {
         updateOutputsTabContent();
     }
+    
+    // Update child jobs tab content if showing child jobs
+    if (tabName === 'child-jobs' && currentJobDetails) {
+        updateChildJobsTabContent();
+    }
 }
 
 function updateModelsTabContent() {
@@ -3664,6 +3719,116 @@ function updateOutputsTabContent() {
             </div>
         `;
     }
+}
+
+function updateChildJobsTabContent() {
+    const childJobsTab = document.getElementById('child-jobs-tab');
+    
+    if (!currentJobDetails || !currentJobDetails.childJobs || currentJobDetails.childJobs.length === 0) {
+        // Show empty state if no child jobs
+        childJobsTab.innerHTML = `
+            <div class="tab-content-placeholder">
+                <h4>Child jobs</h4>
+                <div class="empty-state">
+                    <div class="empty-state-content">
+                        <div class="empty-state-icon">📋</div>
+                        <h3>No child jobs</h3>
+                        <p>Individual model training runs will appear here when algorithms are configured.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Create child jobs table
+    childJobsTab.innerHTML = `
+        <div class="child-jobs-content">
+            <h4>Child jobs</h4>
+            <div class="child-jobs-table-container">
+                <table class="child-jobs-table">
+                    <thead>
+                        <tr>
+                            <th>Display name</th>
+                            <th>Parent Job</th>
+                            <th>Compute Type</th>
+                            <th>Created on</th>
+                            <th>Status</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody id="child-jobs-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    
+    const tableBody = document.getElementById('child-jobs-table-body');
+    
+    // Populate child jobs table
+    currentJobDetails.childJobs.forEach(childJob => {
+        const row = document.createElement('tr');
+        row.className = 'child-job-row';
+        
+        // Calculate duration
+        let duration = 'N/A';
+        if (childJob.endTime && childJob.startTime) {
+            const durationMs = childJob.endTime - childJob.startTime;
+            const durationSeconds = Math.round(durationMs / 1000);
+            if (durationSeconds < 60) {
+                duration = `${durationSeconds}s`;
+            } else {
+                const minutes = Math.floor(durationSeconds / 60);
+                const seconds = durationSeconds % 60;
+                duration = `${minutes}m ${seconds}s`;
+            }
+        } else if (childJob.status === 'Running') {
+            duration = 'Running...';
+        }
+        
+        // Format created date
+        const createdDate = childJob.createdOn ? childJob.createdOn.toLocaleString() : 'N/A';
+        
+        // Determine status class and icon
+        let statusClass = 'status-running';
+        let statusIcon = '⏳';
+        if (childJob.status === 'Completed') {
+            statusClass = 'status-completed';
+            statusIcon = '✅';
+        } else if (childJob.status === 'Failed') {
+            statusClass = 'status-failed';
+            statusIcon = '❌';
+        }
+        
+        row.innerHTML = `
+            <td>
+                <div class="child-job-name">
+                    <span class="job-icon">🤖</span>
+                    <span>${childJob.displayName}</span>
+                </div>
+            </td>
+            <td>${childJob.parentJobName}</td>
+            <td>
+                <span class="compute-type-tag">${childJob.computeType}</span>
+            </td>
+            <td>${createdDate}</td>
+            <td>
+                <span class="child-job-status ${statusClass}">
+                    <span class="status-icon">${statusIcon}</span>
+                    <span>${childJob.status}</span>
+                </span>
+            </td>
+            <td>${duration}</td>
+        `;
+        
+        // Add error information if failed
+        if (childJob.status === 'Failed' && childJob.error) {
+            row.title = `Error: ${childJob.error}`;
+        }
+        
+        tableBody.appendChild(row);
+    });
 }
 
 function navigateToAutoML() {
