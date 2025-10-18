@@ -270,20 +270,76 @@
             <div id="models-page" class="page-content" style="display: none;">
                 <div class="page-header">
                     <h1>Models</h1>
-                    <p>Manage your deployed machine learning models and view their details.</p>
+                    <p>Manage your registered machine learning models and view their details.</p>
                 </div>
 
                 <div class="models-section">
-                    <div id="deployed-models-list" class="deployed-models-list">
+                    <div id="deployed-models-list" class="models-table-container">
                         <div class="empty-state">
                             <div class="empty-state-content">
-                                <h3>No models deployed yet.</h3>
-                                <p>Deploy models from Automated ML training results to see them here.</p>
+                                <h3>No models registered yet.</h3>
+                                <p>Register models from training results to see them here.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Model Details Page -->
+            <div id="model-details-page" class="page-content" style="display: none;">
+                <!-- Model Details Header -->
+                <div class="model-details-header">
+                    <div class="model-header-info">
+                        <div class="model-title-section">
+                            <h1 id="model-details-title">Model1</h1>
+                            <div class="model-type">Custom model</div>
+                        </div>
+                        
+                        <div class="model-actions">
+                            <button class="action-button" onclick="refreshModelDetails()">
+                                ↻ Refresh
+                            </button>
+                            <button class="action-button primary" onclick="useThisModel()">
+                                Use this model
+                            </button>
+                            <button class="action-button" onclick="downloadModel()">
+                                ⬇ Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="model-content">
+                    <!-- Attributes Card -->
+                    <div class="attributes-card">
+                        <h3>Attributes</h3>
+                        
+                        <div class="attribute-row">
+                            <div class="attribute-label">Name</div>
+                            <div class="attribute-value" id="model-attr-name">Model1</div>
+                        </div>
+                        
+                        <div class="attribute-row">
+                            <div class="attribute-label">Created on</div>
+                            <div class="attribute-value" id="model-attr-created">Oct 17, 2025 4:52 PM</div>
+                        </div>
+                        
+                        <div class="attribute-row">
+                            <div class="attribute-label">Type</div>
+                            <div class="attribute-value" id="model-attr-type">scikit-learn</div>
+                        </div>
+                        
+                        <div class="attribute-row">
+                            <div class="attribute-label">Created by job</div>
+                            <div class="attribute-value">
+                                <a href="#" class="job-link" id="model-attr-job" onclick="navigateToSourceJob()">ML_Job_1</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
             <!-- Job Details Page -->
             <div id="job-details-page" class="page-content" style="display: none;">
@@ -614,7 +670,7 @@
             </div>
 
             <!-- Job Wizard Modal -->
-            <div id="job-wizard-modal" class="modal full-page-modal">
+            <div id="job-wizard-modal" class="modal full-page-modal" style="display: none;">
                 <div class="full-page-wizard">
                     <div class="wizard-header">
                         <h1>Submit an Automated ML job</h1>
@@ -936,79 +992,6 @@
             <div class="flyout-actions" style="margin-top: 24px;">
                 <button type="button" class="btn btn-secondary" onclick="closeFeaturizationFlyout()" data-tooltip="Cancel and close featurization settings">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="saveFeaturization()" data-tooltip="Save featurization settings">Save</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Model Details Modal -->
-    <div id="model-details-modal" class="modal">
-        <div class="modal-content large-modal">
-            <div class="modal-header">
-                <h3 id="model-title">Model Details</h3>
-                <span class="close" onclick="closeModelDetails()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="model-metrics"></div>
-                <div id="model-visualization"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModelDetails()" data-tooltip="Close model details">Close</button>
-                <button type="button" class="btn btn-primary" onclick="deployModel()" id="deploy-btn" data-tooltip="Deploy this model for predictions">Deploy Model</button>
-                <button type="button" class="btn btn-success" onclick="testModel()" id="test-btn" style="display: none;" data-tooltip="Test the deployed model with sample data">Test Model</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Test Model Modal -->
-    <div id="test-model-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Test Model</h3>
-                <span class="close" onclick="closeTestModel()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="test-features">Features (JSON)</label>
-                    <textarea id="test-features" rows="8" placeholder='{"feature1": value1, "feature2": value2, ...}'></textarea>
-                </div>
-                <div id="prediction-result"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeTestModel()" data-tooltip="Close test model dialog">Close</button>
-                <button type="button" class="btn btn-primary" onclick="makePrediction()" data-tooltip="Generate prediction using the model">Predict</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Training Progress Modal -->
-    <div id="training-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Training Models</h3>
-            </div>
-            <div class="modal-body">
-                <div id="training-progress"></div>
-                <div id="model-results"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="closeTrainingModal()" id="training-close-btn" style="display: none;" data-tooltip="Close training results">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Data Content Modal -->
-    <div id="data-content-modal" class="modal">
-        <div class="modal-content large-modal">
-            <div class="modal-header">
-                <h3 id="data-file-title">Data File Contents</h3>
-                <span class="close" onclick="closeDataContentModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="data-file-info"></div>
-                <div id="data-file-preview"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeDataContentModal()" data-tooltip="Close data preview">Close</button>
             </div>
         </div>
     </div>
@@ -1665,6 +1648,34 @@
             <div class="flyout-actions">
                 <button class="btn-secondary" onclick="closeCreateWorkspaceFlyout()">Cancel</button>
                 <button class="btn-primary" onclick="createNewWorkspace()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Registration Modal -->
+    <div id="registerModelModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Register model</h2>
+                <span class="close" onclick="closeRegisterModelModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="registerModelForm">
+                    <div class="form-group">
+                        <label for="modelName">Name *</label>
+                        <input type="text" id="modelName" name="modelName" required placeholder="Enter model name">
+                    </div>
+                    <div class="form-group">
+                        <label for="modelSelection">Model *</label>
+                        <select id="modelSelection" name="modelSelection" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeRegisterModelModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="completeModelRegistration()">Register</button>
             </div>
         </div>
     </div>

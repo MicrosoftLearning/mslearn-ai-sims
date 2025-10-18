@@ -16,6 +16,10 @@ let jobCounter = 1;
 // Workspace management
 let existingWorkspaceNames = [];
 
+// Model registration
+let registeredModels = [];
+let currentRegistrationContext = null;
+
 // PyScript status (keeping for future use)
 let pyScriptReady = false;
 
@@ -36,6 +40,25 @@ function getMetricDisplayName(metric, taskType) {
     
     // Return the display name if found, otherwise use the original value or fallback
     return metricNames[metric] || metric || (taskType === 'classification' ? 'AUC' : 'Mean Absolute Error');
+}
+
+function isMetricHigherBetter(metric, taskType) {
+    // Metrics where HIGHER values are better
+    const higherIsBetter = ['auc', 'accuracy', 'precision', 'recall', 'f1', 'r2'];
+    
+    // Metrics where LOWER values are better  
+    const lowerIsBetter = ['mae', 'rmse', 'mse', 'mean_absolute_error', 'root_mean_squared_error', 'mean_squared_error'];
+    
+    const metricLower = metric.toLowerCase();
+    
+    if (higherIsBetter.includes(metricLower)) {
+        return true;
+    } else if (lowerIsBetter.includes(metricLower)) {
+        return false;
+    } else {
+        // Default based on task type
+        return taskType === 'classification';
+    }
 }
 
 // Start PyScript initialization when page loads
@@ -98,7 +121,14 @@ function showMyAccountPage() {
 
 function createWorkspace() {
     // Show the create workspace flyout panel
-    document.getElementById('create-workspace-flyout').classList.add('active');
+    const flyout = document.getElementById('create-workspace-flyout');
+    
+    if (flyout) {
+        flyout.classList.add('active');
+    } else {
+        console.error('create-workspace-flyout element not found!');
+        return;
+    }
     
     // Set up input validation for the Create button
     const nameInput = document.getElementById('workspace-name');
@@ -383,7 +413,10 @@ function showModelsPage() {
 
 // Wizard management
 function openNewJobWizard() {
-    document.getElementById('job-wizard-modal').style.display = 'flex';
+    const wizardModal = document.getElementById('job-wizard-modal');
+    if (wizardModal) {
+        wizardModal.style.display = 'flex';
+    }
     resetWizard();
     
     // Add event listeners for validation
@@ -395,7 +428,10 @@ function openNewJobWizard() {
 }
 
 function closeJobWizard() {
-    document.getElementById('job-wizard-modal').style.display = 'none';
+    const wizardModal = document.getElementById('job-wizard-modal');
+    if (wizardModal) {
+        wizardModal.style.display = 'none';
+    }
     resetWizard();
 }
 
@@ -2311,12 +2347,14 @@ function completeTraining(modelResults, jobId) {
         });
     } else if (typeof modelResults === 'object') {
         // Handle legacy format (object) - convert object to array and find best model
-        let bestScore = -1;
+        const higherIsBetter = isMetricHigherBetter(primaryMetric, job.taskType);
+        let bestScore = higherIsBetter ? -Infinity : Infinity;
         let bestModelName = '';
         
         Object.entries(modelResults).forEach(([modelName, metrics]) => {
             const score = metrics.score || 0;
-            if (score > bestScore) {
+            const isBetter = higherIsBetter ? (score > bestScore) : (score < bestScore);
+            if (isBetter) {
                 bestScore = score;
                 bestModelName = modelName;
             }
@@ -2337,13 +2375,44 @@ function completeTraining(modelResults, jobId) {
         }
     }
     
+    // Ensure correct best model selection if not already set by Python
+    if (modelArray.length > 1) {
+        const hasBestModel = modelArray.some(model => model.is_best);
+        
+        if (!hasBestModel) {
+            console.log('🔍 No best model set by Python, determining best model...');
+            const higherIsBetter = isMetricHigherBetter(primaryMetric, job.taskType);
+            
+            // Find the actual best model
+            let bestModel = modelArray[0];
+            let bestScore = parseFloat(bestModel.metrics[primaryMetric] || bestModel.primary_score || 0);
+            
+            modelArray.forEach(model => {
+                const score = parseFloat(model.metrics[primaryMetric] || model.primary_score || 0);
+                const isBetter = higherIsBetter ? (score > bestScore) : (score < bestScore);
+                if (isBetter) {
+                    bestScore = score;
+                    bestModel = model;
+                }
+            });
+            
+            // Mark the correct best model
+            bestModel.is_best = true;
+            console.log(`🔍 Best model determined: ${bestModel.name} with ${primaryMetric}=${bestScore} (${higherIsBetter ? 'higher' : 'lower'} is better)`);
+        } else {
+            console.log('🔍 Best model already set by Python training');
+        }
+    } else if (modelArray.length === 1) {
+        modelArray[0].is_best = true;
+    }
+    
     console.log('Processed model results:', modelArray);
     console.log('Primary metric being used:', primaryMetric);
     
     // Update job status
     if (job) {
         console.log('Updating job status to completed for job:', jobId);
-        job.status = 'completed';
+        job.status = 'Completed';
         job.models = modelArray;
         job.endTime = new Date();
         
@@ -2402,7 +2471,10 @@ function completeTraining(modelResults, jobId) {
     trainedModels[jobId] = modelArray;
     
     // Show close button
-    document.getElementById('training-close-btn').style.display = 'block';
+    const trainingCloseBtn = document.getElementById('training-close-btn');
+    if (trainingCloseBtn) {
+        trainingCloseBtn.style.display = 'block';
+    }
     
     // Update jobs list
     console.log('About to call refreshJobs() from completeTraining');
@@ -2411,7 +2483,10 @@ function completeTraining(modelResults, jobId) {
 }
 
 function closeTrainingModal() {
-    document.getElementById('training-modal').style.display = 'none';
+    const trainingModal = document.getElementById('training-modal');
+    if (trainingModal) {
+        trainingModal.style.display = 'none';
+    }
 }
 
 // Model details and management
@@ -2465,11 +2540,17 @@ function showModelDetails(model) {
         testBtn.style.display = 'none';
     }
     
-    document.getElementById('model-details-modal').style.display = 'block';
+    const modelDetailsModal = document.getElementById('model-details-modal');
+    if (modelDetailsModal) {
+        modelDetailsModal.style.display = 'block';
+    }
 }
 
 function closeModelDetails() {
-    document.getElementById('model-details-modal').style.display = 'none';
+    const modelDetailsModal = document.getElementById('model-details-modal');
+    if (modelDetailsModal) {
+        modelDetailsModal.style.display = 'none';
+    }
     selectedModel = null;
 }
 
@@ -2519,193 +2600,14 @@ function displayScatterPlot(container, data) {
     container.appendChild(vizContainer);
 }
 
-function deployModel() {
-    if (!selectedModel) return;
-    
-    try {
-        // Save model using PyScript
-        pyodide.runPython(`
-import pickle
-import json
-from js import selectedModel
-
-# Get the model name
-model_name = selectedModel.name.to_py()
-model_key = model_name.lower().replace(" ", "_")
-
-# Get the trained model
-model = globals().get(f'trained_model_{model_key}')
-
-if model:
-    # Save model as pickle
-    model_filename = f"{model_key}_model.pkl"
-    
-    # Serialize model
-    model_data = pickle.dumps(model)
-    
-    # Store in deployed models
-    deployed_info = {
-        'name': model_name,
-        'filename': model_filename,
-        'data': model_data,
-        'jobId': selectedModel.get('jobId', 'current')
-    }
-    
-    # Add to global deployed models
-    if 'deployed_models' not in globals():
-        globals()['deployed_models'] = {}
-    
-    globals()['deployed_models'][model_key] = deployed_info
-    
-    js.modelDeploymentComplete(model_name, model_filename)
-else:
-    js.modelDeploymentError("Model not found")
-        `);
-    } catch (error) {
-        console.error('Deployment error:', error);
-        alert('Failed to deploy model: ' + error.message);
-    }
-}
-
-function modelDeploymentComplete(modelName, filename) {
-    // Store more detailed information about the deployed model
-    const jobModels = Object.values(trainedModels).flat();
-    const trainingModel = jobModels.find(m => m.name === modelName);
-    
-    deployedModels[modelName] = {
-        name: modelName,
-        filename: filename,
-        jobId: selectedModel.jobId || 'current',
-        deployTime: new Date(),
-        metrics: trainingModel ? trainingModel.metrics : {},
-        primaryScore: trainingModel ? trainingModel.primary_score : 'N/A',
-        taskType: currentJobData.taskType || 'unknown'
-    };
-    
-    alert(`Model "${modelName}" deployed successfully as ${filename}`);
-    
-    // Update buttons in model details modal
-    document.getElementById('deploy-btn').style.display = 'none';
-    document.getElementById('test-btn').style.display = 'block';
-    
-    // Update Models page if it's currently visible
-    if (document.getElementById('models-page').style.display === 'block') {
-        updateDeployedModelsList();
-    }
-}
-
-function modelDeploymentError(error) {
-    alert('Failed to deploy model: ' + error);
-}
-
-function testModel() {
-    if (!selectedModel) return;
-    
-    // Generate example features based on the training data
-    try {
-        pyodide.runPython(`
-import json
-from js import selectedModel
-
-# Get feature names from training data
-if 'X_train' in globals():
-    X_train = globals()['X_train']
-    feature_names = X_train.columns.tolist()
-    
-    # Create example features with sample values
-    example_features = {}
-    for col in feature_names:
-        if X_train[col].dtype in ['int64', 'int32', 'float64', 'float32']:
-            example_features[col] = float(X_train[col].mean())
-        else:
-            example_features[col] = X_train[col].mode().iloc[0] if len(X_train[col].mode()) > 0 else 0
-    
-    js.showTestModelModal(json.dumps(example_features, indent=2))
-else:
-    js.showTestModelModal('{"feature1": 0, "feature2": 0}')
-        `);
-    } catch (error) {
-        console.error('Error generating example features:', error);
-        showTestModelModal('{"feature1": 0, "feature2": 0}');
-    }
-}
-
-function showTestModelModal(exampleFeatures) {
-    document.getElementById('test-features').value = exampleFeatures;
-    document.getElementById('prediction-result').innerHTML = '';
-    document.getElementById('test-model-modal').style.display = 'block';
-}
-
-function closeTestModel() {
-    document.getElementById('test-model-modal').style.display = 'none';
-}
-
-function makePrediction() {
-    const featuresText = document.getElementById('test-features').value;
-    const resultDiv = document.getElementById('prediction-result');
-    
-    try {
-        const features = JSON.parse(featuresText);
-        
-        pyodide.runPython(`
-import json
-import pickle
-import pandas as pd
-import numpy as np
-from js import features, selectedModel
-
-try:
-    # Get features
-    feature_data = features.to_py()
-    model_name = selectedModel.name.to_py()
-    model_key = model_name.lower().replace(" ", "_")
-    
-    # Get deployed model
-    if 'deployed_models' in globals() and model_key in globals()['deployed_models']:
-        model_info = globals()['deployed_models'][model_key]
-        model = pickle.loads(model_info['data'])
-        
-        # Convert features to DataFrame
-        X_pred = pd.DataFrame([feature_data])
-        
-        # Make prediction
-        prediction = model.predict(X_pred)[0]
-        
-        # Get prediction probability if classification
-        try:
-            if hasattr(model, 'predict_proba'):
-                probabilities = model.predict_proba(X_pred)[0]
-                js.showPredictionResult(f"Prediction: {prediction}, Probabilities: {probabilities.tolist()}")
-            else:
-                js.showPredictionResult(f"Prediction: {prediction}")
-        except:
-            js.showPredictionResult(f"Prediction: {prediction}")
-    else:
-        js.showPredictionError("Model not found or not deployed")
-
-except Exception as e:
-    js.showPredictionError(f"Prediction error: {str(e)}")
-        `);
-    } catch (error) {
-        showPredictionError('Invalid JSON format: ' + error.message);
-    }
-}
-
-function showPredictionResult(result) {
-    const resultDiv = document.getElementById('prediction-result');
-    resultDiv.className = 'prediction-result success';
-    resultDiv.innerHTML = `<strong>Result:</strong> ${result}`;
-}
-
-function showPredictionError(error) {
-    const resultDiv = document.getElementById('prediction-result');
-    resultDiv.className = 'prediction-result error';
-    resultDiv.innerHTML = `<strong>Error:</strong> ${error}`;
-}
-
 // Jobs list management
 function updateJobsList() {
     const jobsListDiv = document.getElementById('jobs-list');
+    
+    // Check if the element exists (user might not be on the AutoML page)
+    if (!jobsListDiv) {
+        return;
+    }
     
     if (jobHistory.length === 0) {
         jobsListDiv.innerHTML = `
@@ -2727,7 +2629,7 @@ function updateJobsList() {
         jobDiv.className = 'job-item';
         jobDiv.onclick = () => navigateToJobDetails(job);
         
-        const statusClass = job.status === 'completed' ? 'completed' : 'running';
+        const statusClass = job.status === 'Completed' ? 'completed' : 'running';
         const duration = job.endTime ? 
             Math.round((job.endTime - job.startTime) / 1000) + 's' : 
             'Running...';
@@ -2750,6 +2652,11 @@ function updateJobsList() {
 function updateJobsPageList() {
     const jobsPageListDiv = document.getElementById('jobs-page-list');
     
+    // Check if the element exists (user might not be on the Jobs page)
+    if (!jobsPageListDiv) {
+        return;
+    }
+    
     if (jobHistory.length === 0) {
         jobsPageListDiv.innerHTML = `
             <div class="empty-state">
@@ -2769,7 +2676,7 @@ function updateJobsPageList() {
         jobDiv.className = 'job-item';
         jobDiv.onclick = () => navigateToJobDetails(job);
         
-        const statusClass = job.status === 'completed' ? 'completed' : 'running';
+        const statusClass = job.status === 'Completed' ? 'completed' : 'running';
         const duration = job.endTime ? 
             Math.round((job.endTime - job.startTime) / 1000) + 's' : 
             'Running...';
@@ -2847,7 +2754,10 @@ function updateDataFilesList() {
 
 function showDataFileContent(file) {
     // Open the modal
-    document.getElementById('data-content-modal').style.display = 'flex';
+    const dataContentModal = document.getElementById('data-content-modal');
+    if (dataContentModal) {
+        dataContentModal.style.display = 'flex';
+    }
     
     // Set modal title
     document.getElementById('data-file-title').textContent = `${file.name || file.filename} - Contents`;
@@ -2960,106 +2870,19 @@ function displayDataFileContent(resultJson) {
     previewDiv.innerHTML += tableHtml;
     
     // Show modal
-    document.getElementById('data-content-modal').style.display = 'block';
+    const dataContentModal = document.getElementById('data-content-modal');
+    if (dataContentModal) {
+        dataContentModal.style.display = 'block';
+    }
 }
 
 function closeDataContentModal() {
-    document.getElementById('data-content-modal').style.display = 'none';
-}
-
-// Models page management
-function updateDeployedModelsList() {
-    const modelsListDiv = document.getElementById('deployed-models-list');
-    
-    if (Object.keys(deployedModels).length === 0) {
-        modelsListDiv.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-content">
-                    <h3>No models deployed yet.</h3>
-                    <p>Deploy models from Automated ML training results to see them here.</p>
-                </div>
-            </div>
-        `;
-        return;
-    }
-    
-    modelsListDiv.innerHTML = '';
-    
-    Object.values(deployedModels).forEach(model => {
-        const modelDiv = document.createElement('div');
-        modelDiv.className = 'deployed-model-item';
-        
-        // Get model metrics if available from training results
-        const jobModels = Object.values(trainedModels).flat();
-        const trainingModel = jobModels.find(m => m.name === model.name);
-        const metrics = trainingModel ? trainingModel.metrics : {};
-        const primaryScore = trainingModel ? trainingModel.primary_score : 'N/A';
-        
-        // Format deployment time
-        const deployTime = model.deployTime ? model.deployTime.toLocaleString() : 'Unknown';
-        
-        modelDiv.innerHTML = `
-            <div class="deployed-model-info">
-                <div class="deployed-model-icon">⚙</div>
-                <div class="deployed-model-details">
-                    <h4>${model.name}</h4>
-                    <div class="deployed-model-meta">Deployed: ${deployTime}</div>
-                    <div class="deployed-model-meta">File: ${model.filename}</div>
-                    <div class="deployed-model-metrics">
-                        ${Object.entries(metrics).map(([key, value]) => 
-                            `<span class="metric-badge">${key}: ${value}</span>`
-                        ).join('')}
-                    </div>
-                </div>
-            </div>
-            <div class="deployed-model-status">
-                <span class="model-status-badge">Deployed</span>
-                <div class="deployed-model-actions">
-                    <button class="model-action-btn" onclick="viewDeployedModelDetails('${model.name}')">View Details</button>
-                    <button class="model-action-btn primary" onclick="testDeployedModel('${model.name}')">Test</button>
-                </div>
-            </div>
-        `;
-        
-        modelsListDiv.appendChild(modelDiv);
-    });
-}
-
-function viewDeployedModelDetails(modelName) {
-    // Find the deployed model and its training data
-    const deployedModel = deployedModels[modelName];
-    if (!deployedModel) return;
-    
-    // Find the original training model data
-    const jobModels = Object.values(trainedModels).flat();
-    const trainingModel = jobModels.find(m => m.name === modelName);
-    
-    if (trainingModel) {
-        // Set the selected model and show details
-        selectedModel = { ...trainingModel, jobId: deployedModel.jobId, isDeployed: true };
-        showModelDetails(selectedModel);
-    } else {
-        alert('Model training details not available.');
+    const dataContentModal = document.getElementById('data-content-modal');
+    if (dataContentModal) {
+        dataContentModal.style.display = 'none';
     }
 }
 
-function testDeployedModel(modelName) {
-    // Find the deployed model and its training data
-    const deployedModel = deployedModels[modelName];
-    if (!deployedModel) return;
-    
-    // Find the original training model data
-    const jobModels = Object.values(trainedModels).flat();
-    const trainingModel = jobModels.find(m => m.name === modelName);
-    
-    if (trainingModel) {
-        // Set the selected model and show test modal
-        selectedModel = { ...trainingModel, jobId: deployedModel.jobId, isDeployed: true };
-        testModel();
-    } else {
-        alert('Model training details not available for testing.');
-    }
-}
 
 // Modal close on outside click
 window.onclick = function(event) {
@@ -3391,6 +3214,13 @@ function handleTrainingComplete(resultsJson) {
 
                 
                 updateJobsList();
+                
+                // Update current job details if this is the active job
+                if (currentJobDetails && currentJobDetails.id === results.job_id) {
+                    console.log('Updating current job details after training completion');
+                    currentJobDetails = job;
+                    updateJobDetailsContent(job);
+                }
             }
             
             // Complete the training process
@@ -3534,7 +3364,7 @@ function updateJobDetailsContent(job) {
         statusText.textContent = job.status.charAt(0).toUpperCase() + job.status.slice(1);
         
         // Update status badge classes
-        statusBadge.className = `job-status-badge ${job.status}`;
+        statusBadge.className = `job-status-badge ${job.status.toLowerCase()}`;
         
         // Update properties section
         document.getElementById('properties-status').innerHTML = `
@@ -3628,7 +3458,7 @@ function updateJobDetailsContent(job) {
 function updateBestModelSection(job) {
     const bestModelContent = document.getElementById('best-model-content');
     
-    if (job.status === 'completed' && job.models && job.models.length > 0) {
+    if (job.status === 'Completed' && job.models && job.models.length > 0) {
         const bestModel = job.models.find(m => m.is_best);
         if (bestModel) {
             // Get the proper display name for the primary metric
@@ -3652,7 +3482,7 @@ function updateBestModelSection(job) {
                             ${bestModel.name}
                         </button>
                     </div>
-                    <div class="best-model-score">${bestModel.primary_score.toFixed(4)}</div>
+                    <div class="best-model-score">${typeof bestModel.primary_score === 'number' ? bestModel.primary_score.toFixed(4) : bestModel.primary_score}</div>
                     <div class="best-model-metric">Primary metric: ${primaryMetricDisplay}</div>
                 </div>
             `;
@@ -3776,7 +3606,13 @@ function showChildJobTab(tabName) {
 function updateModelsTabContent() {
     const modelsResults = document.getElementById('job-model-results');
     
-    if (currentJobDetails.status === 'completed' && currentJobDetails.models && currentJobDetails.models.length > 0) {
+    console.log('🔍 DEBUG updateModelsTabContent:');
+    console.log('  - currentJobDetails:', currentJobDetails);
+    console.log('  - status:', currentJobDetails?.status);
+    console.log('  - models:', currentJobDetails?.models);
+    console.log('  - models length:', currentJobDetails?.models?.length);
+    
+    if (currentJobDetails.status === 'Completed' && currentJobDetails.models && currentJobDetails.models.length > 0) {
         // Get the primary metric name for the column header
         const primaryMetric = currentJobDetails.primaryMetric || 'auc';
         const primaryMetricDisplayName = getMetricDisplayName(primaryMetric, currentJobDetails.taskType);
@@ -4528,14 +4364,13 @@ function refreshChildJob() {
     console.log('Refreshing child job:', currentChildJobDetails?.displayName);
 }
 
-function registerChildModel() {
-    // Placeholder for register model functionality
-    console.log('Registering model for child job:', currentChildJobDetails?.displayName);
-    alert(`Model registration for ${currentChildJobDetails?.displayName} would be implemented here.`);
-}
-
 function updateChildJobsTabContent() {
     const childJobsTab = document.getElementById('child-jobs-tab');
+    
+    console.log('🔍 DEBUG updateChildJobsTabContent:');
+    console.log('  - currentJobDetails:', currentJobDetails);
+    console.log('  - childJobs:', currentJobDetails?.childJobs);
+    console.log('  - childJobs length:', currentJobDetails?.childJobs?.length);
     
     if (!currentJobDetails || !currentJobDetails.childJobs || currentJobDetails.childJobs.length === 0) {
         // Show empty state if no child jobs
@@ -4980,16 +4815,267 @@ function editAndResubmit() {
 }
 
 function registerModel() {
-    if (currentJobDetails && currentJobDetails.status === 'completed') {
-        const bestModel = currentJobDetails.models?.find(m => m.is_best);
-        if (bestModel) {
-            alert(`Model "${bestModel.name}" registration will be implemented in a future version.`);
-        } else {
-            alert('No best model found to register.');
-        }
-    } else {
+    // Get the current job from global variable
+    const job = currentJobDetails;
+    
+    if (!job || job.status !== 'Completed') {
         alert('Job must be completed to register a model.');
+        return;
     }
+
+    // Find the job index in jobHistory
+    const jobIndex = jobHistory.findIndex(j => j.id === job.id);
+    
+    currentRegistrationContext = {
+        type: 'parent',
+        job: job,
+        jobIndex: jobIndex
+    };
+    
+    // Populate model selection dropdown with all child models
+    const modelSelection = document.getElementById('modelSelection');
+    modelSelection.innerHTML = '';
+    
+    if (job && job.childJobs && job.childJobs.length > 0) {
+        // Add options for all models, find best model from existing data
+        job.childJobs.forEach((childJob, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `${childJob.algorithm} (${job.primaryMetric}: ${childJob.metrics[job.primaryMetric]})`;
+            
+            // Check if this model corresponds to the best model
+            if (job.models && job.models.length > 0) {
+                const correspondingModel = job.models.find(m => m.name === childJob.algorithm);
+                if (correspondingModel && correspondingModel.is_best) {
+                    option.selected = true;
+                    option.textContent += ' - Best Model';
+                }
+            }
+            
+            modelSelection.appendChild(option);
+        });
+    }
+    
+    // Clear the name field
+    const modelNameInput = document.getElementById('modelName');
+    if (modelNameInput) {
+        modelNameInput.value = '';
+    }
+    
+    // Show the modal
+    const registerModal = document.getElementById('registerModelModal');
+    if (registerModal) {
+        registerModal.style.display = 'block';
+    } else {
+        console.error('registerModelModal not found!');
+    }
+}
+
+function registerChildModel() {
+    // Get the current job and child job from global variables
+    const job = currentJobDetails;
+    const childJob = currentChildJobDetails;
+    
+    if (!job || job.status !== 'Completed') {
+        alert('Job must be completed to register a model.');
+        return;
+    }
+    
+    if (!childJob) {
+        alert('No child job selected.');
+        return;
+    }
+
+    // Find the job index in jobHistory
+    const jobIndex = jobHistory.findIndex(j => j.id === job.id);
+    
+    currentRegistrationContext = {
+        type: 'child',
+        job: job,
+        childJob: childJob,
+        jobIndex: jobIndex
+    };
+    
+    // Populate model selection dropdown with just this model
+    const modelSelection = document.getElementById('modelSelection');
+    modelSelection.innerHTML = '';
+    
+    // Find the index of the current child job
+    const childJobIndex = job.childJobs ? job.childJobs.indexOf(childJob) : 0;
+    
+    const option = document.createElement('option');
+    option.value = childJobIndex;
+    option.textContent = `${childJob.algorithm} (${job.primaryMetric}: ${childJob.metrics ? childJob.metrics[job.primaryMetric] : 'N/A'})`;
+    option.selected = true;
+    modelSelection.appendChild(option);
+    
+    // Clear the name field
+    const modelNameInput = document.getElementById('modelName');
+    if (modelNameInput) {
+        modelNameInput.value = '';
+    }
+    
+    // Show the modal
+    const registerModal = document.getElementById('registerModelModal');
+    if (registerModal) {
+        registerModal.style.display = 'block';
+    }
+}
+
+function closeRegisterModelModal() {
+    const registerModal = document.getElementById('registerModelModal');
+    if (registerModal) {
+        registerModal.style.display = 'none';
+    }
+    currentRegistrationContext = null;
+}
+
+function completeModelRegistration() {
+    const modelName = document.getElementById('modelName').value.trim();
+    const selectedModelIndex = parseInt(document.getElementById('modelSelection').value);
+    
+    if (!modelName) {
+        alert('Please enter a model name');
+        return;
+    }
+    
+    if (!currentRegistrationContext) {
+        alert('Registration context not found');
+        return;
+    }
+    
+    const { job, jobIndex } = currentRegistrationContext;
+    const childJob = job.childJobs[selectedModelIndex];
+    
+    // Create registered model entry
+    const registeredModel = {
+        id: registeredModels.length + 1,
+        name: modelName,
+        algorithm: childJob.algorithm,
+        metrics: { ...childJob.metrics },
+        primaryMetric: job.primaryMetric,
+        sourceJob: job.name,
+        sourceJobId: jobIndex,
+        childJobIndex: selectedModelIndex,
+        createdDate: new Date().toISOString(),
+        status: 'Registered'
+    };
+    
+    registeredModels.push(registeredModel);
+    
+    // Update the deployed models list
+    updateDeployedModelsList();
+    
+    // Close modal
+    closeRegisterModelModal();
+    
+    // Navigate to Model Details page
+    showModelDetails(registeredModel);
+}
+
+function updateDeployedModelsList() {
+    const deployedModelsList = document.getElementById('deployed-models-list');
+    
+    // Check if the element exists (user might not be on the Models page)
+    if (!deployedModelsList) {
+        return;
+    }
+    
+    if (registeredModels.length === 0) {
+        deployedModelsList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-content">
+                    <h3>No models registered yet.</h3>
+                    <p>Register models from training results to see them here.</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    deployedModelsList.innerHTML = `
+        <table class="models-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Job</th>
+                    <th>Created On</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${registeredModels.map(model => `
+                    <tr onclick="showModelDetails(registeredModels[${model.id - 1}])">
+                        <td><span class="model-name">${model.name}</span></td>
+                        <td><span class="model-type">Scikit-Learn</span></td>
+                        <td><a href="#" class="model-job" onclick="event.stopPropagation(); showJobDetailsFromModel(${model.sourceJobId})">${model.sourceJob}</a></td>
+                        <td><span class="model-created">${formatDateTime(model.createdDate)}</span></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    const options = {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    };
+    return date.toLocaleDateString('en-US', options);
+}
+
+function showModelDetails(model) {
+    // Hide all pages
+    document.querySelectorAll('.page-content').forEach(page => page.style.display = 'none');
+    
+    // Show model details page
+    document.getElementById('model-details-page').style.display = 'block';
+    
+    // Update navigation active state
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.querySelector('.nav-item[onclick="showModelsPage()"]').classList.add('active');
+    
+    // Populate model details
+    document.getElementById('model-details-title').textContent = model.name;
+    
+    // Populate model attributes
+    document.getElementById('model-attr-name').textContent = model.name;
+    document.getElementById('model-attr-created').textContent = new Date(model.createdDate).toLocaleDateString();
+    document.getElementById('model-attr-type').textContent = model.framework || 'scikit-learn';
+    document.getElementById('model-attr-job').textContent = model.sourceJob;
+    
+    // Make the job link clickable
+    document.getElementById('model-attr-job').onclick = () => showJobDetailsFromModel(model.sourceJobId);
+}
+
+function refreshModelDetails() {
+    // Refresh model details - simulate reload
+    const currentModel = registeredModels.find(m => m.name === document.getElementById('model-details-title').textContent);
+    if (currentModel) {
+        showModelDetails(currentModel);
+    }
+}
+
+function useThisModel() {
+    const modelName = document.getElementById('model-details-title').textContent;
+    alert(`"Use this model" functionality for ${modelName} will be implemented in a future version.`);
+}
+
+function downloadModel() {
+    const modelName = document.getElementById('model-details-title').textContent;
+    alert(`Model download for ${modelName} will be implemented in a future version.`);
+}
+
+function showJobDetailsFromModel(jobIndex) {
+    // Store the job index and navigate to job details
+    sessionStorage.setItem('currentJobIndex', jobIndex);
+    showJobDetails(jobIndex);
 }
 
 function cancelJob() {
@@ -5191,15 +5277,13 @@ function toggleLimitsSection() {
     }
 }
 
-// Make functions available globally for PyScript
+// Make functions available globally for PyScript and HTML
 window.handleParsedData = handleParsedData;
 window.handleTrainingComplete = handleTrainingComplete;
 window.updateTrainingProgress = updateTrainingProgress;
 window.completeTraining = completeTraining;
-window.modelDeploymentComplete = modelDeploymentComplete;
-window.modelDeploymentError = modelDeploymentError;
-window.showTestModelModal = showTestModelModal;
-window.showPredictionResult = showPredictionResult;
-window.showPredictionError = showPredictionError;
 window.displayDataFileContent = displayDataFileContent;
 window.notifyPyScriptReady = notifyPyScriptReady;
+window.registerModel = registerModel;
+window.closeRegisterModelModal = closeRegisterModelModal;
+window.completeModelRegistration = completeModelRegistration;
