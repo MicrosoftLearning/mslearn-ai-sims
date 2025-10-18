@@ -446,6 +446,49 @@ button:disabled {
     background-color: #0e6e0e;
 }
 
+/* Algorithm Link Button */
+.algorithm-link {
+    background: none;
+    border: none;
+    color: #0078d4;
+    cursor: pointer;
+    font-size: inherit;
+    font-weight: 500;
+    padding: 2px 4px;
+    border-radius: 3px;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: all 0.2s ease;
+}
+
+.algorithm-link:hover {
+    background-color: #f3f2f1;
+    text-decoration-color: #0078d4;
+}
+
+.algorithm-link:active {
+    background-color: #edebe9;
+}
+
+/* Back Button */
+.btn-link {
+    background: none;
+    border: none;
+    color: #0078d4;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 0;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
 /* Jobs Section */
 .jobs-section {
     background-color: white;
@@ -1605,6 +1648,143 @@ button:disabled {
     font-size: 13px;
 }
 
+/* Child Job Details Styles */
+.model-info-section {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.model-info-section h5 {
+    color: #323130;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #edebe9;
+}
+
+.model-description {
+    color: #605e5c;
+    font-size: 14px;
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+.model-summary {
+    margin-bottom: 20px;
+}
+
+.performance-metric {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background-color: #f3f2f1;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.metric-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #323130;
+}
+
+.metric-value.primary-metric {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0078d4;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f2f1;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #605e5c;
+}
+
+.detail-value {
+    font-size: 14px;
+    color: #323130;
+}
+
+/* Child Job Metrics Grid */
+.metrics-grid .metric-item {
+    background-color: #f8f9fa;
+    padding: 16px;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid #edebe9;
+}
+
+.metrics-grid .metric-name {
+    font-size: 12px;
+    color: #605e5c;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.metrics-grid .metric-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0078d4;
+}
+
+/* Metrics Visualization */
+.metrics-visualization {
+    margin-top: 32px;
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.metrics-visualization h5 {
+    color: #323130;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #edebe9;
+}
+
+.visualization-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #faf9f8;
+    border-radius: 6px;
+    border: 1px solid #edebe9;
+}
+
+.visualization-container canvas {
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 /* Prediction Result */
 .prediction-result {
     margin-top: 16px;
@@ -2324,6 +2504,7 @@ button:disabled {
 
 .properties-section,
 .inputs-section,
+.outputs-section,
 .best-model-section,
 .run-summary-section {
     margin-bottom: 32px;
@@ -2331,6 +2512,7 @@ button:disabled {
 
 .properties-section h3,
 .inputs-section h3,
+.outputs-section h3,
 .best-model-section h3,
 .run-summary-section h3 {
     font-size: 16px;
@@ -2401,6 +2583,32 @@ button:disabled {
 }
 
 .input-type {
+    color: #605e5c;
+}
+
+/* Output Styles (matching Input styles) */
+.output-item {
+    border: 1px solid #edebe9;
+    border-radius: 6px;
+    padding: 16px;
+    background: #faf9f8;
+}
+
+.output-header {
+    margin-bottom: 8px;
+}
+
+.output-label {
+    font-weight: 500;
+    color: #323130;
+}
+
+.output-details {
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.output-type {
     color: #605e5c;
 }
 

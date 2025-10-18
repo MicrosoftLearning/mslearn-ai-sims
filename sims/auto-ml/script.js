@@ -2097,7 +2097,7 @@ function startTrainingJob(capturedJobData) {
         currentJobData.algorithms.forEach((algorithm, index) => {
             const childJob = {
                 id: `${job.id}-child-${index + 1}`,
-                displayName: `${job.name}-child${index + 1}`,
+                displayName: `${job.name}-child${index + 1}`, // Use proper child job naming format
                 parentJobId: job.id,
                 parentJobName: job.name,
                 algorithm: algorithm,
@@ -3302,6 +3302,11 @@ function handleTrainingComplete(resultsJson) {
                             if (modelResult.error) {
                                 childJob.status = 'Failed';
                                 childJob.error = modelResult.error;
+                            } else {
+                                // Copy metrics to child job for display
+                                childJob.metrics = modelResult.metrics;
+                                childJob.primary_score = modelResult.primary_score;
+                                childJob.algorithm = modelResult.name; // Ensure algorithm name matches
                             }
                         }
                     });
@@ -3313,6 +3318,8 @@ function handleTrainingComplete(resultsJson) {
                     job.training_logs = results.job_info.training_logs;
                     console.log('Stored training logs:', job.training_logs?.length || 0, 'entries');
                 }
+                
+
                 
                 updateJobsList();
             }
@@ -3347,6 +3354,8 @@ function handleTrainingComplete(resultsJson) {
                     console.log('Stored error logs:', job.training_logs?.length || 0, 'entries');
                 }
                 
+
+                
                 updateJobsList();
             }
         }
@@ -3358,9 +3367,11 @@ function handleTrainingComplete(resultsJson) {
 
 // Job Details Page Functions
 let currentJobDetails = null;
+let currentChildJobDetails = null;
 
 function showJobDetails(job) {
     currentJobDetails = job;
+    currentChildJobDetails = null; // Reset child job view
     
     // Hide all other pages
     document.querySelectorAll('.page-content').forEach(page => {
@@ -3375,6 +3386,72 @@ function showJobDetails(job) {
     
     // Show overview tab by default
     showJobTab('overview');
+}
+
+function showChildJobDetails(childJob, parentJob) {
+    currentChildJobDetails = childJob;
+    currentJobDetails = parentJob; // Keep parent job reference
+    
+    // Hide all other pages
+    document.querySelectorAll('.page-content').forEach(page => {
+        page.style.display = 'none';
+    });
+    
+    // Show child job details page
+    document.getElementById('child-job-details-page').style.display = 'block';
+    
+    // Update child job details content
+    updateChildJobDetailsContent(childJob, parentJob);
+    
+    // Show overview tab by default for child job
+    showChildJobTab('overview');
+}
+
+function navigateToChildJob(algorithmName, parentJob) {
+    // Find the corresponding child job by algorithm name
+    if (!parentJob || !parentJob.childJobs) {
+        console.error('No parent job or child jobs available');
+        return;
+    }
+    
+    console.log('Looking for algorithm:', algorithmName);
+    console.log('Available child jobs:', parentJob.childJobs.map(job => ({
+        displayName: job.displayName,
+        algorithm: job.algorithm
+    })));
+    
+    // First, try to find by exact algorithm match
+    let childJob = parentJob.childJobs.find(job => job.algorithm === algorithmName);
+    
+    // If not found by algorithm, try to match by model name to child job index
+    if (!childJob && parentJob.models) {
+        const modelIndex = parentJob.models.findIndex(model => 
+            model.name === algorithmName || model.display_name === algorithmName
+        );
+        if (modelIndex >= 0 && modelIndex < parentJob.childJobs.length) {
+            childJob = parentJob.childJobs[modelIndex];
+            console.log(`Matched algorithm "${algorithmName}" to child job by model index: ${modelIndex}`);
+        }
+    }
+    
+    // If still not found, try partial matches on algorithm names
+    if (!childJob) {
+        childJob = parentJob.childJobs.find(job => 
+            job.algorithm && (
+                job.algorithm.includes(algorithmName) ||
+                algorithmName.includes(job.algorithm)
+            )
+        );
+    }
+    
+    if (childJob) {
+        console.log('Navigating to child job:', childJob);
+        showChildJobDetails(childJob, parentJob);
+    } else {
+        console.error('Child job not found for algorithm:', algorithmName);
+        console.error('Available algorithms in child jobs:', parentJob.childJobs.map(job => job.algorithm));
+        console.error('Available models:', parentJob.models ? parentJob.models.map(m => m.name) : 'None');
+    }
 }
 
 function updateJobDetailsContent(job) {
@@ -3501,7 +3578,11 @@ function updateBestModelSection(job) {
                     <div class="best-model-header">
                         <span class="best-model-badge">Best Model</span>
                     </div>
-                    <div class="best-model-algorithm">Algorithm name: ${bestModel.name}</div>
+                    <div class="best-model-algorithm">Algorithm name: 
+                        <button class="algorithm-link" onclick="navigateToChildJob('${bestModel.name.replace(/'/g, "\\'")}', currentJobDetails)" title="View child job details">
+                            ${bestModel.name}
+                        </button>
+                    </div>
                     <div class="best-model-score">${bestModel.primary_score.toFixed(4)}</div>
                     <div class="best-model-metric">Primary metric: ${primaryMetricDisplay}</div>
                 </div>
@@ -3577,14 +3658,49 @@ function showJobTab(tabName) {
         updateOutputsTabContent();
     }
     
+    // Update data guardrails tab content if showing data guardrails
+    if (tabName === 'data-guardrails' && currentJobDetails) {
+        updateDataGuardrailsTabContent();
+    }
+    
     // Update child jobs tab content if showing child jobs
     if (tabName === 'child-jobs' && currentJobDetails) {
         updateChildJobsTabContent();
     }
+}
+
+function showChildJobTab(tabName) {
+    // Hide all child job tab panels
+    document.querySelectorAll('#child-job-details-page .tab-panel').forEach(panel => {
+        panel.style.display = 'none';
+        panel.classList.remove('active');
+    });
     
-    // Update data guardrails tab content if showing data guardrails
-    if (tabName === 'data-guardrails' && currentJobDetails) {
-        updateDataGuardrailsTabContent();
+    // Remove active class from all child job tab buttons
+    document.querySelectorAll('#child-job-details-page .tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // Show selected child job tab
+    const selectedTab = document.getElementById(`child-${tabName}-tab`);
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+        selectedTab.classList.add('active');
+    }
+    
+    // Add active class to corresponding button
+    const selectedButton = document.querySelector(`#child-job-details-page .tab-button[onclick="showChildJobTab('${tabName}')"]`);
+    if (selectedButton) {
+        selectedButton.classList.add('active');
+    }
+    
+    // Update specific tab content if needed
+    if (tabName === 'metrics' && currentChildJobDetails) {
+        updateChildJobMetricsContent();
+    } else if (tabName === 'model' && currentChildJobDetails) {
+        updateChildJobModelContent();
+    } else if (tabName === 'outputs' && currentChildJobDetails) {
+        updateChildJobOutputsContent();
     }
 }
 
@@ -3643,7 +3759,9 @@ function updateModelsTabContent() {
             
             row.innerHTML = `
                 <td class="algorithm-cell">
-                    <span class="algorithm-name">${model.display_name || model.name}</span>
+                    <button class="algorithm-link" onclick="navigateToChildJob('${model.name.replace(/'/g, "\\'")}', currentJobDetails)" title="View child job details">
+                        ${model.display_name || model.name}
+                    </button>
                     ${model.is_best ? '<span class="best-model-badge">Best Model</span>' : ''}
                 </td>
                 <td class="metric-cell">${formattedValue}</td>
@@ -3761,6 +3879,592 @@ function updateOutputsTabContent() {
     }
 }
 
+
+function updateChildJobOutputsContent() {
+    const outputsContent = document.getElementById('child-outputs-content');
+    
+    if (!outputsContent) {
+        console.warn('child-outputs-content element not found');
+        return;
+    }
+    
+    // Get the current child job details and parent job
+    const childJob = currentChildJobDetails;
+    const parentJob = currentJobDetails;
+    
+    if (!childJob || !parentJob) {
+        outputsContent.innerHTML = `
+            <div class="logs-placeholder">
+                <div class="logs-placeholder-icon">ℹ</div>
+                <div class="logs-placeholder-text">No logs available</div>
+                <div class="logs-placeholder-subtext">Training logs will appear here after job completion</div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Check if we have training logs from the parent job
+    if (parentJob.training_logs && parentJob.training_logs.length > 0) {
+        // Use all training logs from the parent job
+        const logsToShow = parentJob.training_logs;
+        const logCount = logsToShow.length;
+        
+        // Create logs display container
+        outputsContent.innerHTML = `
+            <div class="outputs-section">
+                <h3>Outputs</h3>
+                <div class="output-details">
+                    <div class="output-item">
+                        <div class="output-label">Model Output</div>
+                        <div class="output-value" id="child-output-model-asset">${childJob.displayName}-model</div>
+                    </div>
+                </div>
+            </div>
+            <div class="logs-container">
+                <div class="logs-header">
+                    <h3>Training Logs</h3>
+                    <div class="logs-info">
+                        <span class="logs-count">${logCount} log entries</span>
+                    </div>
+                </div>
+                <div class="logs-content" id="child-training-logs-list">
+                </div>
+            </div>
+        `;
+        
+        const logsList = document.getElementById('child-training-logs-list');
+        
+        // Display each log entry
+        logsToShow.forEach((logEntry, index) => {
+            const logElement = document.createElement('div');
+            logElement.className = 'log-entry';
+            
+            // Parse timestamp if available
+            let timeDisplay = '';
+            if (logEntry.timestamp) {
+                timeDisplay = `<span class="log-timestamp">[${logEntry.timestamp}]</span>`;
+            }
+            
+            // Determine log level class
+            let levelClass = 'info';
+            if (logEntry.level) {
+                levelClass = logEntry.level;
+            } else if (logEntry.message && typeof logEntry.message === 'string') {
+                const msg = logEntry.message.toLowerCase();
+                if (msg.includes('error') || msg.includes('failed') || msg.includes('❌')) {
+                    levelClass = 'error';
+                } else if (msg.includes('warning') || msg.includes('⚠️')) {
+                    levelClass = 'warning';
+                } else if (msg.includes('completed') || msg.includes('finished') || msg.includes('✅') || msg.includes('🎉')) {
+                    levelClass = 'success';
+                }
+            }
+            
+            logElement.innerHTML = `
+                <div class="log-header">
+                    ${timeDisplay}
+                    <span class="log-level ${levelClass}"></span>
+                </div>
+                <div class="log-message">${logEntry.message || 'No message'}</div>
+            `;
+            
+            logsList.appendChild(logElement);
+        });
+        
+    } else if (childJob.status === 'running') {
+        // Show loading message for running child jobs
+        outputsContent.innerHTML = `
+            <div class="outputs-section">
+                <h3>Outputs</h3>
+                <div class="output-details">
+                    <div class="output-item">
+                        <div class="output-label">Model Output</div>
+                        <div class="output-value">${childJob.displayName}-model (in progress)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="logs-placeholder">
+                <div class="logs-placeholder-icon">⏳</div>
+                <div class="logs-placeholder-text">Training in progress...</div>
+                <div class="logs-placeholder-subtext">Logs will appear here as training proceeds</div>
+            </div>
+        `;
+    } else {
+        // Show no logs available message
+        outputsContent.innerHTML = `
+            <div class="outputs-section">
+                <h3>Outputs</h3>
+                <div class="output-details">
+                    <div class="output-item">
+                        <div class="output-label">Model Output</div>
+                        <div class="output-value" id="child-output-model-asset">${childJob.displayName}-model</div>
+                    </div>
+                </div>
+            </div>
+            <div class="logs-placeholder">
+                <div class="logs-placeholder-icon">ℹ</div>
+                <div class="logs-placeholder-text">No logs available</div>
+                <div class="logs-placeholder-subtext">Training logs will appear here after job completion</div>
+            </div>
+        `;
+    }
+}
+
+function updateChildJobDetailsContent(childJob, parentJob) {
+    try {
+        // Update header information
+        document.getElementById('child-job-details-title').textContent = childJob.displayName;
+        
+        // Update status badge
+        const statusBadge = document.getElementById('child-job-status-badge');
+        const statusText = document.getElementById('child-job-status-text');
+        statusText.textContent = childJob.status;
+        
+        // Update status badge classes
+        statusBadge.className = `job-status-badge ${childJob.status.toLowerCase()}`;
+        
+        // Update properties section
+        document.getElementById('child-properties-status').innerHTML = `
+            <span class="status-icon">●</span>
+            <span>${childJob.status}</span>
+        `;
+        
+        // Format created date
+        const createdDate = childJob.createdOn ? childJob.createdOn.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }) : 'N/A';
+        
+        document.getElementById('child-properties-created-on').textContent = createdDate;
+        
+        // Calculate and display duration
+        let duration = 'N/A';
+        if (childJob.endTime && childJob.startTime) {
+            const durationMs = childJob.endTime - childJob.startTime;
+            const durationSeconds = Math.round(durationMs / 1000);
+            if (durationSeconds < 60) {
+                duration = `${durationSeconds}s`;
+            } else {
+                const minutes = Math.floor(durationSeconds / 60);
+                const seconds = durationSeconds % 60;
+                duration = `${minutes}m ${seconds}s`;
+            }
+        }
+        document.getElementById('child-properties-duration').textContent = duration;
+        
+        // Update compute target
+        document.getElementById('child-properties-compute-target').textContent = childJob.computeType || 'Serverless';
+        
+        // Update name  
+        document.getElementById('child-properties-name').textContent = childJob.displayName;
+        
+        // Update input data asset - prioritize custom dataset name over filename
+        let datasetName = 'training_data';
+        
+        // Try multiple sources for dataset name, prioritizing custom names
+        if (parentJob && parentJob.datasetInfo && parentJob.datasetInfo.customName) {
+            datasetName = parentJob.datasetInfo.customName;
+        } else if (typeof selectedDataset !== 'undefined' && selectedDataset) {
+            datasetName = selectedDataset.customName || selectedDataset.name || selectedDataset.filename;
+        } else if (typeof currentData !== 'undefined' && currentData) {
+            datasetName = currentData.customName || currentData.name || currentData.filename;
+        } else if (parentJob && parentJob.datasetInfo && (parentJob.datasetInfo.name || parentJob.datasetInfo.filename)) {
+            datasetName = parentJob.datasetInfo.name || parentJob.datasetInfo.filename;
+        }
+        
+        // Remove file extension if it exists to show clean dataset name
+        if (datasetName && datasetName.includes('.')) {
+            const parts = datasetName.split('.');
+            if (parts.length > 1 && parts[parts.length - 1].length <= 4) { // Common file extensions are usually 4 chars or less
+                datasetName = parts.slice(0, -1).join('.');
+            }
+        }
+        
+        const childInputDataAssetElement = document.getElementById('child-input-data-asset');
+        if (childInputDataAssetElement) {
+            childInputDataAssetElement.textContent = datasetName;
+        }
+        
+        // Update output information using format: {Parent-Job}-{Child-Job}-model
+        const parentJobName = parentJob ? parentJob.name : 'ML-Job';
+        const childJobName = childJob.displayName || childJob.id || 'child';
+        const outputName = `${parentJobName}-${childJobName}-model`;
+        
+        const childOutputNameElement = document.getElementById('child-output-name');
+        if (childOutputNameElement) {
+            childOutputNameElement.textContent = `Output name: ${outputName}`;
+        }
+        
+        const childOutputModelAssetElement = document.getElementById('child-output-model-asset');
+        if (childOutputModelAssetElement) {
+            childOutputModelAssetElement.textContent = outputName;
+        }
+        
+    } catch (error) {
+        console.error('Error updating child job details content:', error);
+        console.error('Child job object:', childJob);
+    }
+}
+
+function updateChildJobMetricsContent() {
+    const metricsDisplay = document.getElementById('child-metrics-display');
+    
+    if (!currentChildJobDetails || !currentChildJobDetails.metrics) {
+        metricsDisplay.innerHTML = `
+            <div class="no-data-message">
+                <span class="no-data-icon">ℹ</span>
+                <span>No metrics available</span>
+            </div>
+        `;
+        return;
+    }
+    
+    // Display all metrics for this child job
+    const metrics = currentChildJobDetails.metrics;
+    let metricsHtml = '<div class="metrics-grid">';
+    
+    Object.entries(metrics).forEach(([metric, value]) => {
+        const displayName = getMetricDisplayName(metric, currentJobDetails?.taskType || 'classification');
+        const formattedValue = typeof value === 'number' ? value.toFixed(4) : value;
+        
+        metricsHtml += `
+            <div class="metric-item">
+                <div class="metric-name">${displayName}</div>
+                <div class="metric-value">${formattedValue}</div>
+            </div>
+        `;
+    });
+    
+    metricsHtml += '</div>';
+    
+    // Add visualization section
+    metricsHtml += `
+        <div class="metrics-visualization">
+            <h5>Model Performance Visualization</h5>
+            <div class="visualization-container">
+                <canvas id="metrics-chart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    `;
+    
+    metricsDisplay.innerHTML = metricsHtml;
+    
+    // Generate the appropriate chart based on task type
+    generateMetricsVisualization();
+}
+
+function generateMetricsVisualization() {
+    const canvas = document.getElementById('metrics-chart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const taskType = currentJobDetails?.taskType || 'classification';
+    
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (taskType === 'classification') {
+        generateConfusionMatrix(ctx, canvas);
+    } else if (taskType === 'regression') {
+        generateScatterPlot(ctx, canvas);
+    }
+}
+
+function generateConfusionMatrix(ctx, canvas) {
+    // Clear the canvas completely first
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Generate sample confusion matrix data based on the model's accuracy
+    const accuracy = currentChildJobDetails?.metrics?.accuracy || 0.85;
+    const sampleSize = 100;
+    
+    // Create a realistic confusion matrix
+    const truePositives = Math.round(accuracy * sampleSize * 0.6);
+    const trueNegatives = Math.round(accuracy * sampleSize * 0.4);
+    const falsePositives = Math.round((1 - accuracy) * sampleSize * 0.4);
+    const falseNegatives = Math.round((1 - accuracy) * sampleSize * 0.6);
+    
+    const confusionMatrix = [
+        [trueNegatives, falsePositives],
+        [falseNegatives, truePositives]
+    ];
+    
+    const labels = ['Predicted Negative', 'Predicted Positive'];
+    const actualLabels = ['Actual Negative', 'Actual Positive'];
+    
+    // Draw confusion matrix
+    const cellWidth = 120;
+    const cellHeight = 60;
+    const startX = 80;
+    const startY = 60;
+    
+    // Set font
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    
+    // Draw title
+    ctx.fillStyle = '#0078d4';
+    ctx.font = '16px Arial';
+    ctx.fillText('Confusion Matrix', canvas.width / 2, 25);
+    
+    // Draw labels
+    ctx.font = '12px Arial';
+    ctx.fillStyle = '#0078d4';
+    ctx.fillText('Predicted', canvas.width / 2, 50);
+    
+    // Find min and max values for color scaling
+    const allValues = confusionMatrix.flat();
+    const minValue = Math.min(...allValues);
+    const maxValue = Math.max(...allValues);
+    
+    // Draw matrix
+    for (let i = 0; i < 2; i++) {
+        for (let j = 0; j < 2; j++) {
+            const x = startX + j * cellWidth;
+            const y = startY + i * cellHeight;
+            const value = confusionMatrix[i][j];
+            
+            // Calculate color intensity based on value (0 = white, 1 = full Microsoft blue)
+            const intensity = maxValue > minValue ? (value - minValue) / (maxValue - minValue) : 0;
+            
+            // Create gradient from white to Microsoft blue
+            const r = Math.round(255 - (255 - 0) * intensity);    // Red: 255 → 0
+            const g = Math.round(255 - (255 - 120) * intensity);  // Green: 255 → 120
+            const b = Math.round(255 - (255 - 212) * intensity);  // Blue: 255 → 212
+            
+            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            
+            // Draw cell
+            ctx.fillRect(x, y, cellWidth, cellHeight);
+            
+            // Draw border
+            ctx.strokeStyle = '#0078d4';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y, cellWidth, cellHeight);
+            
+            // Draw value - use white text on dark backgrounds, dark text on light backgrounds
+            ctx.fillStyle = intensity > 0.6 ? '#ffffff' : '#0078d4';
+            ctx.font = '18px Arial';
+            ctx.fillText(value, x + cellWidth/2, y + cellHeight/2 + 6);
+        }
+    }
+    
+    // Draw axis labels
+    ctx.font = '12px Arial';
+    ctx.fillStyle = '#0078d4';
+    
+    // Column labels (predicted)
+    ctx.fillText('Negative', startX + cellWidth/2, startY - 10);
+    ctx.fillText('Positive', startX + cellWidth + cellWidth/2, startY - 10);
+    
+    // Row labels (actual) - rotated
+    ctx.save();
+    ctx.translate(startX - 30, startY + cellHeight/2);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillStyle = '#0078d4';
+    ctx.fillText('Negative', 0, 0);
+    ctx.restore();
+    
+    ctx.save();
+    ctx.translate(startX - 30, startY + cellHeight + cellHeight/2);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillStyle = '#0078d4';
+    ctx.fillText('Positive', 0, 0);
+    ctx.restore();
+    
+    // Add "Actual" label
+    ctx.save();
+    ctx.translate(20, canvas.height/2);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillStyle = '#0078d4';
+    ctx.font = '12px Arial';
+    ctx.fillText('Actual', 0, 0);
+    ctx.restore();
+}
+
+function generateScatterPlot(ctx, canvas) {
+    // Generate sample scatter plot data based on the model's R² score
+    const r2Score = currentChildJobDetails?.metrics?.r2 || currentChildJobDetails?.metrics?.r2_score || 0.8;
+    const mae = currentChildJobDetails?.metrics?.mae || currentChildJobDetails?.metrics?.mean_absolute_error || 2.5;
+    
+    const numPoints = 50;
+    const points = [];
+    
+    // Generate correlated data points
+    for (let i = 0; i < numPoints; i++) {
+        const actual = Math.random() * 100;
+        const noise = (Math.random() - 0.5) * mae * 4; // Noise based on MAE
+        const predicted = actual * Math.sqrt(r2Score) + noise;
+        points.push({ actual, predicted });
+    }
+    
+    // Set up plot area
+    const padding = 60;
+    const plotWidth = canvas.width - 2 * padding;
+    const plotHeight = canvas.height - 2 * padding;
+    
+    // Find min/max for scaling
+    const minVal = 0;
+    const maxVal = 100;
+    
+    // Clear and set background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw title
+    ctx.fillStyle = '#0078d4';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Actual vs Predicted Values', canvas.width / 2, 25);
+    
+    // Draw axes
+    ctx.strokeStyle = '#0078d4';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, canvas.height - padding);
+    ctx.lineTo(canvas.width - padding, canvas.height - padding);
+    ctx.stroke();
+    
+    // Draw perfect prediction line (diagonal)
+    ctx.strokeStyle = '#cce7f0';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 4]);
+    ctx.beginPath();
+    ctx.moveTo(padding, canvas.height - padding);
+    ctx.lineTo(canvas.width - padding, padding);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Draw points
+    ctx.fillStyle = '#0078d4';
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1;
+    points.forEach(point => {
+        const x = padding + (point.actual / maxVal) * plotWidth;
+        const y = canvas.height - padding - (point.predicted / maxVal) * plotHeight;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+    });
+    
+    // Draw axis labels
+    ctx.fillStyle = '#0078d4';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    
+    // X-axis label
+    ctx.fillText('Actual Values', canvas.width / 2, canvas.height - 15);
+    
+    // Y-axis label (rotated)
+    ctx.save();
+    ctx.translate(15, canvas.height / 2);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText('Predicted Values', 0, 0);
+    ctx.restore();
+    
+    // Add legend for perfect prediction line
+    ctx.fillStyle = '#0078d4';
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('Perfect Prediction', canvas.width - 140, 45);
+    
+    // Draw legend line
+    ctx.strokeStyle = '#cce7f0';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 4]);
+    ctx.beginPath();
+    ctx.moveTo(canvas.width - 150, 40);
+    ctx.lineTo(canvas.width - 120, 40);
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+function updateChildJobModelContent() {
+    const modelInfo = document.getElementById('child-model-info');
+    
+    if (!currentChildJobDetails) {
+        modelInfo.innerHTML = `
+            <div class="no-data-message">
+                <span class="no-data-icon">ℹ</span>
+                <span>No model information available</span>
+            </div>
+        `;
+        return;
+    }
+    
+    // Display model information
+    const primaryMetric = currentJobDetails?.primaryMetric || 'auc';
+    const primaryMetricDisplay = getMetricDisplayName(primaryMetric, currentJobDetails?.taskType);
+    const primaryScore = currentChildJobDetails.primary_score || currentChildJobDetails.metrics?.[primaryMetric] || 'N/A';
+    const formattedScore = typeof primaryScore === 'number' ? primaryScore.toFixed(4) : primaryScore;
+    
+    modelInfo.innerHTML = `
+        <div class="model-info-section">
+            <div class="model-summary">
+                <h5>Algorithm: ${currentChildJobDetails.algorithm}</h5>
+                <p class="model-description">
+                    This model was trained using the ${currentChildJobDetails.algorithm} algorithm.
+                </p>
+            </div>
+            
+            <div class="model-performance">
+                <h5>Performance</h5>
+                <div class="performance-metric">
+                    <span class="metric-label">${primaryMetricDisplay}:</span>
+                    <span class="metric-value primary-metric">${formattedScore}</span>
+                </div>
+            </div>
+            
+            <div class="model-details">
+                <h5>Training Details</h5>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Algorithm:</span>
+                        <span class="detail-value">${currentChildJobDetails.algorithm}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">${currentChildJobDetails.status}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Compute Type:</span>
+                        <span class="detail-value">${currentChildJobDetails.computeType || 'Serverless'}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+
+
+function backToParentJob() {
+    if (currentJobDetails) {
+        showJobDetails(currentJobDetails);
+    } else {
+        console.error('No parent job available');
+        // Fallback to jobs page
+        showJobsPage();
+    }
+}
+
+function refreshChildJob() {
+    // Placeholder for refresh functionality
+    console.log('Refreshing child job:', currentChildJobDetails?.displayName);
+}
+
+function registerChildModel() {
+    // Placeholder for register model functionality
+    console.log('Registering model for child job:', currentChildJobDetails?.displayName);
+    alert(`Model registration for ${currentChildJobDetails?.displayName} would be implemented here.`);
+}
+
 function updateChildJobsTabContent() {
     const childJobsTab = document.getElementById('child-jobs-tab');
     
@@ -3845,7 +4549,9 @@ function updateChildJobsTabContent() {
             <td>
                 <div class="child-job-name">
                     <span class="job-icon">🤖</span>
-                    <span>${childJob.displayName}</span>
+                    <button class="algorithm-link" onclick="navigateToChildJob('${childJob.algorithm.replace(/'/g, "\\'")}', currentJobDetails)" title="View child job details">
+                        ${childJob.displayName}
+                    </button>
                 </div>
             </td>
             <td>${childJob.parentJobName}</td>

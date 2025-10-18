@@ -436,6 +436,136 @@
                 </div>
             </div>
 
+            <!-- Child Job Details Page -->
+            <div id="child-job-details-page" class="page-content" style="display: none;">
+                <div class="page-header">
+                    <div class="job-header-content">
+                        <div class="job-title-section">
+                            <div class="job-title-row">
+                                <button class="btn btn-link back-button" onclick="backToParentJob()" data-tooltip="Back to parent job">
+                                    ← Back to parent job
+                                </button>
+                                <h1 id="child-job-details-title">ML-Job-1-Child1</h1>
+                                <div class="job-status-badge" id="child-job-status-badge">
+                                    <span class="status-icon">●</span>
+                                    <span id="child-job-status-text">Completed</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="job-actions">
+                            <button class="btn btn-secondary" onclick="refreshChildJob()" data-tooltip="Refresh job status">
+                                <span class="icon">↻</span> Refresh
+                            </button>
+                            <button class="btn btn-secondary" onclick="registerChildModel()" data-tooltip="Register this model">
+                                + Register model
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="job-details-content">
+                    <div class="job-tabs">
+                        <button class="tab-button active" onclick="showChildJobTab('overview')" data-tooltip="Job overview and status">Overview</button>
+                        <button class="tab-button" onclick="showChildJobTab('model')" data-tooltip="Model details and metrics">Model</button>
+                        <button class="tab-button" onclick="showChildJobTab('metrics')" data-tooltip="Performance metrics">Metrics</button>
+                        <button class="tab-button" onclick="showChildJobTab('outputs')" data-tooltip="Job outputs and logs">Outputs + logs</button>
+                    </div>
+
+                    <div class="job-tab-content">
+                        <!-- Child Job Overview Tab -->
+                        <div id="child-overview-tab" class="tab-panel active">
+                            <div class="job-overview-layout">
+                                <div class="job-overview-left">
+                                    <div class="properties-section">
+                                        <h3>Properties</h3>
+                                        <div class="property-grid">
+                                            <div class="property-item">
+                                                <label>Status</label>
+                                                <div class="status-with-icon" id="child-properties-status">
+                                                    <span class="status-icon">●</span>
+                                                    <span>Completed</span>
+                                                </div>
+                                            </div>
+                                            <div class="property-item">
+                                                <label>Created on</label>
+                                                <span id="child-properties-created-on">Oct 17, 2025 2:19 PM</span>
+                                            </div>
+                                            <div class="property-item">
+                                                <label>Duration</label>
+                                                <span id="child-properties-duration">28.84s</span>
+                                            </div>
+                                            <div class="property-item">
+                                                <label>Compute target</label>
+                                                <span id="child-properties-compute-target">Serverless</span>
+                                            </div>
+                                            <div class="property-item">
+                                                <label>Name</label>
+                                                <span id="child-properties-name">ML-Job-1</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="job-overview-right">
+                                    <div class="inputs-section">
+                                        <h3>Inputs</h3>
+                                        <div class="input-item">
+                                            <div class="input-header">
+                                                <span class="input-label">Input name: training_data</span>
+                                            </div>
+                                            <div class="input-details">
+                                                <span class="input-type">Data asset: </span>
+                                                <span id="child-input-data-asset">Seeds</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="outputs-section">
+                                        <h3>Outputs</h3>
+                                        <div class="output-item">
+                                            <div class="output-header">
+                                                <span class="output-label" id="child-output-name">Output name: model_12345</span>
+                                            </div>
+                                            <div class="output-details">
+                                                <span class="output-type">Model asset: </span>
+                                                <span id="child-output-model-asset">model_12345</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Child Job Model Tab -->
+                        <div id="child-model-tab" class="tab-panel" style="display: none;">
+                            <div id="child-model-content">
+                                <h4>Model Details</h4>
+                                <div id="child-model-info"></div>
+                            </div>
+                        </div>
+
+                        <!-- Child Job Metrics Tab -->
+                        <div id="child-metrics-tab" class="tab-panel" style="display: none;">
+                            <div id="child-metrics-content">
+                                <h4>Model Performance Metrics</h4>
+                                <div id="child-metrics-display"></div>
+                            </div>
+                        </div>
+
+                        <!-- Child Job Outputs Tab -->
+                        <div id="child-outputs-tab" class="tab-panel" style="display: none;">
+                            <div id="child-outputs-content">
+                                <div class="logs-placeholder">
+                                    <div class="logs-placeholder-icon">ℹ</div>
+                                    <div class="logs-placeholder-text">No logs available</div>
+                                    <div class="logs-placeholder-subtext">Training logs will appear here after job completion</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Automated ML Page -->
             <div id="automl-page" class="page-content" style="display: none;">
                 <div class="page-header">
