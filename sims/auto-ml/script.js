@@ -138,6 +138,17 @@ function createWorkspace() {
     nameInput.removeEventListener('input', validateInput);
     nameInput.addEventListener('input', validateInput);
     
+    // Add Enter key handler to activate Create button
+    const handleEnterKey = (event) => {
+        if (event.key === 'Enter' && !createButton.disabled) {
+            createNewWorkspace();
+        }
+    };
+    
+    // Remove existing Enter key listener to avoid duplicates
+    nameInput.removeEventListener('keypress', handleEnterKey);
+    nameInput.addEventListener('keypress', handleEnterKey);
+    
     // Initial validation
     validateInput();
     
