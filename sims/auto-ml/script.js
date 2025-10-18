@@ -374,6 +374,13 @@ function showModelsPage() {
 function openNewJobWizard() {
     document.getElementById('job-wizard-modal').style.display = 'flex';
     resetWizard();
+    
+    // Add event listeners for validation
+    const jobNameInput = document.getElementById('job-name');
+    jobNameInput.addEventListener('input', validateWizardStep);
+    
+    // Initial validation
+    validateWizardStep();
 }
 
 function closeJobWizard() {
@@ -689,20 +696,8 @@ function updateWizardStep() {
     nextBtn.style.display = currentStep < maxSteps ? 'block' : 'none';
     submitBtn.style.display = currentStep === maxSteps ? 'block' : 'none';
     
-    // Disable Next button on step 2 if data is not saved
-    if (currentStep === 2 && nextBtn) {
-        if (currentData && !currentData.isSaved) {
-            nextBtn.disabled = true;
-            nextBtn.style.opacity = '0.5';
-            nextBtn.style.cursor = 'not-allowed';
-            nextBtn.title = 'Save your dataset configuration first';
-        } else {
-            nextBtn.disabled = false;
-            nextBtn.style.opacity = '1';
-            nextBtn.style.cursor = 'pointer';
-            nextBtn.title = 'Continue to next step';
-        }
-    }
+    // Validate current step to enable/disable Next button
+    validateWizardStep();
     
     // Update dataset list if on step 2
     if (currentStep === 2) {
@@ -892,6 +887,9 @@ function selectTaskType(value) {
     
     // Call the update function
     updateTaskType(value);
+    
+    // Validate step after task type selection
+    validateWizardStep();
 }
 
 // Close dropdown when clicking outside
@@ -902,6 +900,48 @@ document.addEventListener('click', function(event) {
         document.getElementById('task-type-selected').classList.remove('active');
     }
 });
+
+// Wizard validation functions
+function validateWizardStep() {
+    const nextBtn = document.getElementById('next-btn');
+    let isValid = false;
+    
+    switch (currentStep) {
+        case 1:
+            // Basic settings - just need job name
+            const jobName = document.getElementById('job-name').value.trim();
+            isValid = jobName.length > 0;
+            break;
+            
+        case 2:
+            // Task type and data - need both task type and dataset
+            const taskType = document.getElementById('task-type').value;
+            const hasDataset = currentData && currentData.isSaved;
+            isValid = taskType && hasDataset;
+            break;
+            
+        case 3:
+            // Task settings - need target column
+            const targetColumn = document.getElementById('target-column').value;
+            isValid = targetColumn && targetColumn !== '';
+            break;
+            
+        default:
+            // For other steps, allow progression
+            isValid = true;
+            break;
+    }
+    
+    // Enable/disable Next button
+    if (nextBtn) {
+        nextBtn.disabled = !isValid;
+        if (isValid) {
+            nextBtn.classList.remove('disabled');
+        } else {
+            nextBtn.classList.add('disabled');
+        }
+    }
+}
 
 // File upload handling
 function handleFileUpload(input) {
@@ -1290,6 +1330,9 @@ function handleParsedData(columnDataJson) {
 
     document.getElementById('target-column-group').style.display = 'block';
     
+    // Add change event listener to target column dropdown for validation
+    targetSelect.addEventListener('change', validateWizardStep);
+    
     console.log('Target column dropdown populated. Options:', Array.from(targetSelect.options).map(opt => opt.value));
     
     // Show success message with file info
@@ -1613,13 +1656,8 @@ function saveDataset() {
     // Update the UI to reflect saved state
     displayUploadedFile(currentData.filename);
     
-    // Enable the Next button now that data is saved
-    const nextBtn = document.getElementById('next-btn');
-    if (nextBtn) {
-        nextBtn.disabled = false;
-        nextBtn.style.opacity = '1';
-        nextBtn.style.cursor = 'pointer';
-    }
+    // Validate wizard step after data is saved
+    validateWizardStep();
     
     // Update the data page to show this dataset
     updateDataFilesList();
