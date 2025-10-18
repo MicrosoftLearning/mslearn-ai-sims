@@ -1401,17 +1401,12 @@ function displayUploadedFile(fileName) {
                 </div>
                 
                 ${hasValidData ? `
-                    <!-- Header checkbox and Save button - positioned above table, aligned left -->
-                    <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 15px;">
+                    <!-- Header checkbox - positioned above table, aligned left -->
+                    <div style="margin-bottom: 10px;">
                         <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; white-space: nowrap;">
                             <input type="checkbox" id="first-row-headers" ${useFirstRowAsHeaders ? 'checked' : ''} onchange="toggleHeaderMode()" style="margin: 0;" ${currentData.isSaved ? 'disabled' : ''}>
                             <span>First row contains column headers</span>
                         </label>
-                        <button type="button" id="save-data-btn" onclick="saveDataset()" 
-                                style="padding: 6px 12px; font-size: 12px; background: #0366d6; color: white; border: none; border-radius: 4px; cursor: pointer; ${currentData.isSaved ? 'background: #28a745;' : ''}" 
-                                ${currentData.isSaved ? 'disabled' : ''}>
-                            ${currentData.isSaved ? '✓ Created' : 'Create'}
-                        </button>
                     </div>
                     
                     <div style="overflow-x: auto; max-width: 100%;">
@@ -1442,6 +1437,15 @@ function displayUploadedFile(fileName) {
                             </tbody>
                         </table>
                     </div>
+                    
+                    <!-- Create button positioned under right edge of table -->
+                    <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                        <button type="button" id="save-data-btn" onclick="saveDataset()" 
+                                style="padding: 8px 16px; font-size: 12px; background: #0366d6; color: white; border: none; border-radius: 4px; cursor: pointer; ${currentData.isSaved ? 'background: #28a745;' : ''}" 
+                                ${currentData.isSaved ? 'disabled' : ''}>
+                            ${currentData.isSaved ? '✓ Created' : 'Create'}
+                        </button>
+                    </div>
                 ` : `
                     <!-- Header checkbox - positioned above placeholder, aligned left -->
                     <div style="margin-bottom: 10px;">
@@ -1465,6 +1469,16 @@ function displayUploadedFile(fileName) {
     }
     
     uploadedFilesDiv.innerHTML = fileDisplay;
+    
+    // Auto-scroll to show the table area after file upload
+    if (currentData && currentData.success && currentData.preview && currentData.preview.length > 0) {
+        setTimeout(() => {
+            const tableElement = document.getElementById('data-preview-table');
+            if (tableElement) {
+                tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100); // Small delay to ensure DOM is updated
+    }
 }
 
 function removeUploadedFile() {
@@ -1676,7 +1690,13 @@ function saveDataset() {
             // Trigger the onchange event to set it as current data
             selectExistingDataset(datasetName);
         }
-    }, 100);
+        
+        // Scroll up to show the dataset list after creation
+        const datasetListElement = document.getElementById('dataset-list');
+        if (datasetListElement) {
+            datasetListElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, 200); // Slightly longer delay to ensure all UI updates are complete
     
     console.log('Dataset saved successfully:', finalizedData);
 }
