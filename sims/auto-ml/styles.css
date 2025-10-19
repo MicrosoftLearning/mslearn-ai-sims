@@ -2815,27 +2815,96 @@ button:disabled {
     background: #f8f6f4;
 }
 
+/* === UNIFIED TAB STYLES - Used across all pages === */
+/* All tab containers */
+.job-tabs,
+.tab-navigation,
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #e1e4e8;
+    background-color: #f8f9fa;
+    margin-bottom: 0;
+}
+
+/* All tab buttons - COMPLETE RESET then rebuild styles */
+button.tab-button,
+.job-tabs .tab-button,
+.tab-navigation .tab-button,
+.tabs .tab-button,
 .tab-button {
-    background: none;
-    border: none;
-    padding: 16px 24px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    color: #605e5c;
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s ease;
+    all: unset !important;
+    box-sizing: border-box !important;
+    display: inline-block !important;
+    padding: 16px 24px !important;
+    cursor: pointer !important;
+    font-family: inherit !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #605e5c !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 3px solid transparent !important;
+    transition: all 0.2s ease !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
 }
 
+button.tab-button:hover,
+.job-tabs .tab-button:hover,
+.tab-navigation .tab-button:hover,
+.tabs .tab-button:hover,
 .tab-button:hover {
-    background: #f3f2f1;
-    color: #323130;
+    background: #f3f2f1 !important;
+    color: #323130 !important;
+    border: 0 !important;
+    border-bottom: 3px solid transparent !important;
 }
 
+button.tab-button.active,
+.job-tabs .tab-button.active,
+.tab-navigation .tab-button.active,
+.tabs .tab-button.active,
 .tab-button.active {
-    color: #0078d4;
-    border-bottom-color: #0078d4;
-    background: white;
+    color: #0078d4 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 3px solid #0078d4 !important;
+}
+
+button.tab-button:focus,
+.job-tabs .tab-button:focus,
+.tab-navigation .tab-button:focus,
+.tabs .tab-button:focus,
+.tab-button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    border-bottom: 3px solid transparent !important;
+}
+
+button.tab-button.active:focus,
+.job-tabs .tab-button.active:focus,
+.tab-navigation .tab-button.active:focus,
+.tabs .tab-button.active:focus,
+.tab-button.active:focus {
+    border: 0 !important;
+    border-bottom: 3px solid #0078d4 !important;
+}
+
+/* Tab content containers */
+.job-tab-content,
+.tab-content,
+.tab-panel {
+    padding: 24px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
 }
 
 .job-tab-content {
@@ -4756,14 +4825,7 @@ button:disabled {
     border-bottom-color: #0078d4;
 }
 
-.tab-content {
-    display: none;
-    padding: 24px 40px;
-}
-
-.tab-content.active {
-    display: block;
-}
+/* Tab content now uses unified styles above */
 
 .details-section,
 .performance-section,
@@ -4973,39 +5035,7 @@ button:disabled {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.tab-navigation {
-    display: flex;
-    border-bottom: 1px solid #e1e4e8;
-    background-color: #f8f9fa;
-    border-radius: 4px 4px 0 0;
-}
-
-.tab-button {
-    padding: 12px 24px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    color: #605e5c;
-    transition: all 0.2s ease;
-    border-bottom: 2px solid transparent;
-}
-
-.tab-button.active {
-    color: #0078d4;
-    border-bottom-color: #0078d4;
-    background-color: white;
-}
-
-.tab-button:hover:not(.active) {
-    color: #323130;
-    background-color: #f3f2f1;
-}
-
-.tab-content {
-    padding: 24px;
-}
+/* Tab navigation now uses unified styles above */
 
 /* Endpoint Details Tab */
 .endpoint-details-section h3 {
@@ -5151,4 +5181,42 @@ button:disabled {
     font-size: 13px;
     color: #323130;
     word-break: break-all;
+}
+
+.consume-download-section {
+    margin: 24px 0;
+}
+
+.consume-download-section .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.consume-code-section {
+    margin-top: 32px;
+}
+
+.consume-code-section h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #323130;
+}
+
+.consume-code-section pre {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 4px;
+    padding: 16px;
+    overflow-x: auto;
+    margin: 0;
+}
+
+.consume-code-section code {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #323130;
+    line-height: 1.5;
+    white-space: pre;
 }

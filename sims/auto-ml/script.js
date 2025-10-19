@@ -5753,6 +5753,9 @@ function showEndpointDetails(endpointId) {
     // Clear any placeholder text since we're setting actual content
     testInput.placeholder = '';
     
+    // Update the Python code example with actual feature names
+    updateConsumeCodeExample(featureColumns, registeredModel);
+    
     // Show details tab by default
     showEndpointTab('details');
 }
@@ -5901,6 +5904,113 @@ function downloadModel() {
         console.error('Error downloading real model:', error);
         alert(`Error downloading model: ${error.message}`);
     }
+}
+
+function downloadEndpointModel() {
+    // Get the current endpoint's model name
+    const modelName = document.getElementById('deployed-model-display').textContent;
+    
+    if (!modelName) {
+        alert('No model information available.');
+        return;
+    }
+    
+    // Find the registered model data
+    const registeredModel = registeredModels.find(model => model.name === modelName);
+    
+    if (!registeredModel) {
+        alert('Model data not found.');
+        return;
+    }
+    
+    // Use PyScript to serialize the real trained model
+    if (!window.serialize_model_pyscript) {
+        alert('PyScript model serialization not available. Please wait for PyScript to load.');
+        return;
+    }
+    
+    try {
+        // Use the exact model key for precise model identification
+        const modelIdentifier = registeredModel.modelKey || modelName;
+        console.log('Downloading real scikit-learn model from endpoint:', modelName, 'with key:', modelIdentifier);
+        const serializedModelB64 = window.serialize_model_pyscript(modelIdentifier);
+        
+        // Check if there was an error
+        if (serializedModelB64.startsWith('{"error":')) {
+            const errorInfo = JSON.parse(serializedModelB64);
+            throw new Error(errorInfo.error);
+        }
+        
+        // Convert base64 to binary data for download
+        const binaryString = atob(serializedModelB64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        const fileName = `${modelName.replace(/[^a-zA-Z0-9-_]/g, '_')}_model.pkl`;
+        downloadFile(bytes, fileName, 'application/octet-stream');
+        
+        console.log('Downloaded real scikit-learn model from endpoint:', modelName);
+    } catch (error) {
+        console.error('Error downloading model from endpoint:', error);
+        alert(`Error downloading model: ${error.message}`);
+    }
+}
+
+function updateConsumeCodeExample(featureColumns, registeredModel) {
+    const codeElement = document.getElementById('example-python-code');
+    
+    if (!codeElement) return;
+    
+    // Generate sample data based on actual feature columns with appropriate values
+    const sampleDataEntries = featureColumns.map((col, index) => {
+        // Create reasonable sample values based on feature names
+        let sampleValue;
+        if (col.toLowerCase().includes('age')) {
+            sampleValue = 35;
+        } else if (col.toLowerCase().includes('price') || col.toLowerCase().includes('cost') || col.toLowerCase().includes('amount')) {
+            sampleValue = 100.50;
+        } else if (col.toLowerCase().includes('count') || col.toLowerCase().includes('number')) {
+            sampleValue = 5;
+        } else if (col.toLowerCase().includes('rate') || col.toLowerCase().includes('ratio') || col.toLowerCase().includes('percent')) {
+            sampleValue = 0.75;
+        } else if (col.toLowerCase().includes('income') || col.toLowerCase().includes('salary')) {
+            sampleValue = 50000;
+        } else if (col.toLowerCase().includes('score')) {
+            sampleValue = 85;
+        } else {
+            // Default sample values based on position
+            const defaultValues = [1.0, 2.5, 0.8, 150, 3.2, 42, 0.6, 25.5, 1, 0.9];
+            sampleValue = defaultValues[index % defaultValues.length];
+        }
+        return `    '${col}': [${sampleValue}]`;
+    }).join(',\n');
+    
+    // Get the model filename
+    const modelName = document.getElementById('deployed-model-display').textContent || 'your_model';
+    const fileName = `${modelName.replace(/[^a-zA-Z0-9-_]/g, '_')}_model.pkl`;
+    
+    const pythonCode = `import joblib
+import pandas as pd
+import numpy as np
+
+# Load the downloaded model
+model = joblib.load('${fileName}')
+
+# Prepare sample data (replace with your actual feature values)
+sample_data = {
+${sampleDataEntries}
+}
+
+# Convert to DataFrame
+df = pd.DataFrame(sample_data)
+
+# Make prediction
+prediction = model.predict(df)
+print(f"Prediction: {prediction[0]}")`;
+
+    codeElement.textContent = pythonCode;
 }
 
 // DEPRECATED: These functions created fake/mock models and are no longer used

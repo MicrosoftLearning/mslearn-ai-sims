@@ -424,21 +424,49 @@
                     <!-- Consume Tab -->
                     <div id="endpoint-consume-tab" class="tab-content" style="display: none;" role="tabpanel" aria-labelledby="consume-tab-button">
                         <div class="endpoint-consume-section">
-                            <h3>Consume Endpoint</h3>
-                            <p>Integration details for consuming your deployed model endpoint.</p>
-                            <div class="consume-details" role="list" aria-label="Integration details">
-                                <div class="consume-item" role="listitem">
-                                    <label>REST Endpoint URL:</label>
-                                    <code id="endpoint-url" aria-label="REST endpoint URL">https://your-endpoint.azureml.net/score</code>
-                                </div>
-                                <div class="consume-item" role="listitem">
-                                    <label>Authentication:</label>
-                                    <code aria-label="Authentication type">Bearer Token Required</code>
-                                </div>
-                                <div class="consume-item" role="listitem">
-                                    <label>Content Type:</label>
-                                    <code aria-label="Content type">application/json</code>
-                                </div>
+                            <h3>Consume Model</h3>
+                            <p>To consume this model, download it and use Python code like this to use it.</p>
+                            
+                            <!-- Keep the endpoint URL element that JavaScript expects -->
+                            <div style="display: none;">
+                                <code id="endpoint-url" aria-label="REST endpoint URL">https://your-endpoint.azureml.net/score</code>
+                            </div>
+                            
+                            <div class="consume-download-section">
+                                <button class="btn btn-primary" id="download-model-btn" onclick="downloadEndpointModel()" aria-describedby="download-help">
+                                    <i class="icon-download"></i> Download model
+                                </button>
+                                <div id="download-help" class="sr-only">Downloads the trained scikit-learn model as a .pkl file</div>
+                            </div>
+                            <div class="consume-code-section">
+                                <h4>Example Python Code:</h4>
+                                <pre><code id="example-python-code" class="language-python">
+import joblib
+import pandas as pd
+import numpy as np
+
+# Load the downloaded model
+model = joblib.load('your_model.pkl')
+
+# Prepare sample data (replace with your actual feature values)
+sample_data = {
+    'feature1': [1.0],
+    'feature2': [2.5],
+    'feature3': [0.8]
+}
+
+# Convert to DataFrame
+df = pd.DataFrame(sample_data)
+
+# Make prediction
+prediction = model.predict(df)
+print(f"Prediction: {prediction[0]}")
+
+# Get prediction probability (for classification models)
+if hasattr(model, 'predict_proba'):
+    probabilities = model.predict_proba(df)
+    print(f"Probabilities: {probabilities[0]}")
+                                </code></pre>
                             </div>
                         </div>
                     </div>
