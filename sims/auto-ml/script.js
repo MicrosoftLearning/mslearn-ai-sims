@@ -5384,9 +5384,20 @@ function navigateToSourceJob() {
 }
 
 function showJobDetailsFromModel(jobIndex) {
-    // Store the job index and navigate to job details
-    sessionStorage.setItem('currentJobIndex', jobIndex);
-    showJobDetails(jobIndex);
+    console.log('showJobDetailsFromModel called with jobIndex:', jobIndex);
+    console.log('jobHistory length:', jobHistory.length);
+    
+    // Find the job in jobHistory by index
+    const job = jobHistory[jobIndex];
+    if (job) {
+        console.log('Found job:', job.name);
+        // Store the job index and navigate to job details
+        sessionStorage.setItem('currentJobIndex', jobIndex);
+        showJobDetails(job);
+    } else {
+        console.error('Job not found at index:', jobIndex);
+        console.error('Available jobs:', jobHistory.map((j, i) => `${i}: ${j.name}`));
+    }
 }
 
 function showConfigSettingsModal() {
