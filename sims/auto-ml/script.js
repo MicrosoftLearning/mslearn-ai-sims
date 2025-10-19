@@ -5345,7 +5345,7 @@ function registerChildModel() {
     const job = currentJobDetails;
     const childJob = currentChildJobDetails;
     
-    if (!job || job.status !== 'Completed') {
+    if (!job || !job.status.startsWith('Completed')) {
         alert('Job must be completed to register a model.');
         return;
     }
@@ -5403,7 +5403,7 @@ function deployChildModel() {
         return;
     }
     
-    if (childJob.status !== 'Completed') {
+    if (!childJob.status.startsWith('Completed')) {
         alert('Job must be completed to deploy the model.');
         return;
     }
@@ -5438,7 +5438,7 @@ function downloadChildModel() {
         return;
     }
     
-    if (childJob.status !== 'Completed') {
+    if (!childJob.status.startsWith('Completed')) {
         alert('Job must be completed to download the model.');
         return;
     }
