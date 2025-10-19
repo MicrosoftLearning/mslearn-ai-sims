@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <!-- MobileNet Model -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/mobilenet.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Image Analyzer</h1>
+            <p>Upload an image and let AI identify what's in it!</p>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <div class="file-input-wrapper">
+                    <input type="file" id="imageInput" accept="image/*" hidden>
+                    <button id="uploadBtn" class="upload-btn">
+                        📁 Choose Image
+                    </button>
+                </div>
+                
+                <div class="image-preview" id="imagePreview">
+                    <div class="placeholder">
+                        <span>📷</span>
+                        <p>No image selected</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="analyzeBtn" class="analyze-btn" disabled>
+                    🔍 Analyze Image
+                </button>
+            </div>
+
+            <div class="results-section" id="resultsSection">
+                <h3>Analysis Results</h3>
+                <div class="loading" id="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Analyzing image...</p>
+                </div>
+                <div class="predictions" id="predictions"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by TensorFlow.js and MobileNet</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
