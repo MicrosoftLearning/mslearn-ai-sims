@@ -677,6 +677,254 @@
                 </div>
             </div>
 
+            <!-- New AutoML Job Wizard Page -->
+            <div id="automl-wizard-page" class="page-content" style="display: none;">
+                <div class="wizard-page-container">
+                    <div class="wizard-header">
+                        <h1>Submit an Automated ML job</h1>
+                        <button class="close-wizard" onclick="closeJobWizard()" data-tooltip="Cancel job creation">&times;</button>
+                    </div>
+                    
+                    <div class="wizard-main">
+                        <div class="wizard-sidebar">
+                            <div class="wizard-steps-vertical">
+                                <div class="step-vertical active" data-step="1">
+                                    <div class="step-indicator">
+                                        <span class="step-number">1</span>
+                                    </div>
+                                    <div class="step-info">
+                                        <div class="step-title">Basic settings</div>
+                                    </div>
+                                </div>
+                                <div class="step-vertical" data-step="2">
+                                    <div class="step-indicator">
+                                        <span class="step-number">2</span>
+                                    </div>
+                                    <div class="step-info">
+                                        <div class="step-title">Task type & data</div>
+                                    </div>
+                                </div>
+                                <div class="step-vertical" data-step="3">
+                                    <div class="step-indicator">
+                                        <span class="step-number">3</span>
+                                    </div>
+                                    <div class="step-info">
+                                        <div class="step-title">Task settings</div>
+                                    </div>
+                                </div>
+                                <div class="step-vertical" data-step="4">
+                                    <div class="step-indicator">
+                                        <span class="step-number">4</span>
+                                    </div>
+                                    <div class="step-info">
+                                        <div class="step-title">Compute</div>
+                                    </div>
+                                </div>
+                                <div class="step-vertical" data-step="5">
+                                    <div class="step-indicator">
+                                        <span class="step-number">5</span>
+                                    </div>
+                                    <div class="step-info">
+                                        <div class="step-title">Review</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="wizard-content-area">
+                            <!-- Step 1: Basic Settings -->
+                            <div id="step-1" class="wizard-step active">
+                                <div class="step-header">
+                                    <h2>Basic settings</h2>
+                                    <p>Let's start with some basic information about your training job.</p>
+                                </div>
+                                <div class="step-content">
+                                    <div class="form-section">
+                                        <div class="form-group">
+                                            <label for="job-name">Job name *</label>
+                                            <input type="text" id="job-name" placeholder="Enter job name" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="job-description">Description</label>
+                                            <textarea id="job-description" rows="4" placeholder="Enter description (optional)"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Task & Data -->
+                            <div id="step-2" class="wizard-step">
+                                <div class="step-header">
+                                    <h2>Task type & data</h2>
+                                    <p>Select the machine learning task type and upload your data.</p>
+                                </div>
+                                <div class="step-content">
+                                    <div class="form-section">
+                                        <div class="form-group">
+                                            <label for="task-type">Task type *</label>
+                                            <div class="custom-dropdown" data-tooltip="Choose the type of machine learning task">
+                                                <div class="dropdown-selected" id="task-type-selected" onclick="toggleTaskTypeDropdown()">
+                                                    <span class="placeholder">Select task type</span>
+                                                    <span class="dropdown-arrow">▼</span>
+                                                </div>
+                                                <div class="dropdown-options" id="task-type-options">
+                                                    <div class="task-type-option" data-value="classification" onclick="selectTaskType('classification')">
+                                                        <div class="task-type-icon chart"></div>
+                                                        <span>Classification</span>
+                                                    </div>
+                                                    <div class="task-type-option" data-value="regression" onclick="selectTaskType('regression')">
+                                                        <div class="task-type-icon layers"></div>
+                                                        <span>Regression</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" id="task-type" value="">
+                                            <div class="help-text">
+                                                <small><strong>Classification:</strong> Predict categories (e.g., spam/not spam, pass/fail)</small><br>
+                                                <small><strong>Regression:</strong> Predict continuous values (e.g., price, temperature)</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Create Dataset Button -->
+                                        <div class="form-group">
+                                            <button type="button" class="btn btn-primary" onclick="showCreateDatasetInterface()" data-tooltip="Create a new tabular dataset">
+                                                Create (Tabular)
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Existing Datasets List -->
+                                        <div class="form-group">
+                                            <label>Select existing dataset</label>
+                                            <div id="dataset-list" class="dataset-list">
+                                                <div class="no-datasets">
+                                                    <p>No datasets available. Create a dataset using the button above.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- File Upload (Hidden initially, shown when Create button is clicked) -->
+                                        <div class="form-group" id="file-upload-group" style="display: none;">
+                                            <label for="dataset-name">Dataset name *</label>
+                                            <input type="text" id="dataset-name" placeholder="Enter dataset name" oninput="validateDatasetName()">
+                                            <div id="dataset-name-error" class="error-message" style="display: none;"></div>
+                                            
+                                            <label for="data-file" style="margin-top: 15px;">Upload CSV file *</label>
+                                            <input type="file" id="data-file" accept=".csv" onchange="handleFileUpload(this)">
+                                            <div id="uploaded-files"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Task Settings -->
+                            <div id="step-3" class="wizard-step">
+                                <div class="step-header">
+                                    <h2>Task settings</h2>
+                                    <p>Configure additional settings for your machine learning task.</p>
+                                </div>
+                                <div class="step-content">
+                                    <div class="form-section">
+                                        <div class="form-group" id="target-column-group" style="display: none;">
+                                            <label for="target-column">Target column *</label>
+                                            <select id="target-column">
+                                                <option value="">Select target column</option>
+                                            </select>
+                                        </div>
+                                        <div class="config-section horizontal">
+                                            <div class="config-item">
+                                                <button type="button" class="config-btn" onclick="openConfigFlyout()" data-tooltip="Configure primary metrics and algorithms">
+                                                    <span class="config-icon">⚙️</span>
+                                                    <div>
+                                                        <div class="config-title">Additional configuration settings</div>
+                                                        <div class="config-desc">Primary metric and algorithms</div>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                            <div class="config-item">
+                                                <button type="button" class="config-btn" onclick="openFeaturizationFlyout()" data-tooltip="Configure data preprocessing options">
+                                                    <span class="config-icon">🔧</span>
+                                                    <div>
+                                                        <div class="config-title">Featurization settings</div>
+                                                        <div class="config-desc">Data preprocessing options</div>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Limits expandable section -->
+                                        <div class="expandable-section">
+                                            <button type="button" class="expandable-header" onclick="toggleLimitsSection()">
+                                                <span class="expand-icon">▶</span>
+                                                <span>Limits</span>
+                                            </button>
+                                            <div id="limits-content" class="expandable-content">
+                                                <div class="form-group">
+                                                    <label for="metric-threshold">Metric score threshold</label>
+                                                    <input type="number" id="metric-threshold" name="metric-threshold" 
+                                                           placeholder="e.g., 0.85" step="0.01" min="0" max="1">
+                                                    <small class="form-help">Stop training when this metric score is reached (range depends on selected primary metric)</small>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="experiment-timeout">Experiment timeout (minutes)</label>
+                                                    <input type="number" id="experiment-timeout" name="experiment-timeout" 
+                                                           placeholder="e.g., 60" min="15" max="1440">
+                                                    <small class="form-help">Maximum time to run the experiment (minimum 15 minutes)</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Compute -->
+                            <div id="step-4" class="wizard-step">
+                                <div class="step-header">
+                                    <h2>Compute</h2>
+                                    <p>Select the compute target for training your machine learning model.</p>
+                                </div>
+                                <div class="step-content">
+                                    <div class="form-section">
+                                        <div class="form-group">
+                                            <label for="compute-type">Select compute type</label>
+                                            <select id="compute-type" class="form-control">
+                                                <option value="serverless" selected>Serverless</option>
+                                            </select>
+                                            <div class="form-help">
+                                                <small>Serverless compute is the recommended option for getting started with automated ML.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 5: Review -->
+                            <div id="step-5" class="wizard-step">
+                                <div class="step-header">
+                                    <h2>Review and submit</h2>
+                                    <p>Review your configuration and submit the training job.</p>
+                                </div>
+                                <div class="step-content">
+                                    <div class="form-section">
+                                        <div id="job-summary"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-footer">
+                        <div class="footer-left">
+                            <button type="button" class="btn btn-secondary" onclick="previousStep()" id="prev-btn" style="display: none;" data-tooltip="Go to previous step">Back</button>
+                            <button type="button" class="btn btn-primary" onclick="nextStep()" id="next-btn" data-tooltip="Continue to next step">Next</button>
+                            <button type="button" class="btn btn-primary" onclick="submitJob()" id="submit-btn" style="display: none;" data-tooltip="Start training the models">Submit</button>
+                        </div>
+                        <div class="footer-right">
+                            <button type="button" class="btn btn-secondary" onclick="closeJobWizard()" data-tooltip="Cancel job creation">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Job Wizard Modal -->
             <div id="job-wizard-modal" class="modal full-page-modal" style="display: none;">
                 <div class="full-page-wizard">
@@ -923,6 +1171,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </main>

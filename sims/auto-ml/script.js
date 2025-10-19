@@ -408,10 +408,14 @@ function showModelsPage() {
 
 // Wizard management
 function openNewJobWizard() {
-    const wizardModal = document.getElementById('job-wizard-modal');
-    if (wizardModal) {
-        wizardModal.style.display = 'flex';
-    }
+    // Hide all page content
+    const pages = document.querySelectorAll('.page-content');
+    pages.forEach(page => page.style.display = 'none');
+    
+    // Show the wizard page
+    const wizardPage = document.getElementById('automl-wizard-page');
+    wizardPage.style.display = 'block';
+    
     resetWizard();
     
     // Add event listeners for validation
@@ -423,10 +427,15 @@ function openNewJobWizard() {
 }
 
 function closeJobWizard() {
-    const wizardModal = document.getElementById('job-wizard-modal');
-    if (wizardModal) {
-        wizardModal.style.display = 'none';
+    // Hide wizard page
+    const wizardPage = document.getElementById('automl-wizard-page');
+    if (wizardPage) {
+        wizardPage.style.display = 'none';
     }
+    
+    // Show AutoML page
+    showAutoMLPage();
+    
     resetWizard();
 }
 
@@ -734,7 +743,7 @@ function updateWizardStep() {
     const nextBtn = document.getElementById('next-btn');
     const submitBtn = document.getElementById('submit-btn');
     
-    prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
+    prevBtn.style.display = 'block'; // Always show Back button
     nextBtn.style.display = currentStep < maxSteps ? 'block' : 'none';
     submitBtn.style.display = currentStep === maxSteps ? 'block' : 'none';
     
@@ -773,6 +782,9 @@ function previousStep() {
     if (currentStep > 1) {
         currentStep--;
         updateWizardStep();
+    } else {
+        // On step 1, Back button acts like Cancel
+        closeJobWizard();
     }
 }
 
