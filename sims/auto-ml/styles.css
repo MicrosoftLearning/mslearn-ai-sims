@@ -3259,11 +3259,19 @@ button:disabled {
     margin-bottom: 32px;
 }
 
+.workspaces-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+    margin-bottom: 16px;
+}
+
 .workspaces-subtitle {
     font-size: 20px;
     font-weight: 600;
     color: #323130;
-    margin: 0 0 16px 0;
+    margin: 0;
 }
 
 .workspaces-list {
@@ -3276,10 +3284,10 @@ button:disabled {
     background-color: white;
     color: #323130;
     border: 1px solid #323130;
-    padding: 12px 20px;
-    font-size: 14px;
+    padding: 24px 40px;
+    font-size: 18px;
     font-weight: 500;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -3440,13 +3448,13 @@ button:disabled {
     background-color: #0066cc;
     color: white;
     border: none;
-    padding: 20px 40px;
-    font-size: 20px;
+    padding: 14px 28px;
+    font-size: 14px;
     font-weight: 600;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    box-shadow: 0 4px 8px rgba(0, 102, 204, 0.3);
+    box-shadow: 0 3px 6px rgba(0, 102, 204, 0.3);
 }
 
 .create-workspace-btn:hover {
