@@ -96,6 +96,7 @@ function checkPyScriptStatus(attempts = 0) {
 // Data management
 let uploadedDataFiles = [];
 let deployedEndpoints = [];
+let deploymentSource = null; // Track if deployment is from 'model-details' or 'child-job'
 
 // Header mode preference (true = use first row as headers, false = use custom headers)
 let useFirstRowAsHeaders = true;
@@ -5046,9 +5047,25 @@ function deployChildModel() {
         return;
     }
     
-    // Placeholder for deploy functionality
-    alert(`Deploying model from ${childJob.displayName || childJob.id}...`);
-    console.log('Deploy child model:', childJob);
+    // Set deployment source
+    deploymentSource = 'child-job';
+    
+    // Generate default names based on child job
+    const jobName = childJob.displayName || childJob.id || 'model';
+    const defaultEndpointName = `${jobName}-endpoint`;
+    const defaultDeploymentName = `${jobName}-deployment`;
+    
+    // Populate the form fields
+    document.getElementById('endpointName').value = defaultEndpointName;
+    document.getElementById('deploymentName').value = defaultDeploymentName;
+    
+    // Show the deploy model flyout
+    const flyout = document.getElementById('deployModelFlyout');
+    flyout.style.display = 'block';
+    // Add slight delay to ensure display is set before adding open class for animation
+    setTimeout(() => {
+        flyout.classList.add('open');
+    }, 10);
 }
 
 function downloadChildModel() {
@@ -5273,6 +5290,9 @@ function refreshModelDetails() {
 function useThisModel() {
     const modelName = document.getElementById('model-details-title').textContent;
     
+    // Set deployment source
+    deploymentSource = 'model-details';
+    
     // Set default values for endpoint and deployment names
     const defaultEndpointName = `${modelName}-endpoint`;
     const defaultDeploymentName = `${modelName}-deployment`;
@@ -5299,13 +5319,14 @@ function closeDeployModelFlyout() {
         // Clear form fields
         document.getElementById('endpointName').value = '';
         document.getElementById('deploymentName').value = '';
+        // Reset deployment source
+        deploymentSource = null;
     }, 300);
 }
 
 function completeModelDeployment() {
     const endpointName = document.getElementById('endpointName').value.trim();
     const deploymentName = document.getElementById('deploymentName').value.trim();
-    const modelName = document.getElementById('model-details-title').textContent;
     
     // Validate required fields
     if (!endpointName) {
@@ -5316,6 +5337,53 @@ function completeModelDeployment() {
     if (!deploymentName) {
         alert('Please enter a deployment name.');
         return;
+    }
+    
+    let modelName;
+    
+    if (deploymentSource === 'model-details') {
+        // Deploying from model details page - model is already registered
+        modelName = document.getElementById('model-details-title').textContent;
+    } else if (deploymentSource === 'child-job') {
+        // Deploying from child job - may need to register model first
+        const childJob = currentChildJobDetails;
+        const jobName = childJob.displayName || childJob.id || 'model';
+        
+        // Check if model is already registered
+        const existingModel = registeredModels.find(model => 
+            model.sourceJobId === childJob.id || model.sourceJob === jobName
+        );
+        
+        if (existingModel) {
+            modelName = existingModel.name;
+        } else {
+            // Register the model first with unique name
+            const baseModelName = jobName;
+            let modelCounter = 1;
+            let uniqueModelName = `${baseModelName}-${modelCounter}`;
+            
+            // Ensure unique name
+            while (registeredModels.find(model => model.name === uniqueModelName)) {
+                modelCounter++;
+                uniqueModelName = `${baseModelName}-${modelCounter}`;
+            }
+            
+            // Create new registered model
+            const newRegisteredModel = {
+                id: registeredModels.length + 1,
+                name: uniqueModelName,
+                sourceJob: jobName,
+                sourceJobId: childJob.id,
+                createdDate: new Date().toISOString(),
+                algorithm: childJob.algorithm || 'Unknown',
+                metrics: childJob.metrics || {}
+            };
+            
+            registeredModels.push(newRegisteredModel);
+            updateDeployedModelsList();
+            
+            modelName = uniqueModelName;
+        }
     }
     
     // Create new endpoint
@@ -5333,6 +5401,9 @@ function completeModelDeployment() {
     
     // Close the flyout
     closeDeployModelFlyout();
+    
+    // Reset deployment source
+    deploymentSource = null;
     
     // Update endpoints list
     updateEndpointsList();
