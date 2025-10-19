@@ -1679,6 +1679,10 @@ if hasattr(model, 'predict_proba'):
                 normalize_features = job_data.get('normalizeFeatures', False)
                 categorical_settings = job_data.get('categoricalSettings', {})
                 
+                # Get early stopping threshold if set
+                metric_threshold = job_data.get('metricThreshold')
+                early_stop_triggered = False
+                
                 log_message("🔄 Preparing training data with pipelines...")
                 
                 # Prepare features and target
@@ -1824,6 +1828,10 @@ if hasattr(model, 'predict_proba'):
                     
                 best_model_name = None
                 log_message(f"🎯 Primary metric: '{primary_metric}' (initialized best_score to {best_score})")
+                if metric_threshold is not None:
+                    log_message(f"⏰ Early stopping threshold: {metric_threshold} (will stop if any model meets or beats this score)")
+                else:
+                    log_message("⏰ No early stopping threshold set - will train all algorithms")
                 log_message("=" * 50)
                 log_message("🏋️ STARTING MODEL TRAINING...")
                 
@@ -2000,6 +2008,31 @@ if hasattr(model, 'predict_proba'):
                             
                             log_message(f"  ✅ {algo.replace('_', ' ').title()} completed successfully")
                             
+                            # Check for early stopping condition
+                            if metric_threshold is not None:
+                                # Determine if threshold has been met based on metric direction
+                                threshold_met = False
+                                if primary_metric in higher_is_better:
+                                    threshold_met = current_score >= metric_threshold
+                                    comparison_op = ">="
+                                elif primary_metric in lower_is_better:
+                                    threshold_met = current_score <= metric_threshold
+                                    comparison_op = "<="
+                                else:
+                                    # Default: assume higher is better for unknown metrics
+                                    threshold_met = current_score >= metric_threshold
+                                    comparison_op = ">="
+                                
+                                log_message(f"  🎯 Threshold check: {current_score:.6f} {comparison_op} {metric_threshold} = {threshold_met}")
+                                
+                                if threshold_met:
+                                    early_stop_triggered = True
+                                    log_message(f"  🛑 EARLY STOPPING TRIGGERED!")
+                                    log_message(f"     Model '{algo.replace('_', ' ').title()}' achieved {primary_metric}={current_score:.6f}")
+                                    log_message(f"     This meets the threshold of {metric_threshold}")
+                                    log_message(f"     Stopping training - remaining algorithms will not be trained")
+                                    break  # Exit the training loop
+                            
                         except Exception as e:
                             log_message(f"  ❌ Failed to train {algo.replace('_', ' ').title()}: {str(e)}", "error")
                     else:
@@ -2012,6 +2045,11 @@ if hasattr(model, 'predict_proba'):
                 log_message("=" * 50)
                 log_message("🏆 TRAINING SUMMARY:")
                 log_message(f"  • Total models trained: {len(model_results)}")
+                if early_stop_triggered:
+                    remaining_algorithms = len(algorithms) - len(model_results)
+                    log_message(f"  • Early stopping triggered after {len(model_results)} model(s)")
+                    log_message(f"  • Skipped {remaining_algorithms} remaining algorithm(s)")
+                    log_message(f"  • Threshold met: {primary_metric} {'≥' if primary_metric in higher_is_better else '≤'} {metric_threshold}")
                 log_message(f"  • Primary metric used: {primary_metric}")
                 if best_model_name:
                     log_message(f"  • Best model: {best_model_name.replace('_', ' ').title()}")
@@ -2019,23 +2057,30 @@ if hasattr(model, 'predict_proba'):
                 else:
                     log_message("  • No models completed successfully", "warning")
                 
-                log_message("🎉 TRAINING COMPLETED SUCCESSFULLY!")
+                if early_stop_triggered:
+                    log_message("🛑 TRAINING COMPLETED WITH EARLY STOP!")
+                else:
+                    log_message("🎉 TRAINING COMPLETED SUCCESSFULLY!")
                 log_message("=" * 50)
                 
-                # Return results to JavaScript with comprehensive logs
+                # Return results to JavaScript with comprehensive logs  
+                job_status = 'Completed (stopped early)' if early_stop_triggered else 'Completed'
                 training_results = {
                     'success': True,
                     'results': model_results,
                     'job_id': job_data.get('id', 'unknown'),
+                    'early_stop_triggered': early_stop_triggered,
                     'job_info': {
                         'id': job_data.get('id', 'unknown'),
                         'name': job_data.get('name', 'ML Training Job'),
                         'training_logs': training_logs,
-                        'status': 'completed',
+                        'status': job_status,
                         'models_count': len(model_results),
                         'best_model': best_model_name.replace('_', ' ').title() if best_model_name else None,
                         'best_score': best_score if best_model_name else None,
-                        'primary_metric': primary_metric
+                        'primary_metric': primary_metric,
+                        'early_stop_triggered': early_stop_triggered,
+                        'metric_threshold': metric_threshold
                     }
                 }
                 

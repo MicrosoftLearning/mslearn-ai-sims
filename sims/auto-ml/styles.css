@@ -2907,6 +2907,37 @@ button.tab-button.active:focus,
     display: block;
 }
 
+/* Early stopping notice */
+.early-stop-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background-color: #fff4ce;
+    border: 1px solid #f1c21b;
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.notice-icon {
+    font-size: 20px;
+    margin-top: 2px;
+}
+
+.notice-content h4,
+.notice-content strong {
+    margin: 0 0 8px 0;
+    color: #393939;
+    font-weight: 600;
+}
+
+.notice-content p {
+    margin: 0;
+    color: #525252;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
 .job-tab-content {
     padding: 24px;
 }

@@ -2704,10 +2704,9 @@ function completeTraining(modelResults, jobId) {
     console.log('Processed model results:', modelArray);
     console.log('Primary metric being used:', primaryMetric);
     
-    // Update job status
+    // Update job models and end time (status is already set by handleTrainingComplete)
     if (job) {
-        console.log('Updating job status to completed for job:', jobId);
-        job.status = 'Completed';
+        console.log('Updating job models and end time for job:', jobId);
         job.models = modelArray;
         job.endTime = new Date();
         
@@ -2855,7 +2854,7 @@ function updateJobsList() {
     if (!jobsListDiv) {
         return;
     }
-    
+
     if (jobHistory.length === 0) {
         jobsListDiv.innerHTML = `
             <div class="empty-state">
@@ -2876,7 +2875,7 @@ function updateJobsList() {
         jobDiv.className = 'job-item';
         jobDiv.onclick = () => navigateToJobDetails(job);
         
-        const statusClass = job.status === 'Completed' ? 'completed' : 'running';
+        const statusClass = (job.status === 'Completed' || job.status === 'Completed (early stop)') ? 'completed' : 'running';
         const duration = job.endTime ? 
             Math.round((job.endTime - job.startTime) / 1000) + 's' : 
             'Running...';
@@ -2923,7 +2922,7 @@ function updateJobsPageList() {
         jobDiv.className = 'job-item';
         jobDiv.onclick = () => navigateToJobDetails(job);
         
-        const statusClass = job.status === 'Completed' ? 'completed' : 'running';
+        const statusClass = (job.status === 'Completed' || job.status === 'Completed (early stop)') ? 'completed' : 'running';
         const duration = job.endTime ? 
             Math.round((job.endTime - job.startTime) / 1000) + 's' : 
             'Running...';
@@ -3408,19 +3407,22 @@ function handleTrainingComplete(resultsJson) {
             // Update job status
             const job = jobHistory.find(j => j.id === results.job_id);
             if (job) {
-                job.status = 'Completed';
+                // Set status based on early stopping
+                job.status = results.early_stop_triggered ? 'Completed (stopped early)' : 'Completed';
                 job.models = results.results;
                 job.endTime = new Date();
+                job.early_stop_triggered = results.early_stop_triggered || false;
                 
                 // Update child job statuses
                 if (job.childJobs && job.childJobs.length > 0) {
                     job.childJobs.forEach((childJob, index) => {
-                        childJob.status = 'Completed';
-                        childJob.endTime = new Date();
+                        // Check if this child job corresponds to a trained model
+                        const modelResult = results.results && results.results.find(r => r.name === childJob.algorithm);
                         
-                        // Match child job with corresponding model result if available
-                        if (results.results && results.results[index]) {
-                            const modelResult = results.results[index];
+                        if (modelResult) {
+                            // This model was trained
+                            childJob.status = 'Completed';
+                            childJob.endTime = new Date();
                             childJob.modelResult = modelResult;
                             
                             // Set child job status based on model training success
@@ -3431,8 +3433,16 @@ function handleTrainingComplete(resultsJson) {
                                 // Copy metrics to child job for display
                                 childJob.metrics = modelResult.metrics;
                                 childJob.primary_score = modelResult.primary_score;
-                                childJob.algorithm = modelResult.name; // Ensure algorithm name matches
                             }
+                        } else if (results.early_stop_triggered) {
+                            // This model was not trained due to early stopping
+                            childJob.status = 'Skipped (stopped early)';
+                            childJob.endTime = new Date();
+                            childJob.skipped_reason = 'Training stopped early when metric threshold was met';
+                        } else {
+                            // This shouldn't happen in normal cases, but handle it
+                            childJob.status = 'Completed';
+                            childJob.endTime = new Date();
                         }
                     });
                 }
@@ -3594,13 +3604,14 @@ function updateJobDetailsContent(job) {
         // Update status badge
         const statusBadge = document.getElementById('job-status-badge');
         const statusText = document.getElementById('job-status-text');
-        statusText.textContent = job.status.charAt(0).toUpperCase() + job.status.slice(1);
+        statusText.textContent = job.status; // Display the status as-is since it should already be properly formatted
         
-        // Update status badge classes
-        statusBadge.className = `job-status-badge ${job.status.toLowerCase()}`;
+        // Update status badge classes  
+        const statusClass = job.status.includes('Completed') ? 'completed' : job.status.toLowerCase();
+        statusBadge.className = `job-status-badge ${statusClass}`;
         
         // Update Register model button state based on job status
-        if (job.status === 'Completed') {
+        if (job.status === 'Completed' || job.status === 'Completed (stopped early)') {
             enableRegisterButton();
         } else {
             disableRegisterButton();
@@ -3609,7 +3620,7 @@ function updateJobDetailsContent(job) {
         // Update properties section
         document.getElementById('properties-status').innerHTML = `
             <span class="status-icon">●</span>
-            <span>${job.status.charAt(0).toUpperCase() + job.status.slice(1)}</span>
+            <span>${job.status}</span>
         `;
         
         const createdDate = job.startTime.toLocaleDateString('en-US', {
@@ -3698,7 +3709,7 @@ function updateJobDetailsContent(job) {
 function updateBestModelSection(job) {
     const bestModelContent = document.getElementById('best-model-content');
     
-    if (job.status === 'Completed' && job.models && job.models.length > 0) {
+    if ((job.status === 'Completed' || job.status === 'Completed (stopped early)') && job.models && job.models.length > 0) {
         const bestModel = job.models.find(m => m.is_best);
         if (bestModel) {
             // Get the proper display name for the primary metric
@@ -3852,13 +3863,24 @@ function updateModelsTabContent() {
     console.log('  - models:', currentJobDetails?.models);
     console.log('  - models length:', currentJobDetails?.models?.length);
     
-    if (currentJobDetails.status === 'Completed' && currentJobDetails.models && currentJobDetails.models.length > 0) {
+    if ((currentJobDetails.status === 'Completed' || currentJobDetails.status === 'Completed (stopped early)') && currentJobDetails.models && currentJobDetails.models.length > 0) {
         // Get the primary metric name for the column header
         const primaryMetric = currentJobDetails.primaryMetric || 'auc';
         const primaryMetricDisplayName = getMetricDisplayName(primaryMetric, currentJobDetails.taskType);
         
+        // Create early stopping note if applicable
+        const earlyStopNote = currentJobDetails.early_stop_triggered ? 
+            `<div class="early-stop-notice">
+                <div class="notice-icon">⏰</div>
+                <div class="notice-content">
+                    <strong>Training stopped early</strong>
+                    <p>Metric threshold was met. Only ${currentJobDetails.models.length} of ${currentJobDetails.childJobs ? currentJobDetails.childJobs.length : currentJobDetails.models.length} algorithms were trained.</p>
+                </div>
+            </div>` : '';
+
         // Create table structure
         modelsResults.innerHTML = `
+            ${earlyStopNote}
             <div class="models-table-container">
                 <table class="models-table">
                     <thead>
