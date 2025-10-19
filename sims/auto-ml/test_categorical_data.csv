@@ -1,0 +1,21 @@
+customer_id,age,gender,education,income,region,product_category,satisfaction_score,purchased
+1,25,Male,Bachelor,50000,North,Electronics,4.2,Yes
+2,34,Female,Master,75000,South,Clothing,3.8,No
+3,28,Male,Bachelor,45000,East,Electronics,4.5,Yes
+4,45,Female,PhD,95000,West,Books,3.2,No
+5,32,Male,High School,35000,North,Clothing,4.0,Yes
+6,29,Female,Bachelor,55000,South,Electronics,4.1,Yes
+7,38,Male,Master,80000,East,Books,3.9,No
+8,27,Female,High School,32000,West,Clothing,4.3,Yes
+9,41,Male,PhD,120000,North,Electronics,3.7,No
+10,33,Female,Bachelor,62000,South,Books,4.4,Yes
+11,30,Male,Master,70000,East,Clothing,3.5,No
+12,26,Female,High School,28000,West,Electronics,4.6,Yes
+13,39,Male,Bachelor,58000,North,Books,3.3,No
+14,31,Female,PhD,88000,South,Clothing,4.0,Yes
+15,35,Male,Master,73000,East,Electronics,4.2,Yes
+16,28,Female,High School,31000,West,Books,3.8,No
+17,42,Male,Bachelor,65000,North,Clothing,4.1,Yes
+18,29,Female,PhD,102000,South,Electronics,3.6,No
+19,36,Male,Master,76000,East,Books,4.3,Yes
+20,27,Female,High School,29000,West,Clothing,4.4,Yes

@@ -6104,29 +6104,115 @@ function updateConsumeCodeExample(featureColumns, registeredModel) {
     
     if (!codeElement) return;
     
-    // Generate sample data based on actual feature columns with appropriate values
-    const sampleDataEntries = featureColumns.map((col, index) => {
-        // Create reasonable sample values based on feature names
-        let sampleValue;
-        if (col.toLowerCase().includes('age')) {
-            sampleValue = 35;
-        } else if (col.toLowerCase().includes('price') || col.toLowerCase().includes('cost') || col.toLowerCase().includes('amount')) {
-            sampleValue = 100.50;
-        } else if (col.toLowerCase().includes('count') || col.toLowerCase().includes('number')) {
-            sampleValue = 5;
-        } else if (col.toLowerCase().includes('rate') || col.toLowerCase().includes('ratio') || col.toLowerCase().includes('percent')) {
-            sampleValue = 0.75;
-        } else if (col.toLowerCase().includes('income') || col.toLowerCase().includes('salary')) {
-            sampleValue = 50000;
-        } else if (col.toLowerCase().includes('score')) {
-            sampleValue = 85;
-        } else {
-            // Default sample values based on position
-            const defaultValues = [1.0, 2.5, 0.8, 150, 3.2, 42, 0.6, 25.5, 1, 0.9];
-            sampleValue = defaultValues[index % defaultValues.length];
+    // Try to get actual sample data from the training dataset
+    let sampleDataEntries = [];
+    let usedActualData = false;
+    
+    if (registeredModel && registeredModel.datasetInfo && registeredModel.datasetInfo.preview) {
+        console.log('🔍 DEBUG: Found dataset preview:', registeredModel.datasetInfo.preview);
+        
+        // Find the first complete row (no empty values for feature columns)
+        const preview = registeredModel.datasetInfo.preview;
+        let sampleRow = null;
+        
+        for (const row of preview) {
+            // Check if this row has values for all feature columns
+            const hasAllFeatures = featureColumns.every(col => 
+                row[col] !== undefined && row[col] !== null && row[col] !== ''
+            );
+            
+            if (hasAllFeatures) {
+                sampleRow = row;
+                break;
+            }
         }
-        return `    '${col}': [${sampleValue}]`;
-    }).join(',\n');
+        
+        if (sampleRow) {
+            console.log('🔍 DEBUG: Using actual data row:', sampleRow);
+            usedActualData = true;
+            
+            sampleDataEntries = featureColumns.map(col => {
+                let value = sampleRow[col];
+                
+                // Format the value appropriately for Python
+                if (typeof value === 'string') {
+                    // Escape quotes and wrap in quotes for string values
+                    const escapedValue = value.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                    return `    '${col}': '${escapedValue}'`;
+                } else if (typeof value === 'number') {
+                    return `    '${col}': ${value}`;
+                } else {
+                    // Handle other data types or convert to string
+                    const stringValue = String(value).replace(/'/g, "\\'").replace(/"/g, '\\"');
+                    return `    '${col}': '${stringValue}'`;
+                }
+            });
+        }
+    }
+    
+    // Fallback to generated sample data if we couldn't get actual data
+    if (!usedActualData) {
+        console.log('🔍 DEBUG: Using generated sample data (no actual data available)');
+        
+        // Get data type information from the registered model for better generation
+        let dtypes = {};
+        if (registeredModel && registeredModel.datasetInfo) {
+            dtypes = registeredModel.datasetInfo.dtypes || {};
+        }
+        
+        sampleDataEntries = featureColumns.map((col, index) => {
+            let sampleValue;
+            
+            // Check if this column is categorical (object/string type)
+            const columnType = dtypes[col];
+            const isCategorical = columnType === 'object' || (columnType && columnType.includes('string'));
+            
+            if (isCategorical) {
+                // Generate string sample values for categorical columns
+                if (col.toLowerCase().includes('gender')) {
+                    sampleValue = "'Male'";
+                } else if (col.toLowerCase().includes('category') || col.toLowerCase().includes('type')) {
+                    sampleValue = "'Category A'";
+                } else if (col.toLowerCase().includes('status')) {
+                    sampleValue = "'Active'";
+                } else if (col.toLowerCase().includes('grade') || col.toLowerCase().includes('level')) {
+                    sampleValue = "'High'";
+                } else if (col.toLowerCase().includes('color')) {
+                    sampleValue = "'Blue'";
+                } else if (col.toLowerCase().includes('region') || col.toLowerCase().includes('location')) {
+                    sampleValue = "'North'";
+                } else {
+                    // Default categorical values
+                    const categoricalDefaults = ["'Option A'", "'Type 1'", "'Low'", "'Medium'", "'Category'"];
+                    sampleValue = categoricalDefaults[index % categoricalDefaults.length];
+                }
+            } else {
+                // Generate numeric sample values for numeric columns
+                if (col.toLowerCase().includes('age')) {
+                    sampleValue = 35;
+                } else if (col.toLowerCase().includes('price') || col.toLowerCase().includes('cost') || col.toLowerCase().includes('amount')) {
+                    sampleValue = 100.50;
+                } else if (col.toLowerCase().includes('count') || col.toLowerCase().includes('number')) {
+                    sampleValue = 5;
+                } else if (col.toLowerCase().includes('rate') || col.toLowerCase().includes('ratio') || col.toLowerCase().includes('percent')) {
+                    sampleValue = 0.75;
+                } else if (col.toLowerCase().includes('income') || col.toLowerCase().includes('salary')) {
+                    sampleValue = 50000;
+                } else if (col.toLowerCase().includes('score')) {
+                    sampleValue = 85;
+                } else {
+                    // Default numeric values based on position
+                    const defaultValues = [1.0, 2.5, 0.8, 150, 3.2, 42, 0.6, 25.5, 1, 0.9];
+                    sampleValue = defaultValues[index % defaultValues.length];
+                }
+            }
+            
+            return `    '${col}': ${sampleValue}`;
+        });
+    }
+    
+    // Join the sample data entries
+    const sampleDataString = sampleDataEntries.join(',\n');
     
     // Get the model filename
     const modelName = document.getElementById('deployed-model-display').textContent || 'your_model';
@@ -6141,7 +6227,7 @@ model = joblib.load('${fileName}')
 
 # Prepare sample data (replace with your actual feature values)
 sample_data = {
-${sampleDataEntries}
+${sampleDataString}
 }
 
 # Convert to DataFrame
