@@ -21,6 +21,147 @@ let currentRegistrationContext = null;
 // PyScript status (keeping for future use)
 let pyScriptReady = false;
 
+// Accessibility support functions
+function handleKeyPress(event, callback) {
+    // Handle Enter and Space key presses for clickable elements
+    if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        if (typeof callback === 'function') {
+            callback();
+        }
+    }
+}
+
+function handleDropdownKeyDown(event) {
+    const dropdown = event.target.closest('.custom-dropdown');
+    const options = dropdown.querySelector('.dropdown-options');
+    
+    if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleTaskTypeDropdown();
+    } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        if (!options.style.display || options.style.display === 'none') {
+            toggleTaskTypeDropdown();
+        }
+        // Focus first option
+        const firstOption = options.querySelector('.task-type-option');
+        if (firstOption) firstOption.focus();
+    }
+}
+
+function handleOptionKeyDown(event) {
+    const option = event.target;
+    const options = option.parentElement;
+    const allOptions = Array.from(options.querySelectorAll('.task-type-option'));
+    const currentIndex = allOptions.indexOf(option);
+    
+    switch (event.key) {
+        case 'Enter':
+        case ' ':
+            event.preventDefault();
+            option.click();
+            break;
+        case 'ArrowDown':
+            event.preventDefault();
+            const nextIndex = (currentIndex + 1) % allOptions.length;
+            allOptions[nextIndex].focus();
+            break;
+        case 'ArrowUp':
+            event.preventDefault();
+            const prevIndex = currentIndex === 0 ? allOptions.length - 1 : currentIndex - 1;
+            allOptions[prevIndex].focus();
+            break;
+        case 'Escape':
+            event.preventDefault();
+            toggleTaskTypeDropdown();
+            document.getElementById('task-type-selected').focus();
+            break;
+    }
+}
+
+function updateAriaExpanded(elementId, expanded) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.setAttribute('aria-expanded', expanded);
+    }
+}
+
+function announceToScreenReader(message, priority = 'polite') {
+    // Create a live region for screen reader announcements
+    let liveRegion = document.getElementById('sr-live-region');
+    if (!liveRegion) {
+        liveRegion = document.createElement('div');
+        liveRegion.id = 'sr-live-region';
+        liveRegion.setAttribute('aria-live', priority);
+        liveRegion.setAttribute('aria-atomic', 'true');
+        liveRegion.style.position = 'absolute';
+        liveRegion.style.left = '-10000px';
+        liveRegion.style.width = '1px';
+        liveRegion.style.height = '1px';
+        liveRegion.style.overflow = 'hidden';
+        document.body.appendChild(liveRegion);
+    }
+    
+    // Clear and set the message
+    liveRegion.textContent = '';
+    setTimeout(() => {
+        liveRegion.textContent = message;
+    }, 100);
+}
+
+function setupAccessibilityFeatures() {
+    // Add focus indicators for better keyboard navigation
+    const style = document.createElement('style');
+    style.textContent = `
+        /* Enhanced focus indicators */
+        .nav-item:focus,
+        .learning-card:focus,
+        .btn:focus,
+        .tab-button:focus,
+        .dropdown-selected:focus,
+        .task-type-option:focus {
+            outline: 2px solid #0078d4 !important;
+            outline-offset: 2px !important;
+        }
+        
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .nav-item, .btn, .learning-card {
+                border: 1px solid;
+            }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Initialize accessibility features when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setupAccessibilityFeatures();
+});
+
 // Utility functions
 function getMetricDisplayName(metric, taskType) {
     const metricNames = {
@@ -116,6 +257,15 @@ function showMyAccountPage() {
     // Update navigation active state
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     document.querySelector('.nav-item[onclick="showMyAccountPage()"]').classList.add('active');
+    
+    // Announce page change to screen readers
+    announceToScreenReader('Navigated to ML App page');
+    
+    // Focus the main heading for screen readers
+    const heading = document.getElementById('welcome-heading');
+    if (heading) {
+        heading.focus();
+    }
 }
 
 function createWorkspace() {
@@ -369,6 +519,15 @@ function showAutoMLPage() {
     // Update navigation active state
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     document.querySelector('.nav-item[onclick="showAutoMLPage()"]').classList.add('active');
+    
+    // Announce page change to screen readers
+    announceToScreenReader('Navigated to Automated ML page');
+    
+    // Focus the main heading for screen readers
+    const heading = document.getElementById('automl-page-heading');
+    if (heading) {
+        heading.focus();
+    }
 }
 
 function showDataPage() {
@@ -379,6 +538,15 @@ function showDataPage() {
     // Update navigation active state
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     document.querySelector('.nav-item[onclick="showDataPage()"]').classList.add('active');
+    
+    // Announce page change to screen readers
+    announceToScreenReader('Navigated to Data page');
+    
+    // Focus the main heading for screen readers
+    const heading = document.getElementById('data-page-heading');
+    if (heading) {
+        heading.focus();
+    }
     
     // Update data files list
     updateDataFilesList();
@@ -393,6 +561,15 @@ function showJobsPage() {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     document.querySelector('.nav-item[onclick="showJobsPage()"]').classList.add('active');
     
+    // Announce page change to screen readers
+    announceToScreenReader('Navigated to Jobs page');
+    
+    // Focus the main heading for screen readers
+    const heading = document.getElementById('jobs-page-heading');
+    if (heading) {
+        heading.focus();
+    }
+    
     // Update jobs list for the Jobs page
     updateJobsPageList();
 }
@@ -406,6 +583,15 @@ function showModelsPage() {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     document.querySelector('.nav-item[onclick="showModelsPage()"]').classList.add('active');
     
+    // Announce page change to screen readers
+    announceToScreenReader('Navigated to Models page');
+    
+    // Focus the main heading for screen readers
+    const heading = document.getElementById('models-page-heading');
+    if (heading) {
+        heading.focus();
+    }
+    
     // Update deployed models list
     updateDeployedModelsList();
 }
@@ -418,6 +604,15 @@ function showEndpointsPage() {
     // Update navigation active state
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     document.querySelector('.nav-item[onclick="showEndpointsPage()"]').classList.add('active');
+    
+    // Announce page change to screen readers
+    announceToScreenReader('Navigated to Endpoints page');
+    
+    // Focus the main heading for screen readers
+    const heading = document.getElementById('endpoints-page-heading');
+    if (heading) {
+        heading.focus();
+    }
     
     // Update endpoints list
     updateEndpointsList();
@@ -655,11 +850,17 @@ function validateDatasetName() {
     );
     
     if (isDuplicate) {
-        errorDiv.textContent = 'A dataset with this name already exists. Please choose a different name.';
+        const errorMessage = 'A dataset with this name already exists. Please choose a different name.';
+        errorDiv.textContent = errorMessage;
         errorDiv.style.display = 'block';
+        
+        // Announce error to screen readers
+        announceToScreenReader(`Validation error: ${errorMessage}`, 'assertive');
         return false;
     }
     
+    // Announce successful validation
+    announceToScreenReader('Dataset name is valid');
     return true;
 }
 
@@ -794,6 +995,10 @@ function nextStep() {
         if (currentStep < maxSteps) {
             currentStep++;
             updateWizardStep();
+            
+            // Announce step change to screen readers
+            const stepNames = ['', 'Basic settings', 'Task type & data', 'Task settings', 'Compute', 'Review'];
+            announceToScreenReader(`Moved to step ${currentStep}: ${stepNames[currentStep]}`);
         }
     }
 }
@@ -802,6 +1007,10 @@ function previousStep() {
     if (currentStep > 1) {
         currentStep--;
         updateWizardStep();
+        
+        // Announce step change to screen readers
+        const stepNames = ['', 'Basic settings', 'Task type & data', 'Task settings', 'Compute', 'Review'];
+        announceToScreenReader(`Moved back to step ${currentStep}: ${stepNames[currentStep]}`);
     } else {
         // On step 1, Back button acts like Cancel
         closeJobWizard();
@@ -814,7 +1023,10 @@ function validateCurrentStep() {
             const jobName = document.getElementById('job-name').value.trim();
             
             if (!jobName) {
-                alert('Please enter a job name.');
+                const errorMessage = 'Please enter a job name.';
+                alert(errorMessage);
+                announceToScreenReader(`Validation error: ${errorMessage}`, 'assertive');
+                document.getElementById('job-name').focus();
                 return false;
             }
             
@@ -825,18 +1037,25 @@ function validateCurrentStep() {
             const taskType = document.getElementById('task-type').value;
             
             if (!taskType) {
-                alert('Please select a task type.');
+                const errorMessage = 'Please select a task type.';
+                alert(errorMessage);
+                announceToScreenReader(`Validation error: ${errorMessage}`, 'assertive');
+                document.getElementById('task-type-selected').focus();
                 return false;
             }
             
             // Validate that a dataset is selected (either uploaded or from existing list)
             if (!currentData) {
-                alert('Please create a new dataset or select an existing one.');
+                const errorMessage = 'Please create a new dataset or select an existing one.';
+                alert(errorMessage);
+                announceToScreenReader(`Validation error: ${errorMessage}`, 'assertive');
                 return false;
             }
             
             if (!currentData.isSaved) {
-                alert('Please save your dataset configuration before proceeding.');
+                const errorMessage = 'Please save your dataset configuration before proceeding.';
+                alert(errorMessage);
+                announceToScreenReader(`Validation error: ${errorMessage}`, 'assertive');
                 return false;
             }
             
@@ -925,8 +1144,19 @@ function toggleTaskTypeDropdown() {
     const dropdown = document.getElementById('task-type-options');
     const selected = document.getElementById('task-type-selected');
     
+    const isExpanded = dropdown.classList.contains('show');
     dropdown.classList.toggle('show');
     selected.classList.toggle('active');
+    
+    // Update aria-expanded attribute
+    selected.setAttribute('aria-expanded', !isExpanded);
+    
+    // Announce to screen readers
+    if (!isExpanded) {
+        announceToScreenReader('Task type dropdown opened');
+    } else {
+        announceToScreenReader('Task type dropdown closed');
+    }
 }
 
 function selectTaskType(value) {
@@ -942,6 +1172,9 @@ function selectTaskType(value) {
     const selectedOption = document.querySelector(`[data-value="${value}"]`);
     const icon = selectedOption.querySelector('.task-type-icon').cloneNode(true);
     const text = selectedOption.querySelector('span').textContent;
+    
+    // Announce selection to screen readers
+    announceToScreenReader(`Task type selected: ${text}`);
     
     selected.innerHTML = `
         <div class="selected-option">

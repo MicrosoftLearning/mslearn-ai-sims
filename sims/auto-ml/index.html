@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Machine Learning Lab</title>
+    <title>Machine Learning Lab - AutoML Interface</title>
+    <meta name="description" content="Automated Machine Learning interface for training and deploying ML models">
     <link rel="stylesheet" href="styles.css?v=12">
     
     <!-- PyScript CSS and JS (2024.1.1) -->
@@ -51,68 +52,69 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="header">
+    <header class="header" role="banner">
         <div class="header-left">
             <div class="header-title">
                 <h1>Machine Learning Lab</h1>
             </div>
         </div>
         <div class="header-right">
-            <div id="global-pyscript-status" class="status-loading">
-                <div class="loading-spinner"></div>
+            <div id="global-pyscript-status" class="status-loading" role="status" aria-live="polite" aria-label="PyScript loading status">
+                <div class="loading-spinner" aria-hidden="true"></div>
                 <span>Loading PyScript ML libraries...</span>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content" role="main">
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
+        <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
             <div class="sidebar-header">
-                <button class="hamburger-menu" onclick="toggleSidebar()" data-tooltip="Toggle navigation menu">
-                    ☰
+                <button class="hamburger-menu" onclick="toggleSidebar()" data-tooltip="Toggle navigation menu" aria-label="Toggle navigation menu" aria-expanded="true" aria-controls="sidebar">
+                    <span aria-hidden="true">☰</span>
                 </button>
             </div>
-            <nav class="nav-menu">
+            <nav class="nav-menu" role="navigation" aria-label="Application sections">
                 <div class="nav-section">
-                    <div class="nav-item active" onclick="showMyAccountPage()" data-tooltip="ML App">
-                        <span class="nav-icon">&#128470;</span>
+                    <div class="nav-item active" onclick="showMyAccountPage()" data-tooltip="ML App" role="button" tabindex="0" aria-label="Go to ML App page" onkeydown="handleKeyPress(event, showMyAccountPage)">
+                        <span class="nav-icon" aria-hidden="true">&#128470;</span>
                         <span class="nav-text">ML App</span>
                     </div>
                 </div>
                 
                 <div class="nav-section" id="home-nav-section" style="display: none;">
-                    <div class="nav-item" onclick="showHomePage()" data-tooltip="Home">
-                        <span class="nav-icon">⌂</span>
+                    <div class="nav-item" onclick="showHomePage()" data-tooltip="Home" role="button" tabindex="0" aria-label="Go to Home page" onkeydown="handleKeyPress(event, showHomePage)">
+                        <span class="nav-icon" aria-hidden="true">⌂</span>
                         <span class="nav-text">Home</span>
                     </div>
                 </div>
                 
                 <div class="nav-section">
                     <h3>Authoring</h3>
-                    <div class="nav-item" onclick="showAutoMLPage()" data-tooltip="Automated ML">
-                        <span class="nav-icon">⚙</span>
+                    <div class="nav-item" onclick="showAutoMLPage()" data-tooltip="Automated ML" role="button" tabindex="0" aria-label="Go to Automated ML page" onkeydown="handleKeyPress(event, showAutoMLPage)">
+                        <span class="nav-icon" aria-hidden="true">⚙</span>
                         <span class="nav-text">Automated ML</span>
                     </div>
                 </div>
 
                 <div class="nav-section">
+                <div class="nav-section">
                     <h3>Assets</h3>
-                    <div class="nav-item" onclick="showDataPage()" data-tooltip="Data">
-                        <span class="nav-icon">▤</span>
+                    <div class="nav-item" onclick="showDataPage()" data-tooltip="Data" role="button" tabindex="0" aria-label="Go to Data page to manage datasets" onkeydown="handleKeyPress(event, showDataPage)">
+                        <span class="nav-icon" aria-hidden="true">▤</span>
                         <span class="nav-text">Data</span>
                     </div>
-                    <div class="nav-item" onclick="showJobsPage()" data-tooltip="Jobs">
-                        <span class="nav-icon">&#128710;</span>
+                    <div class="nav-item" onclick="showJobsPage()" data-tooltip="Jobs" role="button" tabindex="0" aria-label="Go to Jobs page to view training jobs" onkeydown="handleKeyPress(event, showJobsPage)">
+                        <span class="nav-icon" aria-hidden="true">&#128710;</span>
                         <span class="nav-text">Jobs</span>
                     </div>
-                    <div class="nav-item" onclick="showModelsPage()" data-tooltip="Models">
-                        <span class="nav-icon">◻</span>
+                    <div class="nav-item" onclick="showModelsPage()" data-tooltip="Models" role="button" tabindex="0" aria-label="Go to Models page to view trained models" onkeydown="handleKeyPress(event, showModelsPage)">
+                        <span class="nav-icon" aria-hidden="true">◻</span>
                         <span class="nav-text">Models</span>
                     </div>
-                    <div class="nav-item" onclick="showEndpointsPage()" data-tooltip="Endpoints">
-                        <span class="nav-icon">&#9928;</span>
+                    <div class="nav-item" onclick="showEndpointsPage()" data-tooltip="Endpoints" role="button" tabindex="0" aria-label="Go to Endpoints page to manage model deployments" onkeydown="handleKeyPress(event, showEndpointsPage)">
+                        <span class="nav-icon" aria-hidden="true">&#9928;</span>
                         <span class="nav-text">Endpoints</span>
                     </div>
                 </div>
@@ -120,42 +122,42 @@
         </aside>
 
         <!-- Content Area -->
-        <div class="content-area">
+        <div class="content-area" role="main">
             <!-- ML App Page -->
-            <div id="my-account-page" class="page-content" style="display: block;">
+            <div id="my-account-page" class="page-content" style="display: block;" role="region" aria-labelledby="welcome-heading">
                 <div class="ml-app-content">
                     <div class="ml-app-header">
-                        <h1 class="welcome-heading">Welcome</h1>
+                        <h1 id="welcome-heading" class="welcome-heading">Welcome</h1>
                     </div>
                     <div class="workspaces-section">
                         <div class="workspaces-header">
                             <h2 class="workspaces-subtitle">Workspaces</h2>
-                            <button class="create-workspace-btn" onclick="createWorkspace()">Create workspace</button>
+                            <button class="create-workspace-btn" onclick="createWorkspace()" aria-label="Create new workspace">Create workspace</button>
                         </div>
-                        <div id="workspaces-list" class="workspaces-list">
+                        <div id="workspaces-list" class="workspaces-list" role="list" aria-label="Available workspaces">
                             <!-- Workspace buttons will be dynamically added here -->
                         </div>
                     </div>
-                    <div class="home-gallery">
-                        <div class="learning-card" onclick="window.open('https://azure.microsoft.com/resources/cloud-computing-dictionary/what-is-machine-learning-platform/', '_blank')">
+                    <div class="home-gallery" role="list" aria-label="Learning resources">
+                        <div class="learning-card" onclick="window.open('https://azure.microsoft.com/resources/cloud-computing-dictionary/what-is-machine-learning-platform/', '_blank')" role="listitem" tabindex="0" aria-label="Learn what is machine learning - opens in new tab" onkeydown="handleKeyPress(event, () => window.open('https://azure.microsoft.com/resources/cloud-computing-dictionary/what-is-machine-learning-platform/', '_blank'))">
                             <div class="learning-icon">
-                                <div class="icon-circle">
+                                <div class="icon-circle" aria-hidden="true">
                                     &#128442;
                                 </div>
                             </div>
                             <div class="learning-label">What is machine learning?</div>
                         </div>
-                        <div class="learning-card" onclick="window.open('https://learn.microsoft.com/training/modules/fundamentals-machine-learning/', '_blank')">
+                        <div class="learning-card" onclick="window.open('https://learn.microsoft.com/training/modules/fundamentals-machine-learning/', '_blank')" role="listitem" tabindex="0" aria-label="Introduction to machine learning concepts - opens in new tab" onkeydown="handleKeyPress(event, () => window.open('https://learn.microsoft.com/training/modules/fundamentals-machine-learning/', '_blank'))">
                             <div class="learning-icon">
-                                <div class="icon-circle">
+                                <div class="icon-circle" aria-hidden="true">
                                     &#128442;
                                 </div>
                             </div>
                             <div class="learning-label">Introduction to machine learning concepts</div>
                         </div>
-                        <div class="learning-card" onclick="window.open('https://learn.microsoft.com/training/paths/create-machine-learn-models/', '_blank')">
+                        <div class="learning-card" onclick="window.open('https://learn.microsoft.com/training/paths/create-machine-learn-models/', '_blank')" role="listitem" tabindex="0" aria-label="Create machine learning models - opens in new tab" onkeydown="handleKeyPress(event, () => window.open('https://learn.microsoft.com/training/paths/create-machine-learn-models/', '_blank'))">
                             <div class="learning-icon">
-                                <div class="icon-circle">
+                                <div class="icon-circle" aria-hidden="true">
                                     &#128442;
                                 </div>
                             </div>
@@ -166,12 +168,12 @@
             </div>
 
             <!-- Home Page -->
-            <div id="home-page" class="page-content" style="display: none;">
+            <div id="home-page" class="page-content" style="display: none;" role="region" aria-labelledby="workspace-title">
                 <div class="home-content">
                     <h1 id="workspace-title" class="workspace-title">Workspace</h1>
-                    <div class="home-gallery">
-                        <div class="home-card">
-                            <div class="card-icon data-icon">
+                    <div class="home-gallery" role="list" aria-label="Workspace capabilities">
+                        <div class="home-card" role="listitem">
+                            <div class="card-icon data-icon" aria-hidden="true">
                                 <div class="database-symbol">
                                     <div class="db-disk"></div>
                                     <div class="db-disk"></div>
@@ -183,8 +185,8 @@
                                 <p class="card-description">Upload, organize, and explore your datasets</p>
                             </div>
                         </div>
-                        <div class="home-card">
-                            <div class="card-icon model-icon">
+                        <div class="home-card" role="listitem">
+                            <div class="card-icon model-icon" aria-hidden="true">
                                 <div class="training-symbol">
                                     <div class="training-line"></div>
                                     <div class="training-points">
@@ -200,8 +202,8 @@
                                 <p class="card-description">Build and train machine learning models</p>
                             </div>
                         </div>
-                        <div class="home-card">
-                            <div class="card-icon ai-icon">
+                        <div class="home-card" role="listitem">
+                            <div class="card-icon ai-icon" aria-hidden="true">
                                 <div class="ai-symbol">
                                     <div class="brain-outline">
                                         <div class="neural-node"></div>
@@ -222,15 +224,15 @@
             </div>
 
             <!-- Data Page -->
-            <div id="data-page" class="page-content" style="display: none;">
+            <div id="data-page" class="page-content" style="display: none;" role="region" aria-labelledby="data-page-heading">
                 <div class="page-header">
-                    <h1>Data</h1>
+                    <h1 id="data-page-heading">Data</h1>
                     <p>Manage your uploaded datasets and explore their contents.</p>
                 </div>
 
                 <div class="data-section">
-                    <div id="data-files-list" class="data-files-list">
-                        <div class="empty-state">
+                    <div id="data-files-list" class="data-files-list" role="list" aria-label="Uploaded datasets">
+                        <div class="empty-state" role="status" aria-live="polite">
                             <div class="empty-state-content">
                                 <h3>No data files uploaded yet.</h3>
                                 <p>Upload CSV files through the Automated ML job wizard to see them here.</p>
@@ -241,10 +243,10 @@
             </div>
 
             <!-- Dataset Details Page -->
-            <div id="dataset-details-page" class="page-content" style="display: none;">
+            <div id="dataset-details-page" class="page-content" style="display: none;" role="region" aria-labelledby="dataset-details-title">
                 <div class="page-header">
                     <div class="page-header-with-back">
-                        <button class="back-btn" onclick="showDataPage()" data-tooltip="Back to Data">
+                        <button class="back-btn" onclick="showDataPage()" data-tooltip="Back to Data" aria-label="Go back to Data page">
                             ← Back
                         </button>
                         <div class="page-header-content">
@@ -255,21 +257,21 @@
                 </div>
 
                 <div class="dataset-details-section">
-                    <div class="dataset-info-cards">
-                        <div class="info-card">
+                    <div class="dataset-info-cards" role="list" aria-label="Dataset information">
+                        <div class="info-card" role="listitem">
                             <div class="info-card-header">Dataset Information</div>
                             <div class="info-card-content">
                                 <div class="info-item">
                                     <span class="info-label">Name:</span>
-                                    <span class="info-value" id="dataset-info-name">-</span>
+                                    <span class="info-value" id="dataset-info-name" aria-label="Dataset name">-</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Rows:</span>
-                                    <span class="info-value" id="dataset-info-rows">-</span>
+                                    <span class="info-value" id="dataset-info-rows" aria-label="Number of rows">-</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Columns:</span>
-                                    <span class="info-value" id="dataset-info-columns">-</span>
+                                    <span class="info-value" id="dataset-info-columns" aria-label="Number of columns">-</span>
                                 </div>
                             </div>
                         </div>
@@ -280,7 +282,7 @@
                             <h3>Data Preview (First 10 rows)</h3>
                         </div>
                         <div class="dataset-preview-content">
-                            <div id="dataset-preview-table" class="dataset-table-container">
+                            <div id="dataset-preview-table" class="dataset-table-container" role="region" aria-label="Dataset preview table">
                                 <!-- Table will be populated by JavaScript -->
                             </div>
                         </div>
@@ -289,15 +291,15 @@
             </div>
 
             <!-- Jobs Page -->
-            <div id="jobs-page" class="page-content" style="display: none;">
+            <div id="jobs-page" class="page-content" style="display: none;" role="region" aria-labelledby="jobs-page-heading">
                 <div class="page-header">
-                    <h1>Jobs</h1>
+                    <h1 id="jobs-page-heading">Jobs</h1>
                     <p>Monitor and manage all your machine learning training jobs.</p>
                 </div>
 
                 <div class="jobs-section">
-                    <div id="jobs-page-list" class="jobs-list">
-                        <div class="empty-state">
+                    <div id="jobs-page-list" class="jobs-list" role="list" aria-label="Training jobs">
+                        <div class="empty-state" role="status" aria-live="polite">
                             <div class="empty-state-content">
                                 <h3>No jobs yet.</h3>
                                 <p>Create jobs from the Automated ML page to see them here.</p>
@@ -308,15 +310,15 @@
             </div>
 
             <!-- Models Page -->
-            <div id="models-page" class="page-content" style="display: none;">
+            <div id="models-page" class="page-content" style="display: none;" role="region" aria-labelledby="models-page-heading">
                 <div class="page-header">
-                    <h1>Models</h1>
+                    <h1 id="models-page-heading">Models</h1>
                     <p>Manage your registered machine learning models and view their details.</p>
                 </div>
 
                 <div class="models-section">
-                    <div id="deployed-models-list" class="models-table-container">
-                        <div class="empty-state">
+                    <div id="deployed-models-list" class="models-table-container" role="list" aria-label="Registered models">
+                        <div class="empty-state" role="status" aria-live="polite">
                             <div class="empty-state-content">
                                 <h3>No models registered yet.</h3>
                                 <p>Register models from training results to see them here.</p>
@@ -327,15 +329,15 @@
             </div>
 
             <!-- Endpoints Page -->
-            <div id="endpoints-page" class="page-content" style="display: none;">
+            <div id="endpoints-page" class="page-content" style="display: none;" role="region" aria-labelledby="endpoints-page-heading">
                 <div class="page-header">
-                    <h1>Endpoints</h1>
+                    <h1 id="endpoints-page-heading">Endpoints</h1>
                     <p>Manage your deployed model endpoints and monitor their status.</p>
                 </div>
 
                 <div class="endpoints-section">
-                    <div id="endpoints-list" class="endpoints-table-container">
-                        <div class="empty-state">
+                    <div id="endpoints-list" class="endpoints-table-container" role="list" aria-label="Deployed endpoints">
+                        <div class="empty-state" role="status" aria-live="polite">
                             <div class="empty-state-content">
                                 <h3>No endpoints deployed yet.</h3>
                                 <p>Deploy models to create endpoints for real-time inference.</p>
@@ -346,71 +348,73 @@
             </div>
 
             <!-- Endpoint Details Page -->
-            <div id="endpoint-details-page" class="page-content" style="display: none;">
+            <div id="endpoint-details-page" class="page-content" style="display: none;" role="region" aria-labelledby="endpoint-details-title">
                 <!-- Endpoint Details Header -->
                 <div class="endpoint-details-header">
                     <div class="endpoint-header-info">
                         <div class="endpoint-title-section">
                             <h1 id="endpoint-details-title">Endpoint Name</h1>
-                            <div class="endpoint-status">Active</div>
+                            <div class="endpoint-status" role="status" aria-live="polite" aria-label="Endpoint status">Active</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Endpoint Actions Toolbar -->
-                <div class="endpoint-actions-toolbar">
-                    <button class="btn btn-secondary">
+                <div class="endpoint-actions-toolbar" role="toolbar" aria-label="Endpoint actions">
+                    <button class="btn btn-secondary" aria-label="Refresh endpoint details">
                         ↻ Refresh
                     </button>
-                    <button class="btn btn-secondary" onclick="backToEndpointsList()">
+                    <button class="btn btn-secondary" onclick="backToEndpointsList()" aria-label="Go back to endpoints list">
                         ← Back to Endpoints
                     </button>
                 </div>
 
                 <!-- Endpoint Tabs -->
                 <div class="endpoint-tabs">
-                    <div class="tab-navigation">
-                        <button class="tab-button active" onclick="showEndpointTab('details')">Details</button>
-                        <button class="tab-button" onclick="showEndpointTab('test')">Test</button>
-                        <button class="tab-button" onclick="showEndpointTab('consume')">Consume</button>
+                    <div class="tab-navigation" role="tablist" aria-label="Endpoint information tabs">
+                        <button class="tab-button active" onclick="showEndpointTab('details')" role="tab" aria-selected="true" aria-controls="endpoint-details-tab" id="details-tab-button">Details</button>
+                        <button class="tab-button" onclick="showEndpointTab('test')" role="tab" aria-selected="false" aria-controls="endpoint-test-tab" id="test-tab-button">Test</button>
+                        <button class="tab-button" onclick="showEndpointTab('consume')" role="tab" aria-selected="false" aria-controls="endpoint-consume-tab" id="consume-tab-button">Consume</button>
                     </div>
 
                     <!-- Details Tab -->
-                    <div id="endpoint-details-tab" class="tab-content active">
+                    <div id="endpoint-details-tab" class="tab-content active" role="tabpanel" aria-labelledby="details-tab-button">
                         <div class="endpoint-details-section">
                             <h3>Endpoint Information</h3>
-                            <div class="details-grid">
-                                <div class="detail-item">
+                            <div class="details-grid" role="list" aria-label="Endpoint details">
+                                <div class="detail-item" role="listitem">
                                     <label>Endpoint Name:</label>
-                                    <span id="endpoint-name-display">-</span>
+                                    <span id="endpoint-name-display" aria-label="Endpoint name">-</span>
                                 </div>
-                                <div class="detail-item">
+                                <div class="detail-item" role="listitem">
                                     <label>Deployment Name:</label>
-                                    <span id="deployment-name-display">-</span>
+                                    <span id="deployment-name-display" aria-label="Deployment name">-</span>
                                 </div>
-                                <div class="detail-item">
+                                <div class="detail-item" role="listitem">
                                     <label>Model:</label>
-                                    <span id="deployed-model-display">-</span>
+                                    <span id="deployed-model-display" aria-label="Deployed model">-</span>
                                 </div>
-                                <div class="detail-item">
+                                <div class="detail-item" role="listitem">
                                     <label>Created On:</label>
-                                    <span id="endpoint-created-display">-</span>
+                                    <span id="endpoint-created-display" aria-label="Creation date">-</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Test Tab -->
-                    <div id="endpoint-test-tab" class="tab-content" style="display: none;">
+                    <div id="endpoint-test-tab" class="tab-content" style="display: none;" role="tabpanel" aria-labelledby="test-tab-button">
                         <div class="endpoint-test-section">
                             <h3>Test Endpoint</h3>
                             <p>Send test requests to your deployed model endpoint.</p>
                             <div class="test-input-section">
                                 <label for="test-input-data">Input Data (JSON):</label>
-                                <textarea id="test-input-data" rows="8" placeholder='{"feature1": value1, "feature2": value2, ...}'></textarea>
-                                <button class="btn btn-primary" onclick="testEndpoint()">Send Test Request</button>
+                                <textarea id="test-input-data" rows="8" placeholder='{"feature1": value1, "feature2": value2, ...}' aria-describedby="input-data-help"></textarea>
+                                <div id="input-data-help" class="sr-only">Enter test data in JSON format with feature names as keys and values corresponding to your model's expected input</div>
+                                <button class="btn btn-primary" onclick="testEndpoint()" aria-describedby="test-button-help">Send Test Request</button>
+                                <div id="test-button-help" class="sr-only">Sends the input data to the endpoint and displays the prediction results</div>
                             </div>
-                            <div id="test-results" class="test-results-section" style="display: none;">
+                            <div id="test-results" class="test-results-section" style="display: none;" role="region" aria-live="polite" aria-label="Test results">
                                 <h4>Response:</h4>
                                 <div id="test-response"></div>
                             </div>
@@ -418,22 +422,22 @@
                     </div>
 
                     <!-- Consume Tab -->
-                    <div id="endpoint-consume-tab" class="tab-content" style="display: none;">
+                    <div id="endpoint-consume-tab" class="tab-content" style="display: none;" role="tabpanel" aria-labelledby="consume-tab-button">
                         <div class="endpoint-consume-section">
                             <h3>Consume Endpoint</h3>
                             <p>Integration details for consuming your deployed model endpoint.</p>
-                            <div class="consume-details">
-                                <div class="consume-item">
+                            <div class="consume-details" role="list" aria-label="Integration details">
+                                <div class="consume-item" role="listitem">
                                     <label>REST Endpoint URL:</label>
-                                    <code id="endpoint-url">https://your-endpoint.azureml.net/score</code>
+                                    <code id="endpoint-url" aria-label="REST endpoint URL">https://your-endpoint.azureml.net/score</code>
                                 </div>
-                                <div class="consume-item">
+                                <div class="consume-item" role="listitem">
                                     <label>Authentication:</label>
-                                    <code>Bearer Token Required</code>
+                                    <code aria-label="Authentication type">Bearer Token Required</code>
                                 </div>
-                                <div class="consume-item">
+                                <div class="consume-item" role="listitem">
                                     <label>Content Type:</label>
-                                    <code>application/json</code>
+                                    <code aria-label="Content type">application/json</code>
                                 </div>
                             </div>
                         </div>
@@ -442,26 +446,26 @@
             </div>
 
             <!-- Model Details Page -->
-            <div id="model-details-page" class="page-content" style="display: none;">
+            <div id="model-details-page" class="page-content" style="display: none;" role="region" aria-labelledby="model-details-title">
                 <!-- Model Details Header -->
                 <div class="model-details-header">
                     <div class="model-header-info">
                         <div class="model-title-section">
                             <h1 id="model-details-title">Model1</h1>
-                            <div class="model-type">Custom model</div>
+                            <div class="model-type" role="status" aria-label="Model type">Custom model</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Model Actions Toolbar -->
-                <div class="model-actions-toolbar">
-                    <button class="btn btn-secondary" onclick="refreshModelDetails()">
+                <div class="model-actions-toolbar" role="toolbar" aria-label="Model actions">
+                    <button class="btn btn-secondary" onclick="refreshModelDetails()" aria-label="Refresh model details">
                         ↻ Refresh
                     </button>
-                    <button class="btn btn-secondary" onclick="useThisModel()">
+                    <button class="btn btn-secondary" onclick="useThisModel()" aria-label="Use this model for predictions">
                         &#9655; Use this model
                     </button>
-                    <button class="btn btn-secondary" onclick="downloadModel()">
+                    <button class="btn btn-secondary" onclick="downloadModel()" aria-label="Download model file">
                         ⬇ Download
                     </button>
                 </div>
@@ -472,25 +476,25 @@
                     <div class="attributes-card">
                         <h3>Attributes</h3>
                         
-                        <div class="attribute-row">
+                        <div class="attribute-row" role="listitem">
                             <div class="attribute-label">Name</div>
-                            <div class="attribute-value" id="model-attr-name">Model1</div>
+                            <div class="attribute-value" id="model-attr-name" aria-label="Model name">Model1</div>
                         </div>
                         
-                        <div class="attribute-row">
+                        <div class="attribute-row" role="listitem">
                             <div class="attribute-label">Created on</div>
-                            <div class="attribute-value" id="model-attr-created">Oct 17, 2025 4:52 PM</div>
+                            <div class="attribute-value" id="model-attr-created" aria-label="Creation date">Oct 17, 2025 4:52 PM</div>
                         </div>
                         
-                        <div class="attribute-row">
+                        <div class="attribute-row" role="listitem">
                             <div class="attribute-label">Type</div>
-                            <div class="attribute-value" id="model-attr-type">scikit-learn</div>
+                            <div class="attribute-value" id="model-attr-type" aria-label="Model type">scikit-learn</div>
                         </div>
                         
-                        <div class="attribute-row">
+                        <div class="attribute-row" role="listitem">
                             <div class="attribute-label">Created by job</div>
                             <div class="attribute-value">
-                                <a href="#" class="job-link" id="model-attr-job" onclick="navigateToSourceJob()">ML_Job_1</a>
+                                <a href="#" class="job-link" id="model-attr-job" onclick="navigateToSourceJob()" aria-label="Go to source training job">ML_Job_1</a>
                             </div>
                         </div>
                     </div>
@@ -787,28 +791,28 @@
             </div>
 
             <!-- Automated ML Page -->
-            <div id="automl-page" class="page-content" style="display: none;">
+            <div id="automl-page" class="page-content" style="display: none;" role="region" aria-labelledby="automl-page-heading">
                 <div class="page-header">
-                    <h1>Automated ML</h1>
-                    <p>Let Automated ML train and find the best model based on your data without writing a single line of code. <a href="https://aka.ms/mslearn-azure-ml-intro" target="_blank" class="learn-more-link">Learn more about Automated ML</a></p>
+                    <h1 id="automl-page-heading">Automated ML</h1>
+                    <p>Let Automated ML train and find the best model based on your data without writing a single line of code. <a href="https://aka.ms/mslearn-azure-ml-intro" target="_blank" class="learn-more-link" aria-label="Learn more about Automated ML - opens in new tab">Learn more about Automated ML</a></p>
                 </div>
                 
-                <div class="action-bar">
-                    <button class="btn btn-primary" onclick="openNewJobWizard()" data-tooltip="Start a new Automated ML training job">
+                <div class="action-bar" role="toolbar" aria-label="AutoML actions">
+                    <button class="btn btn-primary" onclick="openNewJobWizard()" data-tooltip="Start a new Automated ML training job" aria-label="Create new Automated ML training job">
                         + New Automated ML job
                     </button>
-                    <button class="btn btn-secondary" onclick="refreshJobs()" data-tooltip="Refresh the list of jobs">
-                        <span class="icon">↻</span> Refresh
+                    <button class="btn btn-secondary" onclick="refreshJobs()" data-tooltip="Refresh the list of jobs" aria-label="Refresh jobs list">
+                        <span class="icon" aria-hidden="true">↻</span> Refresh
                     </button>
                 </div>
 
                 <div class="jobs-section">
-                    <div id="jobs-list" class="jobs-list">
-                        <div class="empty-state">
+                    <div id="jobs-list" class="jobs-list" role="list" aria-label="Automated ML jobs">
+                        <div class="empty-state" role="status" aria-live="polite">
                             <div class="empty-state-content">
                                 <h3>No recent Automated ML jobs to display.</h3>
                                 <p>Click "New Automated ML job" to create your first job.</p>
-                                <a href="https://aka.ms/mslearn-azure-ml-intro" target="_blank" class="learn-more-link">📚 Learn more about creating Automated ML jobs</a>
+                                <a href="https://aka.ms/mslearn-azure-ml-intro" target="_blank" class="learn-more-link" aria-label="Learn more about creating Automated ML jobs - opens in new tab">📚 Learn more about creating Automated ML jobs</a>
                             </div>
                         </div>
                     </div>
@@ -816,17 +820,17 @@
 
                 <div class="documentation-section">
                     <h3>Documentation</h3>
-                    <div class="doc-links">
-                        <a href="https://aka.ms/mslearn-ml-concepts" target="_blank" class="doc-link">
-                            <span class="doc-icon">📖</span>
+                    <div class="doc-links" role="list" aria-label="Documentation resources">
+                        <a href="https://aka.ms/mslearn-ml-concepts" target="_blank" class="doc-link" role="listitem" aria-label="Concept: What is Machine Learning? - opens in new tab">
+                            <span class="doc-icon" aria-hidden="true">📖</span>
                             <span>Concept: What is Machine Learning?</span>
                         </a>
-                        <a href="https://aka.ms/mslearn-azure-ml-intro" target="_blank" class="doc-link">
-                            <span class="doc-icon">🎓</span>
+                        <a href="https://aka.ms/mslearn-azure-ml-intro" target="_blank" class="doc-link" role="listitem" aria-label="Tutorial: Get started with Machine Learning on Azure - opens in new tab">
+                            <span class="doc-icon" aria-hidden="true">🎓</span>
                             <span>Tutorial: Get started with Machine Learning on Azure</span>
                         </a>
-                        <a href="https://azure.microsoft.com/products/machine-learning/" target="_blank" class="doc-link">
-                            <span class="doc-icon">📝</span>
+                        <a href="https://azure.microsoft.com/products/machine-learning/" target="_blank" class="doc-link" role="listitem" aria-label="On the web: Microsoft Azure Machine Learning - opens in new tab">
+                            <span class="doc-icon" aria-hidden="true">📝</span>
                             <span>On the web: Microsoft Azure Machine Learning</span>
                         </a>
                     </div>
@@ -834,50 +838,50 @@
             </div>
 
             <!-- New AutoML Job Wizard Page -->
-            <div id="automl-wizard-page" class="page-content" style="display: none;">
+            <div id="automl-wizard-page" class="page-content" style="display: none;" role="region" aria-labelledby="wizard-title">
                 <div class="wizard-page-container">
                     <div class="wizard-header">
-                        <h1>Submit an Automated ML job</h1>
-                        <button class="close-wizard" onclick="closeJobWizard()" data-tooltip="Cancel job creation">&times;</button>
+                        <h1 id="wizard-title">Submit an Automated ML job</h1>
+                        <button class="close-wizard" onclick="closeJobWizard()" data-tooltip="Cancel job creation" aria-label="Cancel and close job wizard">&times;</button>
                     </div>
                     
                     <div class="wizard-main">
                         <div class="wizard-sidebar">
-                            <div class="wizard-steps-vertical">
-                                <div class="step-vertical active" data-step="1">
-                                    <div class="step-indicator">
+                            <div class="wizard-steps-vertical" role="list" aria-label="Wizard steps">
+                                <div class="step-vertical active" data-step="1" role="listitem">
+                                    <div class="step-indicator" aria-hidden="true">
                                         <span class="step-number">1</span>
                                     </div>
                                     <div class="step-info">
                                         <div class="step-title">Basic settings</div>
                                     </div>
                                 </div>
-                                <div class="step-vertical" data-step="2">
-                                    <div class="step-indicator">
+                                <div class="step-vertical" data-step="2" role="listitem">
+                                    <div class="step-indicator" aria-hidden="true">
                                         <span class="step-number">2</span>
                                     </div>
                                     <div class="step-info">
                                         <div class="step-title">Task type & data</div>
                                     </div>
                                 </div>
-                                <div class="step-vertical" data-step="3">
-                                    <div class="step-indicator">
+                                <div class="step-vertical" data-step="3" role="listitem">
+                                    <div class="step-indicator" aria-hidden="true">
                                         <span class="step-number">3</span>
                                     </div>
                                     <div class="step-info">
                                         <div class="step-title">Task settings</div>
                                     </div>
                                 </div>
-                                <div class="step-vertical" data-step="4">
-                                    <div class="step-indicator">
+                                <div class="step-vertical" data-step="4" role="listitem">
+                                    <div class="step-indicator" aria-hidden="true">
                                         <span class="step-number">4</span>
                                     </div>
                                     <div class="step-info">
                                         <div class="step-title">Compute</div>
                                     </div>
                                 </div>
-                                <div class="step-vertical" data-step="5">
-                                    <div class="step-indicator">
+                                <div class="step-vertical" data-step="5" role="listitem">
+                                    <div class="step-indicator" aria-hidden="true">
                                         <span class="step-number">5</span>
                                     </div>
                                     <div class="step-info">
@@ -889,70 +893,73 @@
                         
                         <div class="wizard-content-area">
                             <!-- Step 1: Basic Settings -->
-                            <div id="step-1" class="wizard-step active">
+                            <div id="step-1" class="wizard-step active" role="group" aria-labelledby="step1-heading">
                                 <div class="step-header">
-                                    <h2>Basic settings</h2>
+                                    <h2 id="step1-heading">Basic settings</h2>
                                     <p>Let's start with some basic information about your training job.</p>
                                 </div>
                                 <div class="step-content">
                                     <div class="form-section">
                                         <div class="form-group">
                                             <label for="job-name">Job name *</label>
-                                            <input type="text" id="job-name" placeholder="Enter job name" required>
+                                            <input type="text" id="job-name" placeholder="Enter job name" required aria-describedby="job-name-help">
+                                            <div id="job-name-help" class="sr-only">Enter a unique name for your machine learning training job</div>
                                         </div>
                                         <div class="form-group">
                                             <label for="job-description">Description</label>
-                                            <textarea id="job-description" rows="4" placeholder="Enter description (optional)"></textarea>
+                                            <textarea id="job-description" rows="4" placeholder="Enter description (optional)" aria-describedby="job-description-help"></textarea>
+                                            <div id="job-description-help" class="sr-only">Optional description to help you identify this training job later</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Step 2: Task & Data -->
-                            <div id="step-2" class="wizard-step">
+                            <div id="step-2" class="wizard-step" role="group" aria-labelledby="step2-heading">
                                 <div class="step-header">
-                                    <h2>Task type & data</h2>
+                                    <h2 id="step2-heading">Task type & data</h2>
                                     <p>Select the machine learning task type and upload your data.</p>
                                 </div>
                                 <div class="step-content">
                                     <div class="form-section">
                                         <div class="form-group">
                                             <label for="task-type">Task type *</label>
-                                            <div class="custom-dropdown" data-tooltip="Choose the type of machine learning task">
-                                                <div class="dropdown-selected" id="task-type-selected" onclick="toggleTaskTypeDropdown()">
+                                            <div class="custom-dropdown" data-tooltip="Choose the type of machine learning task" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="task-type">
+                                                <div class="dropdown-selected" id="task-type-selected" onclick="toggleTaskTypeDropdown()" tabindex="0" onkeydown="handleDropdownKeyDown(event)" aria-describedby="task-type-help">
                                                     <span class="placeholder">Select task type</span>
-                                                    <span class="dropdown-arrow">▼</span>
+                                                    <span class="dropdown-arrow" aria-hidden="true">▼</span>
                                                 </div>
-                                                <div class="dropdown-options" id="task-type-options">
-                                                    <div class="task-type-option" data-value="classification" onclick="selectTaskType('classification')">
-                                                        <div class="task-type-icon chart"></div>
+                                                <div class="dropdown-options" id="task-type-options" role="listbox" aria-labelledby="task-type">
+                                                    <div class="task-type-option" data-value="classification" onclick="selectTaskType('classification')" role="option" tabindex="0" onkeydown="handleOptionKeyDown(event)" aria-describedby="classification-help">
+                                                        <div class="task-type-icon chart" aria-hidden="true"></div>
                                                         <span>Classification</span>
                                                     </div>
-                                                    <div class="task-type-option" data-value="regression" onclick="selectTaskType('regression')">
-                                                        <div class="task-type-icon layers"></div>
+                                                    <div class="task-type-option" data-value="regression" onclick="selectTaskType('regression')" role="option" tabindex="0" onkeydown="handleOptionKeyDown(event)" aria-describedby="regression-help">
+                                                        <div class="task-type-icon layers" aria-hidden="true"></div>
                                                         <span>Regression</span>
                                                     </div>
                                                 </div>
                                             </div>
                                             <input type="hidden" id="task-type" value="">
-                                            <div class="help-text">
-                                                <small><strong>Classification:</strong> Predict categories (e.g., spam/not spam, pass/fail)</small><br>
-                                                <small><strong>Regression:</strong> Predict continuous values (e.g., price, temperature)</small>
+                                            <div class="help-text" id="task-type-help">
+                                                <small id="classification-help"><strong>Classification:</strong> Predict categories (e.g., spam/not spam, pass/fail)</small><br>
+                                                <small id="regression-help"><strong>Regression:</strong> Predict continuous values (e.g., price, temperature)</small>
                                             </div>
                                         </div>
                                         
                                         <!-- Create Dataset Button -->
                                         <div class="form-group">
-                                            <button type="button" class="btn btn-primary" onclick="showCreateDatasetInterface()" data-tooltip="Create a new tabular dataset">
+                                            <button type="button" class="btn btn-primary" onclick="showCreateDatasetInterface()" data-tooltip="Create a new tabular dataset" aria-describedby="create-dataset-help">
                                                 Create (Tabular)
                                             </button>
+                                            <div id="create-dataset-help" class="sr-only">Upload a CSV file to create a new tabular dataset for training</div>
                                         </div>
                                         
                                         <!-- Existing Datasets List -->
                                         <div class="form-group">
                                             <label>Select existing dataset</label>
-                                            <div id="dataset-list" class="dataset-list">
-                                                <div class="no-datasets">
+                                            <div id="dataset-list" class="dataset-list" role="list" aria-label="Available datasets">
+                                                <div class="no-datasets" role="status">
                                                     <p>No datasets available. Create a dataset using the button above.</p>
                                                 </div>
                                             </div>
@@ -961,70 +968,75 @@
                                         <!-- File Upload (Hidden initially, shown when Create button is clicked) -->
                                         <div class="form-group" id="file-upload-group" style="display: none;">
                                             <label for="dataset-name">Dataset name *</label>
-                                            <input type="text" id="dataset-name" placeholder="Enter dataset name" oninput="validateDatasetName()">
-                                            <div id="dataset-name-error" class="error-message" style="display: none;"></div>
+                                            <input type="text" id="dataset-name" placeholder="Enter dataset name" oninput="validateDatasetName()" aria-describedby="dataset-name-help">
+                                            <div id="dataset-name-help" class="sr-only">Enter a unique name for your dataset</div>
+                                            <div id="dataset-name-error" class="error-message" style="display: none;" role="alert" aria-live="polite"></div>
                                             
                                             <label for="data-file" style="margin-top: 15px;">Upload CSV file *</label>
-                                            <input type="file" id="data-file" accept=".csv" onchange="handleFileUpload(this)">
-                                            <div id="uploaded-files"></div>
+                                            <input type="file" id="data-file" accept=".csv" onchange="handleFileUpload(this)" aria-describedby="file-upload-help">
+                                            <div id="file-upload-help" class="sr-only">Select a CSV file containing your training data with headers in the first row</div>
+                                            <div id="uploaded-files" role="status" aria-live="polite"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Step 3: Task Settings -->
-                            <div id="step-3" class="wizard-step">
+                            <div id="step-3" class="wizard-step" role="group" aria-labelledby="step3-heading">
                                 <div class="step-header">
-                                    <h2>Task settings</h2>
+                                    <h2 id="step3-heading">Task settings</h2>
                                     <p>Configure additional settings for your machine learning task.</p>
                                 </div>
                                 <div class="step-content">
                                     <div class="form-section">
                                         <div class="form-group" id="target-column-group" style="display: none;">
                                             <label for="target-column">Target column *</label>
-                                            <select id="target-column">
+                                            <select id="target-column" aria-describedby="target-column-help">
                                                 <option value="">Select target column</option>
                                             </select>
+                                            <div id="target-column-help" class="sr-only">Choose the column you want to predict from your dataset</div>
                                         </div>
                                         <div class="config-section horizontal">
                                             <div class="config-item">
-                                                <button type="button" class="config-btn" onclick="openConfigFlyout()" data-tooltip="Configure primary metrics and algorithms">
-                                                    <span class="config-icon">⚙️</span>
+                                                <button type="button" class="config-btn" onclick="openConfigFlyout()" data-tooltip="Configure primary metrics and algorithms" aria-describedby="config-btn-help">
+                                                    <span class="config-icon" aria-hidden="true">⚙️</span>
                                                     <div>
                                                         <div class="config-title">Additional configuration settings</div>
                                                         <div class="config-desc">Primary metric and algorithms</div>
                                                     </div>
                                                 </button>
+                                                <div id="config-btn-help" class="sr-only">Opens configuration panel to select evaluation metrics and machine learning algorithms</div>
                                             </div>
                                             <div class="config-item">
-                                                <button type="button" class="config-btn" onclick="openFeaturizationFlyout()" data-tooltip="Configure data preprocessing options">
-                                                    <span class="config-icon">🔧</span>
+                                                <button type="button" class="config-btn" onclick="openFeaturizationFlyout()" data-tooltip="Configure data preprocessing options" aria-describedby="featurization-btn-help">
+                                                    <span class="config-icon" aria-hidden="true">🔧</span>
                                                     <div>
                                                         <div class="config-title">Featurization settings</div>
                                                         <div class="config-desc">Data preprocessing options</div>
                                                     </div>
                                                 </button>
+                                                <div id="featurization-btn-help" class="sr-only">Opens featurization panel to configure how data is preprocessed before training</div>
                                             </div>
                                         </div>
                                         
                                         <!-- Limits expandable section -->
                                         <div class="expandable-section">
-                                            <button type="button" class="expandable-header" onclick="toggleLimitsSection()">
-                                                <span class="expand-icon">▶</span>
+                                            <button type="button" class="expandable-header" onclick="toggleLimitsSection()" aria-expanded="false" aria-controls="limits-content">
+                                                <span class="expand-icon" aria-hidden="true">▶</span>
                                                 <span>Limits</span>
                                             </button>
                                             <div id="limits-content" class="expandable-content">
                                                 <div class="form-group">
                                                     <label for="metric-threshold">Metric score threshold</label>
                                                     <input type="number" id="metric-threshold" name="metric-threshold" 
-                                                           placeholder="e.g., 0.85" step="0.01" min="0" max="1">
-                                                    <small class="form-help">Stop training when this metric score is reached (range depends on selected primary metric)</small>
+                                                           placeholder="e.g., 0.85" step="0.01" min="0" max="1" aria-describedby="metric-threshold-help">
+                                                    <small class="form-help" id="metric-threshold-help">Stop training when this metric score is reached (range depends on selected primary metric)</small>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="experiment-timeout">Experiment timeout (minutes)</label>
                                                     <input type="number" id="experiment-timeout" name="experiment-timeout" 
-                                                           placeholder="e.g., 60" min="15" max="1440">
-                                                    <small class="form-help">Maximum time to run the experiment (minimum 15 minutes)</small>
+                                                           placeholder="e.g., 60" min="15" max="1440" aria-describedby="experiment-timeout-help">
+                                                    <small class="form-help" id="experiment-timeout-help">Maximum time to run the experiment (minimum 15 minutes)</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -1033,19 +1045,19 @@
                             </div>
 
                             <!-- Step 4: Compute -->
-                            <div id="step-4" class="wizard-step">
+                            <div id="step-4" class="wizard-step" role="group" aria-labelledby="step4-heading">
                                 <div class="step-header">
-                                    <h2>Compute</h2>
+                                    <h2 id="step4-heading">Compute</h2>
                                     <p>Select the compute target for training your machine learning model.</p>
                                 </div>
                                 <div class="step-content">
                                     <div class="form-section">
                                         <div class="form-group">
                                             <label for="compute-type">Select compute type</label>
-                                            <select id="compute-type" class="form-control">
+                                            <select id="compute-type" class="form-control" aria-describedby="compute-type-help">
                                                 <option value="serverless" selected>Serverless</option>
                                             </select>
-                                            <div class="form-help">
+                                            <div class="form-help" id="compute-type-help">
                                                 <small>Serverless compute is the recommended option for getting started with automated ML.</small>
                                             </div>
                                         </div>
@@ -1054,28 +1066,28 @@
                             </div>
 
                             <!-- Step 5: Review -->
-                            <div id="step-5" class="wizard-step">
+                            <div id="step-5" class="wizard-step" role="group" aria-labelledby="step5-heading">
                                 <div class="step-header">
-                                    <h2>Review and submit</h2>
+                                    <h2 id="step5-heading">Review and submit</h2>
                                     <p>Review your configuration and submit the training job.</p>
                                 </div>
                                 <div class="step-content">
                                     <div class="form-section">
-                                        <div id="job-summary"></div>
+                                        <div id="job-summary" role="region" aria-label="Job configuration summary"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="wizard-footer">
+                    <div class="wizard-footer" role="toolbar" aria-label="Wizard navigation">
                         <div class="footer-left">
-                            <button type="button" class="btn btn-secondary" onclick="previousStep()" id="prev-btn" style="display: none;" data-tooltip="Go to previous step">Back</button>
-                            <button type="button" class="btn btn-primary" onclick="nextStep()" id="next-btn" data-tooltip="Continue to next step">Next</button>
-                            <button type="button" class="btn btn-primary" onclick="submitJob()" id="submit-btn" style="display: none;" data-tooltip="Start training the models">Submit</button>
+                            <button type="button" class="btn btn-secondary" onclick="previousStep()" id="prev-btn" style="display: none;" data-tooltip="Go to previous step" aria-label="Go to previous wizard step">Back</button>
+                            <button type="button" class="btn btn-primary" onclick="nextStep()" id="next-btn" data-tooltip="Continue to next step" aria-label="Continue to next wizard step">Next</button>
+                            <button type="button" class="btn btn-primary" onclick="submitJob()" id="submit-btn" style="display: none;" data-tooltip="Start training the models" aria-label="Submit the training job">Submit</button>
                         </div>
                         <div class="footer-right">
-                            <button type="button" class="btn btn-secondary" onclick="closeJobWizard()" data-tooltip="Cancel job creation">Cancel</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeJobWizard()" data-tooltip="Cancel job creation" aria-label="Cancel and close wizard">Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -1333,65 +1345,71 @@
     </main>
 
     <!-- Configuration Flyout -->
-    <div id="config-flyout" class="flyout">
+    <div id="config-flyout" class="flyout" role="dialog" aria-labelledby="config-flyout-title" aria-modal="true">
         <div class="flyout-header">
-            <h3>Additional Configuration Settings</h3>
-            <span class="flyout-close" onclick="closeConfigFlyout()">&times;</span>
+            <h3 id="config-flyout-title">Additional Configuration Settings</h3>
+            <span class="flyout-close" onclick="closeConfigFlyout()" aria-label="Close configuration settings">&times;</span>
         </div>
         <div class="flyout-content">
             <div class="form-group">
                 <label for="primary-metric">Primary metric</label>
-                <select id="primary-metric">
+                <select id="primary-metric" aria-describedby="primary-metric-help">
                     <!-- Options will be populated based on task type -->
                 </select>
+                <div id="primary-metric-help" class="sr-only">Choose the metric used to evaluate and compare model performance</div>
             </div>
             <div class="form-group">
                 <label>Algorithms to try</label>
-                <div id="algorithms-list" class="checkbox-group">
+                <div id="algorithms-list" class="checkbox-group" role="group" aria-labelledby="algorithms-label" aria-describedby="algorithms-help">
                     <!-- Checkboxes will be populated based on task type -->
                 </div>
+                <div id="algorithms-help" class="sr-only">Select which machine learning algorithms to train and compare</div>
             </div>
         </div>
         <div class="flyout-actions" style="margin-top: 24px; padding: 0 24px 24px 24px;">
-            <button type="button" class="btn btn-secondary" onclick="closeConfigFlyout()" data-tooltip="Cancel and close configuration">Cancel</button>
-            <button type="button" class="btn btn-primary" id="config-save-btn" onclick="saveConfig()" data-tooltip="Save configuration settings" style="background-color: #0078d4 !important; color: white !important; cursor: pointer !important; pointer-events: auto !important;">Save</button>
+            <button type="button" class="btn btn-secondary" onclick="closeConfigFlyout()" data-tooltip="Cancel and close configuration" aria-label="Cancel configuration changes">Cancel</button>
+            <button type="button" class="btn btn-primary" id="config-save-btn" onclick="saveConfig()" data-tooltip="Save configuration settings" aria-label="Save configuration settings" style="background-color: #0078d4 !important; color: white !important; cursor: pointer !important; pointer-events: auto !important;">Save</button>
         </div>
     </div>
 
     <!-- Featurization Flyout -->
-    <div id="featurization-flyout" class="flyout">
+    <div id="featurization-flyout" class="flyout" role="dialog" aria-labelledby="featurization-flyout-title" aria-modal="true">
         <div class="flyout-header">
-            <h3>Featurization Settings</h3>
-            <span class="flyout-close" onclick="closeFeaturizationFlyout()">&times;</span>
+            <h3 id="featurization-flyout-title">Featurization Settings</h3>
+            <span class="flyout-close" onclick="closeFeaturizationFlyout()" aria-label="Close featurization settings">&times;</span>
         </div>
         <div class="flyout-content">
             <div class="form-group">
                 <label class="checkbox-label-horizontal">
-                    <input type="checkbox" id="normalize-features"> 
+                    <input type="checkbox" id="normalize-features" aria-describedby="normalize-features-help"> 
                     <span>Normalize numeric features</span>
                 </label>
+                <div id="normalize-features-help" class="sr-only">Scale numeric features to have similar ranges for better model performance</div>
             </div>
             <div class="form-group">
                 <label>Handle missing data</label>
-                <div class="radio-group-vertical">
+                <div class="radio-group-vertical" role="radiogroup" aria-labelledby="missing-data-label" aria-describedby="missing-data-help">
                     <label>
-                        <input type="radio" name="missing-data-strategy" value="remove" checked>
+                        <input type="radio" name="missing-data-strategy" value="remove" checked aria-describedby="remove-strategy-help">
                         <span>Remove rows with missing values (default)</span>
                     </label>
                     <label>
-                        <input type="radio" name="missing-data-strategy" value="impute">
+                        <input type="radio" name="missing-data-strategy" value="impute" aria-describedby="impute-strategy-help">
                         <span>Fill missing values (mean for numeric, most frequent for categorical)</span>
                     </label>
                 </div>
+                <div id="missing-data-help" class="sr-only">Choose how to handle rows with missing values in your dataset</div>
+                <div id="remove-strategy-help" class="sr-only">Removes entire rows that contain any missing values</div>
+                <div id="impute-strategy-help" class="sr-only">Fills missing values with calculated replacements</div>
             </div>
             <div class="form-group" id="categorical-columns-group" style="display: none;">
                 <label>Non-numeric columns</label>
                 <div class="categorical-table-container">
-                    <table class="categorical-table">
+                    <table class="categorical-table" role="table" aria-label="Non-numeric columns configuration">
                         <thead>
                             <tr>
-                                <th>Column Name</th>
-                                <th>Action</th>
+                                <th scope="col">Column Name</th>
+                                <th scope="col">Action</th>
                             </tr>
                         </thead>
                         <tbody id="categorical-columns">
@@ -1401,8 +1419,8 @@
                 </div>
             </div>
             <div class="flyout-actions" style="margin-top: 24px;">
-                <button type="button" class="btn btn-secondary" onclick="closeFeaturizationFlyout()" data-tooltip="Cancel and close featurization settings">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="saveFeaturization()" data-tooltip="Save featurization settings">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeFeaturizationFlyout()" data-tooltip="Cancel and close featurization settings" aria-label="Cancel featurization changes">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveFeaturization()" data-tooltip="Save featurization settings" aria-label="Save featurization settings">Save</button>
             </div>
         </div>
     </div>
@@ -2236,78 +2254,84 @@
     <script src="script.js"></script>
 
     <!-- Create Workspace Flyout Panel -->
-    <div id="create-workspace-flyout" class="flyout-panel">
+    <div id="create-workspace-flyout" class="flyout-panel" role="dialog" aria-labelledby="create-workspace-title" aria-modal="true">
         <div class="flyout-header">
-            <h2>Create a new workspace</h2>
-            <button class="flyout-close-btn" onclick="closeCreateWorkspaceFlyout()">×</button>
+            <h2 id="create-workspace-title">Create a new workspace</h2>
+            <button class="flyout-close-btn" onclick="closeCreateWorkspaceFlyout()" aria-label="Close create workspace dialog">×</button>
         </div>
         <div class="flyout-content">
             <div class="form-group">
                 <label for="workspace-name">Name</label>
-                <input type="text" id="workspace-name" class="form-input" placeholder="Enter workspace name">
-                <div id="workspace-name-error" class="error-message" style="display: none; color: #d32f2f; font-size: 12px; margin-top: 4px;"></div>
+                <input type="text" id="workspace-name" class="form-input" placeholder="Enter workspace name" aria-describedby="workspace-name-help">
+                <div id="workspace-name-help" class="sr-only">Enter a unique name for your machine learning workspace</div>
+                <div id="workspace-name-error" class="error-message" style="display: none; color: #d32f2f; font-size: 12px; margin-top: 4px;" role="alert" aria-live="polite"></div>
             </div>
             <div class="form-group">
                 <label for="resource-group">Resource group</label>
-                <input type="text" id="resource-group" class="form-input" value="ResourceGroup1">
+                <input type="text" id="resource-group" class="form-input" value="ResourceGroup1" aria-describedby="resource-group-help">
+                <div id="resource-group-help" class="sr-only">Azure resource group that will contain the workspace resources</div>
             </div>
             <div class="flyout-actions">
-                <button class="btn-secondary" onclick="closeCreateWorkspaceFlyout()">Cancel</button>
-                <button class="btn-primary" onclick="createNewWorkspace()">Create</button>
+                <button class="btn-secondary" onclick="closeCreateWorkspaceFlyout()" aria-label="Cancel workspace creation">Cancel</button>
+                <button class="btn-primary" onclick="createNewWorkspace()" aria-label="Create the new workspace">Create</button>
             </div>
         </div>
     </div>
 
     <!-- Model Registration Modal -->
-    <div id="registerModelModal" class="modal" style="display: none;">
+    <div id="registerModelModal" class="modal" style="display: none;" role="dialog" aria-labelledby="register-model-title" aria-modal="true">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Register model</h2>
-                <span class="close" onclick="closeRegisterModelModal()">&times;</span>
+                <h2 id="register-model-title">Register model</h2>
+                <span class="close" onclick="closeRegisterModelModal()" aria-label="Close registration dialog">&times;</span>
             </div>
             <div class="modal-body">
                 <form id="registerModelForm">
                     <div class="form-group">
                         <label for="modelName">Name *</label>
-                        <input type="text" id="modelName" name="modelName" required placeholder="Enter model name">
-                        <div id="modelNameError" class="error-message" style="display: none; color: #d73a49; font-size: 12px; margin-top: 4px;"></div>
+                        <input type="text" id="modelName" name="modelName" required placeholder="Enter model name" aria-describedby="model-name-help">
+                        <div id="model-name-help" class="sr-only">Enter a unique name for the registered model</div>
+                        <div id="modelNameError" class="error-message" style="display: none; color: #d73a49; font-size: 12px; margin-top: 4px;" role="alert" aria-live="polite"></div>
                     </div>
                     <div class="form-group">
                         <label for="modelSelection">Model *</label>
-                        <select id="modelSelection" name="modelSelection" required>
+                        <select id="modelSelection" name="modelSelection" required aria-describedby="model-selection-help">
                             <!-- Options will be populated by JavaScript -->
                         </select>
+                        <div id="model-selection-help" class="sr-only">Choose which trained model to register</div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeRegisterModelModal()">Cancel</button>
-                <button type="button" class="btn btn-primary" id="registerModelButton" onclick="completeModelRegistration()">Register</button>
+                <button type="button" class="btn btn-secondary" onclick="closeRegisterModelModal()" aria-label="Cancel model registration">Cancel</button>
+                <button type="button" class="btn btn-primary" id="registerModelButton" onclick="completeModelRegistration()" aria-label="Complete model registration">Register</button>
             </div>
         </div>
     </div>
 
     <!-- Deploy Model Flyout -->
-    <div id="deployModelFlyout" class="flyout">
+    <div id="deployModelFlyout" class="flyout" role="dialog" aria-labelledby="deploy-model-title" aria-modal="true">
         <div class="flyout-header">
-            <h3>Deploy model</h3>
-            <div class="flyout-close" onclick="closeDeployModelFlyout()">&times;</div>
+            <h3 id="deploy-model-title">Deploy model</h3>
+            <div class="flyout-close" onclick="closeDeployModelFlyout()" aria-label="Close deployment dialog">&times;</div>
         </div>
         <div class="flyout-content">
             <form id="deployModelForm">
                 <div class="form-group">
                     <label for="endpointName">Endpoint name *</label>
-                    <input type="text" id="endpointName" name="endpointName" required placeholder="Enter endpoint name">
+                    <input type="text" id="endpointName" name="endpointName" required placeholder="Enter endpoint name" aria-describedby="endpoint-name-help">
+                    <div id="endpoint-name-help" class="sr-only">Enter a unique name for the deployment endpoint</div>
                 </div>
                 <div class="form-group">
                     <label for="deploymentName">Deployment name *</label>
-                    <input type="text" id="deploymentName" name="deploymentName" required placeholder="Enter deployment name">
+                    <input type="text" id="deploymentName" name="deploymentName" required placeholder="Enter deployment name" aria-describedby="deployment-name-help">
+                    <div id="deployment-name-help" class="sr-only">Enter a name for this specific deployment configuration</div>
                 </div>
             </form>
         </div>
         <div class="flyout-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeDeployModelFlyout()">Cancel</button>
-            <button type="button" class="btn btn-primary" id="deployModelButton" onclick="completeModelDeployment()">Deploy</button>
+            <button type="button" class="btn btn-secondary" onclick="closeDeployModelFlyout()" aria-label="Cancel model deployment">Cancel</button>
+            <button type="button" class="btn btn-primary" id="deployModelButton" onclick="completeModelDeployment()" aria-label="Complete model deployment">Deploy</button>
         </div>
     </div>
 </body>
