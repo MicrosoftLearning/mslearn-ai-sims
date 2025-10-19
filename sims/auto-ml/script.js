@@ -2268,7 +2268,10 @@ function startTrainingJob(capturedJobData) {
                 computeType: currentJobData.computeType || 'Standard',
                 status: 'Running',
                 createdOn: new Date(),
-                startTime: new Date()
+                startTime: new Date(),
+                // Inherit dataset information from parent job
+                datasetInfo: datasetInfo,
+                targetColumn: currentJobData.targetColumn
             };
             job.childJobs.push(childJob);
         });
@@ -5082,16 +5085,39 @@ function downloadChildModel() {
         return;
     }
     
-    // Create a downloadable model file
+    // Use PyScript to serialize the real trained model
+    if (!window.serialize_model_pyscript) {
+        alert('PyScript model serialization not available. Please wait for PyScript to load.');
+        return;
+    }
+    
     try {
-        const modelData = createSklearnModelData(childJob);
-        const modelName = `${childJob.displayName || childJob.id}_model.pkl`;
-        downloadFile(modelData, modelName, 'application/octet-stream');
+        // Create the model key based on parent job ID and algorithm
+        const modelKey = `${childJob.parentJobId}_${childJob.algorithm}`;
+        console.log('Serializing real scikit-learn model for child job:', childJob.displayName, 'with key:', modelKey);
         
-        console.log('Downloaded child model:', childJob);
+        const serializedModelB64 = window.serialize_model_pyscript(modelKey);
+        
+        // Check if there was an error
+        if (serializedModelB64.startsWith('{"error":')) {
+            const errorInfo = JSON.parse(serializedModelB64);
+            throw new Error(errorInfo.error);
+        }
+        
+        // Convert base64 to binary data for download
+        const binaryString = atob(serializedModelB64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        const modelName = `${childJob.displayName || childJob.id}_model.pkl`;
+        downloadFile(bytes, modelName, 'application/octet-stream');
+        
+        console.log('Downloaded real scikit-learn model for child job:', childJob);
     } catch (error) {
-        console.error('Error downloading model:', error);
-        alert('Error creating model download. Please try again.');
+        console.error('Error downloading real model:', error);
+        alert(`Error downloading model: ${error.message}`);
     }
 }
 
@@ -5139,7 +5165,10 @@ function completeModelRegistration() {
         sourceJobId: jobIndex,
         childJobIndex: selectedModelIndex,
         createdDate: new Date().toISOString(),
-        status: 'Registered'
+        status: 'Registered',
+        datasetInfo: job.datasetInfo, // Store dataset information
+        targetColumn: job.targetColumn, // Store target column
+        modelKey: `${job.id}_${childJob.algorithm}` // Exact key to find the trained model
     };
     
     registeredModels.push(registeredModel);
@@ -5376,7 +5405,10 @@ function completeModelDeployment() {
                 sourceJobId: childJob.id,
                 createdDate: new Date().toISOString(),
                 algorithm: childJob.algorithm || 'Unknown',
-                metrics: childJob.metrics || {}
+                metrics: childJob.metrics || {},
+                datasetInfo: childJob.datasetInfo, // Store dataset information
+                targetColumn: childJob.targetColumn, // Store target column
+                modelKey: `${childJob.parentJobId}_${childJob.algorithm}` // Exact key to find the trained model
             };
             
             registeredModels.push(newRegisteredModel);
@@ -5386,12 +5418,17 @@ function completeModelDeployment() {
         }
     }
     
+    // Find the registered model to get the model key
+    const registeredModel = registeredModels.find(model => model.name === modelName);
+    const modelKey = registeredModel ? registeredModel.modelKey : null;
+    
     // Create new endpoint
     const newEndpoint = {
         id: `endpoint-${Date.now()}`,
         endpointName: endpointName,
         deploymentName: deploymentName,
         modelName: modelName,
+        modelKey: modelKey, // Store the exact model key for precise identification
         createdAt: new Date().toISOString(),
         status: 'Active'
     };
@@ -5438,7 +5475,69 @@ function showEndpointDetails(endpointId) {
     
     // Set up test input placeholder based on model
     const testInput = document.getElementById('test-input-data');
-    testInput.placeholder = '{\n  "data": [\n    {"feature1": 1.0, "feature2": 2.0, "feature3": "value"}\n  ]\n}';
+    
+    // Try to get the model's feature columns
+    const registeredModel = registeredModels.find(model => model.name === endpoint.modelName);
+    let featureColumns = [];
+    
+    console.log('🔍 DEBUG: Getting feature columns for endpoint:', endpoint.modelName);
+    console.log('  registeredModel:', registeredModel);
+    
+    if (registeredModel && registeredModel.datasetInfo) {
+        console.log('  datasetInfo:', registeredModel.datasetInfo);
+        console.log('  targetColumn:', registeredModel.targetColumn);
+        
+        // Get feature columns from the model's dataset info
+        if (registeredModel.datasetInfo.columns || registeredModel.datasetInfo.finalColumns) {
+            const allColumns = registeredModel.datasetInfo.finalColumns || registeredModel.datasetInfo.columns;
+            console.log('  allColumns:', allColumns);
+            // Get all columns except the target column
+            featureColumns = allColumns.filter(col => col !== registeredModel.targetColumn);
+            console.log('  featureColumns (after filtering target):', featureColumns);
+        }
+    } else {
+        console.log('  No model found or no dataset info available');
+    }
+    
+    // If we couldn't get the actual columns, use defaults
+    if (featureColumns.length === 0) {
+        featureColumns = ["feature1", "feature2", "feature3"];
+        console.log('  Using default feature columns:', featureColumns);
+    }
+    
+    // Create the JSON in the requested format
+    const testJson = {
+        input_data: {
+            columns: featureColumns,
+            index: [],
+            data: []
+        }
+    };
+    
+    // Set the textarea value to the formatted JSON (editable)
+    testInput.value = JSON.stringify(testJson, null, 2);
+    
+    // Add a helpful comment about data format
+    const helpText = document.createElement('div');
+    helpText.className = 'test-format-help';
+    helpText.style.cssText = 'margin-top: 10px; padding: 10px; background: #e8f5e8; border-radius: 4px; font-size: 12px; color: #2d5c2d; border: 1px solid #c3e6c3;';
+    helpText.innerHTML = `
+        <strong>✅ Use Original Data Format:</strong> This model includes preprocessing pipelines.
+        <br>• Enter data in the same format as your training data
+        <br>• Categorical values: use original strings like "Thursday", "April"
+        <br>• The model will automatically handle encoding, scaling, and missing values
+    `;
+    
+    // Insert help text after the textarea
+    const textarea = document.getElementById('test-input-data');
+    if (textarea.nextSibling && textarea.nextSibling.className === 'test-format-help') {
+        textarea.parentNode.replaceChild(helpText, textarea.nextSibling);
+    } else {
+        textarea.parentNode.insertBefore(helpText, textarea.nextSibling);
+    }
+    
+    // Clear any placeholder text since we're setting actual content
+    testInput.placeholder = '';
     
     // Show details tab by default
     showEndpointTab('details');
@@ -5485,26 +5584,62 @@ function testEndpoint() {
     
     try {
         // Validate JSON
-        JSON.parse(testData);
+        const inputData = JSON.parse(testData);
         
-        // Simulate API call
-        setTimeout(() => {
-            const mockResponse = {
-                predictions: [0.85],
-                model_version: "1.0",
-                timestamp: new Date().toISOString()
-            };
-            
-            responseDiv.innerHTML = `<pre>${JSON.stringify(mockResponse, null, 2)}</pre>`;
-            resultsDiv.style.display = 'block';
-        }, 1000);
+        // Get the current endpoint to find the model
+        const currentEndpoint = deployedEndpoints.find(ep => 
+            document.getElementById('endpoint-name-display').textContent === ep.endpointName
+        );
+        
+        if (!currentEndpoint) {
+            throw new Error('Could not find endpoint information');
+        }
         
         // Show loading state
-        responseDiv.innerHTML = '<div style="color: #666;">Sending request...</div>';
+        responseDiv.innerHTML = '<div style="color: #666;">Making prediction...</div>';
         resultsDiv.style.display = 'block';
         
+        // Call PyScript prediction function
+        if (window.predict_with_model_pyscript) {
+            try {
+                // Use the exact model key from the endpoint for precise model identification
+                const modelIdentifier = currentEndpoint.modelKey || currentEndpoint.modelName;
+                console.log('Using model identifier:', modelIdentifier);
+                
+                const predictionResult = window.predict_with_model_pyscript(
+                    modelIdentifier,
+                    testData
+                );
+                
+                // Parse the result
+                const predictions = JSON.parse(predictionResult);
+                
+                if (predictions.error) {
+                    throw new Error(predictions.error);
+                }
+                
+                // Display predictions in the requested format
+                responseDiv.innerHTML = `<pre>${JSON.stringify(predictions, null, 2)}</pre>`;
+                
+            } catch (pyError) {
+                // Enhanced error message for data format issues
+                let errorMsg = `Prediction failed: ${pyError.message}`;
+                if (pyError.message.includes('ValueError') || pyError.message.includes('columns') || pyError.message.includes('data')) {
+                    errorMsg += '\n\nTip: Make sure your data matches the format expected by the model:\n';
+                    errorMsg += '• Categorical values should be encoded as numbers (0, 1, 2, etc.)\n';
+                    errorMsg += '• Use the same data types and preprocessing as during training\n';
+                    errorMsg += '• Check that column names and order match exactly';
+                }
+                throw new Error(errorMsg);
+            }
+        } else {
+            throw new Error('PyScript prediction function not available. Please wait for PyScript to load.');
+        }
+        
     } catch (error) {
-        alert('Invalid JSON format. Please check your input data.');
+        console.error('Test endpoint error:', error);
+        responseDiv.innerHTML = `<div style="color: #d73a49; padding: 10px; background: #ffeef0; border-radius: 4px; white-space: pre-wrap;">${error.message}</div>`;
+        resultsDiv.style.display = 'block';
     }
 }
 
@@ -5519,148 +5654,62 @@ function downloadModel() {
         return;
     }
     
-    // Create a downloadable model file
+    // Use PyScript to serialize the real trained model
+    if (!window.serialize_model_pyscript) {
+        alert('PyScript model serialization not available. Please wait for PyScript to load.');
+        return;
+    }
+    
     try {
-        const modelData = createSklearnModelDataFromRegistered(registeredModel);
-        const fileName = `${modelName.replace(/[^a-zA-Z0-9-_]/g, '_')}_model.pkl`;
-        downloadFile(modelData, fileName, 'application/octet-stream');
+        // Use the exact model key for precise model identification
+        const modelIdentifier = registeredModel.modelKey || modelName;
+        console.log('Serializing real scikit-learn model:', modelName, 'with key:', modelIdentifier);
+        const serializedModelB64 = window.serialize_model_pyscript(modelIdentifier);
         
-        console.log('Downloaded registered model:', registeredModel);
+        // Check if there was an error
+        if (serializedModelB64.startsWith('{"error":')) {
+            const errorInfo = JSON.parse(serializedModelB64);
+            throw new Error(errorInfo.error);
+        }
+        
+        // Convert base64 to binary data for download
+        const binaryString = atob(serializedModelB64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        const fileName = `${modelName.replace(/[^a-zA-Z0-9-_]/g, '_')}_model.pkl`;
+        downloadFile(bytes, fileName, 'application/octet-stream');
+        
+        console.log('Downloaded real scikit-learn model:', modelName);
     } catch (error) {
-        console.error('Error downloading model:', error);
-        alert('Error creating model download. Please try again.');
+        console.error('Error downloading real model:', error);
+        alert(`Error downloading model: ${error.message}`);
     }
 }
 
+// DEPRECATED: These functions created fake/mock models and are no longer used
+// The app now uses real scikit-learn models stored in PyScript and serialized with pickle
+
+/*
 function createSklearnModelData(childJob) {
-    // Create a mock scikit-learn model structure that represents the trained model
-    const algorithm = childJob.algorithm;
-    const metrics = childJob.metrics || {};
-    
-    // Create a simplified pickle-like structure that could be used with joblib/pickle
-    const modelStructure = {
-        // Model metadata
-        '_sklearn_version': '1.3.0',
-        'algorithm': algorithm,
-        'model_type': getModelTypeFromAlgorithm(algorithm),
-        'training_metrics': metrics,
-        'created_date': new Date().toISOString(),
-        'job_id': childJob.id,
-        'job_name': childJob.displayName || childJob.id,
-        
-        // Mock model parameters based on algorithm
-        'model_params': generateModelParams(algorithm, metrics),
-        
-        // Feature information (would normally come from training data)
-        'feature_names': generateFeatureNames(),
-        'n_features': 10, // Mock feature count
-        
-        // Classes for classification models
-        'classes_': algorithm.includes('classification') || 
-                   childJob.parentJobDetails?.taskType === 'classification' ? 
-                   ['Class_0', 'Class_1'] : null,
-                   
-        // Instructions for reconstruction
-        '_reconstruction_info': {
-            'note': 'This is a simulated model from Azure ML Studio simulation.',
-            'usage': 'This model structure can be adapted for use with scikit-learn.',
-            'algorithm': algorithm,
-            'performance': metrics
-        }
-    };
-    
-    // Convert to a blob that can be downloaded
-    return JSON.stringify(modelStructure, null, 2);
+    // DEPRECATED: This created fake model data, now using real scikit-learn models
+    // See serialize_model_pyscript() in PyScript section for real model serialization
 }
 
 function createSklearnModelDataFromRegistered(registeredModel) {
-    // Create model data from a registered model
-    const modelStructure = {
-        '_sklearn_version': '1.3.0',
-        'algorithm': registeredModel.algorithm,
-        'model_type': getModelTypeFromAlgorithm(registeredModel.algorithm),
-        'training_metrics': registeredModel.metrics,
-        'created_date': registeredModel.createdDate,
-        'model_name': registeredModel.name,
-        'source_job': registeredModel.sourceJob,
-        
-        'model_params': generateModelParams(registeredModel.algorithm, registeredModel.metrics),
-        'feature_names': generateFeatureNames(),
-        'n_features': 10,
-        
-        'classes_': registeredModel.primaryMetric === 'auc' || 
-                   registeredModel.primaryMetric === 'accuracy' ? 
-                   ['Class_0', 'Class_1'] : null,
-                   
-        '_reconstruction_info': {
-            'note': 'This is a simulated model from Azure ML Studio simulation.',
-            'usage': 'This model structure can be adapted for use with scikit-learn.',
-            'registered_name': registeredModel.name,
-            'algorithm': registeredModel.algorithm,
-            'performance': registeredModel.metrics
-        }
-    };
-    
-    return JSON.stringify(modelStructure, null, 2);
+    // DEPRECATED: This created fake model data, now using real scikit-learn models  
+    // See serialize_model_pyscript() in PyScript section for real model serialization
 }
+*/
 
-function getModelTypeFromAlgorithm(algorithm) {
-    const classificationAlgorithms = ['logistic_regression', 'decision_tree', 'random_forest', 'svm', 'naive_bayes'];
-    const regressionAlgorithms = ['linear_regression', 'lasso', 'ridge', 'elastic_net'];
-    
-    if (classificationAlgorithms.includes(algorithm)) {
-        return 'classifier';
-    } else if (regressionAlgorithms.includes(algorithm)) {
-        return 'regressor';
-    }
-    return 'unknown';
-}
-
-function generateModelParams(algorithm, metrics) {
-    // Generate realistic model parameters based on the algorithm
-    const params = {
-        'algorithm': algorithm,
-        'fitted': true,
-        'training_score': metrics ? Object.values(metrics)[0] : 0.85
-    };
-    
-    // Add algorithm-specific parameters
-    switch (algorithm) {
-        case 'logistic_regression':
-            params.C = 1.0;
-            params.solver = 'lbfgs';
-            params.max_iter = 1000;
-            break;
-        case 'decision_tree':
-            params.max_depth = 10;
-            params.min_samples_split = 2;
-            params.min_samples_leaf = 1;
-            break;
-        case 'random_forest':
-            params.n_estimators = 100;
-            params.max_depth = 10;
-            params.min_samples_split = 2;
-            break;
-        case 'linear_regression':
-            params.fit_intercept = true;
-            params.normalize = false;
-            break;
-        case 'lasso':
-            params.alpha = 1.0;
-            params.max_iter = 1000;
-            break;
-    }
-    
-    return params;
-}
-
-function generateFeatureNames() {
-    // Generate mock feature names that would typically come from the training dataset
-    return [
-        'feature_1', 'feature_2', 'feature_3', 'feature_4', 'feature_5',
-        'feature_6', 'feature_7', 'feature_8', 'feature_9', 'feature_10'
-    ];
-}
+// DEPRECATED: Helper functions for fake model generation - no longer used with real scikit-learn models
+/*
+function getModelTypeFromAlgorithm(algorithm) { ... }
+function generateModelParams(algorithm, metrics) { ... }  
+function generateFeatureNames() { ... }
+*/
 
 function downloadFile(content, fileName, mimeType) {
     // Create a blob with the content
