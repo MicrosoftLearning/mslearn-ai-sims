@@ -77,6 +77,10 @@
                         <span class="nav-icon">◻</span>
                         <span class="nav-text">Models</span>
                     </div>
+                    <div class="nav-item" onclick="showEndpointsPage()" data-tooltip="Endpoints">
+                        <span class="nav-icon">&#9928;</span>
+                        <span class="nav-text">Endpoints</span>
+                    </div>
                 </div>
             </nav>
         </aside>
@@ -282,6 +286,121 @@
                             <div class="empty-state-content">
                                 <h3>No models registered yet.</h3>
                                 <p>Register models from training results to see them here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endpoints Page -->
+            <div id="endpoints-page" class="page-content" style="display: none;">
+                <div class="page-header">
+                    <h1>Endpoints</h1>
+                    <p>Manage your deployed model endpoints and monitor their status.</p>
+                </div>
+
+                <div class="endpoints-section">
+                    <div id="endpoints-list" class="endpoints-table-container">
+                        <div class="empty-state">
+                            <div class="empty-state-content">
+                                <h3>No endpoints deployed yet.</h3>
+                                <p>Deploy models to create endpoints for real-time inference.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endpoint Details Page -->
+            <div id="endpoint-details-page" class="page-content" style="display: none;">
+                <!-- Endpoint Details Header -->
+                <div class="endpoint-details-header">
+                    <div class="endpoint-header-info">
+                        <div class="endpoint-title-section">
+                            <h1 id="endpoint-details-title">Endpoint Name</h1>
+                            <div class="endpoint-status">Active</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Endpoint Actions Toolbar -->
+                <div class="endpoint-actions-toolbar">
+                    <button class="btn btn-secondary" onclick="refreshEndpointDetails()">
+                        ↻ Refresh
+                    </button>
+                    <button class="btn btn-secondary" onclick="backToEndpointsList()">
+                        ← Back to Endpoints
+                    </button>
+                </div>
+
+                <!-- Endpoint Tabs -->
+                <div class="endpoint-tabs">
+                    <div class="tab-navigation">
+                        <button class="tab-button active" onclick="showEndpointTab('details')">Details</button>
+                        <button class="tab-button" onclick="showEndpointTab('test')">Test</button>
+                        <button class="tab-button" onclick="showEndpointTab('consume')">Consume</button>
+                    </div>
+
+                    <!-- Details Tab -->
+                    <div id="endpoint-details-tab" class="tab-content active">
+                        <div class="endpoint-details-section">
+                            <h3>Endpoint Information</h3>
+                            <div class="details-grid">
+                                <div class="detail-item">
+                                    <label>Endpoint Name:</label>
+                                    <span id="endpoint-name-display">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Deployment Name:</label>
+                                    <span id="deployment-name-display">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Model:</label>
+                                    <span id="deployed-model-display">-</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Created On:</label>
+                                    <span id="endpoint-created-display">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Test Tab -->
+                    <div id="endpoint-test-tab" class="tab-content" style="display: none;">
+                        <div class="endpoint-test-section">
+                            <h3>Test Endpoint</h3>
+                            <p>Send test requests to your deployed model endpoint.</p>
+                            <div class="test-input-section">
+                                <label for="test-input-data">Input Data (JSON):</label>
+                                <textarea id="test-input-data" rows="8" placeholder='{"feature1": value1, "feature2": value2, ...}'></textarea>
+                                <button class="btn btn-primary" onclick="testEndpoint()">Send Test Request</button>
+                            </div>
+                            <div id="test-results" class="test-results-section" style="display: none;">
+                                <h4>Response:</h4>
+                                <div id="test-response"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Consume Tab -->
+                    <div id="endpoint-consume-tab" class="tab-content" style="display: none;">
+                        <div class="endpoint-consume-section">
+                            <h3>Consume Endpoint</h3>
+                            <p>Integration details for consuming your deployed model endpoint.</p>
+                            <div class="consume-details">
+                                <div class="consume-item">
+                                    <label>REST Endpoint URL:</label>
+                                    <code id="endpoint-url">https://your-endpoint.azureml.net/score</code>
+                                </div>
+                                <div class="consume-item">
+                                    <label>Authentication:</label>
+                                    <code>Bearer Token Required</code>
+                                </div>
+                                <div class="consume-item">
+                                    <label>Content Type:</label>
+                                    <code>application/json</code>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1936,6 +2055,30 @@
                 <button type="button" class="btn btn-secondary" onclick="closeRegisterModelModal()">Cancel</button>
                 <button type="button" class="btn btn-primary" id="registerModelButton" onclick="completeModelRegistration()">Register</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Deploy Model Flyout -->
+    <div id="deployModelFlyout" class="flyout">
+        <div class="flyout-header">
+            <h3>Deploy model</h3>
+            <div class="flyout-close" onclick="closeDeployModelFlyout()">&times;</div>
+        </div>
+        <div class="flyout-content">
+            <form id="deployModelForm">
+                <div class="form-group">
+                    <label for="endpointName">Endpoint name *</label>
+                    <input type="text" id="endpointName" name="endpointName" required placeholder="Enter endpoint name">
+                </div>
+                <div class="form-group">
+                    <label for="deploymentName">Deployment name *</label>
+                    <input type="text" id="deploymentName" name="deploymentName" required placeholder="Enter deployment name">
+                </div>
+            </form>
+        </div>
+        <div class="flyout-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeDeployModelFlyout()">Cancel</button>
+            <button type="button" class="btn btn-primary" id="deployModelButton" onclick="completeModelDeployment()">Deploy</button>
         </div>
     </div>
 </body>

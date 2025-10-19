@@ -95,6 +95,7 @@ function checkPyScriptStatus(attempts = 0) {
 
 // Data management
 let uploadedDataFiles = [];
+let deployedEndpoints = [];
 
 // Header mode preference (true = use first row as headers, false = use custom headers)
 let useFirstRowAsHeaders = true;
@@ -408,6 +409,19 @@ function showModelsPage() {
     updateDeployedModelsList();
 }
 
+function showEndpointsPage() {
+    // Hide all pages and show Endpoints page
+    document.querySelectorAll('.page-content').forEach(page => page.style.display = 'none');
+    document.getElementById('endpoints-page').style.display = 'block';
+    
+    // Update navigation active state
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.querySelector('.nav-item[onclick="showEndpointsPage()"]').classList.add('active');
+    
+    // Update endpoints list
+    updateEndpointsList();
+}
+
 // Wizard management
 function openNewJobWizard() {
     // Hide all page content
@@ -718,6 +732,9 @@ function selectExistingDataset(datasetId) {
         
         // Clear file input since we're using existing dataset
         document.getElementById('data-file').value = '';
+        
+        // Validate wizard step to enable Next button
+        validateWizardStep();
     }
 }
 
@@ -1670,6 +1687,9 @@ function updateCustomHeaders() {
         
         console.log('Updated currentData with custom headers:', currentData);
     }
+    
+    // Validate wizard step after file display to enable Next button if conditions are met
+    validateWizardStep();
 }
 
 function saveDataset() {
@@ -1873,17 +1893,20 @@ function updateCategoricalColumnsDisplay() {
         categoricalDiv.innerHTML = '';
         
         nonNumericColumns.forEach(column => {
+            // Get saved value or use default
+            const savedValue = currentJobData.categoricalSettings?.[column] || 'categorize';
+            
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="column-name">${column}</td>
                 <td>
                     <div class="radio-group">
                         <label>
-                            <input type="radio" name="categorical-${column}" value="categorize" checked>
+                            <input type="radio" name="categorical-${column}" value="categorize" ${savedValue === 'categorize' ? 'checked' : ''}>
                             <span>Categorize</span>
                         </label>
                         <label>
-                            <input type="radio" name="categorical-${column}" value="ignore">
+                            <input type="radio" name="categorical-${column}" value="ignore" ${savedValue === 'ignore' ? 'checked' : ''}>
                             <span>Ignore</span>
                         </label>
                     </div>
@@ -1941,21 +1964,28 @@ function populateConfigModal(taskType) {
     metricSelect.innerHTML = '';
     algorithmsDiv.innerHTML = '';
     
+    // Get saved values from currentJobData or use defaults
+    const savedPrimaryMetric = currentJobData.primaryMetric || (taskType === 'classification' ? 'auc' : 'mae');
+    const savedAlgorithms = currentJobData.algorithms || (taskType === 'classification' 
+        ? ['logistic_regression', 'decision_tree', 'random_forest']
+        : ['linear_regression', 'decision_tree', 'lasso']);
+    
     if (taskType === 'classification') {
         // Classification metrics
         ['auc', 'accuracy', 'precision', 'recall', 'f1'].forEach(metric => {
             const option = document.createElement('option');
             option.value = metric;
             option.textContent = metric === 'auc' ? 'AUC' : metric.charAt(0).toUpperCase() + metric.slice(1);
-            if (metric === 'auc') option.selected = true;
+            option.selected = metric === savedPrimaryMetric;
             metricSelect.appendChild(option);
         });
         
         // Classification algorithms
         ['logistic_regression', 'decision_tree', 'random_forest'].forEach(algo => {
             const label = document.createElement('label');
+            const isChecked = savedAlgorithms.includes(algo);
             label.innerHTML = `
-                <input type="checkbox" value="${algo}" checked>
+                <input type="checkbox" value="${algo}" ${isChecked ? 'checked' : ''}>
                 ${algo.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
             `;
             algorithmsDiv.appendChild(label);
@@ -1966,15 +1996,16 @@ function populateConfigModal(taskType) {
             const option = document.createElement('option');
             option.value = metric;
             option.textContent = metric.toUpperCase();
-            if (metric === 'mae') option.selected = true;
+            option.selected = metric === savedPrimaryMetric;
             metricSelect.appendChild(option);
         });
         
         // Regression algorithms
         ['linear_regression', 'decision_tree', 'lasso'].forEach(algo => {
             const label = document.createElement('label');
+            const isChecked = savedAlgorithms.includes(algo);
             label.innerHTML = `
-                <input type="checkbox" value="${algo}" checked>
+                <input type="checkbox" value="${algo}" ${isChecked ? 'checked' : ''}>
                 ${algo.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
             `;
             algorithmsDiv.appendChild(label);
@@ -2004,6 +2035,21 @@ function openFeaturizationFlyout() {
     if (currentData) {
         updateCategoricalColumnsDisplay();
     }
+    
+    // Restore saved normalize features checkbox state
+    const normalizeFeatures = currentJobData.normalizeFeatures !== undefined ? currentJobData.normalizeFeatures : false;
+    const normalizeCheckbox = document.getElementById('normalize-features');
+    if (normalizeCheckbox) {
+        normalizeCheckbox.checked = normalizeFeatures;
+    }
+    
+    // Restore saved missing data strategy
+    const missingDataStrategy = currentJobData.missingDataStrategy || 'remove';
+    const strategyRadio = document.querySelector(`input[name="missing-data-strategy"][value="${missingDataStrategy}"]`);
+    if (strategyRadio) {
+        strategyRadio.checked = true;
+    }
+    
     document.getElementById('featurization-flyout').classList.add('open');
     document.getElementById('flyout-overlay').classList.add('show');
 }
@@ -5148,6 +5194,50 @@ function formatDateTime(dateString) {
     return date.toLocaleDateString('en-US', options);
 }
 
+function updateEndpointsList() {
+    const endpointsList = document.getElementById('endpoints-list');
+    
+    // Check if the element exists (user might not be on the Endpoints page)
+    if (!endpointsList) {
+        return;
+    }
+    
+    if (deployedEndpoints.length === 0) {
+        endpointsList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-content">
+                    <h3>No endpoints deployed yet.</h3>
+                    <p>Deploy models to create endpoints for real-time inference.</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    endpointsList.innerHTML = `
+        <table class="endpoints-table">
+            <thead>
+                <tr>
+                    <th>Endpoint Name</th>
+                    <th>Model</th>
+                    <th>Status</th>
+                    <th>Created On</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${deployedEndpoints.map(endpoint => `
+                    <tr onclick="showEndpointDetails('${endpoint.id}')">
+                        <td><span class="endpoint-name">${endpoint.endpointName}</span></td>
+                        <td><span class="endpoint-model">${endpoint.modelName}</span></td>
+                        <td><span class="endpoint-status">Active</span></td>
+                        <td><span class="endpoint-created">${formatDateTime(endpoint.createdAt)}</span></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
 function showModelDetails(model) {
     // Hide all pages
     document.querySelectorAll('.page-content').forEach(page => page.style.display = 'none');
@@ -5182,7 +5272,169 @@ function refreshModelDetails() {
 
 function useThisModel() {
     const modelName = document.getElementById('model-details-title').textContent;
-    alert(`"Use this model" functionality for ${modelName} will be implemented in a future version.`);
+    
+    // Set default values for endpoint and deployment names
+    const defaultEndpointName = `${modelName}-endpoint`;
+    const defaultDeploymentName = `${modelName}-deployment`;
+    
+    // Populate the form fields
+    document.getElementById('endpointName').value = defaultEndpointName;
+    document.getElementById('deploymentName').value = defaultDeploymentName;
+    
+    // Show the deploy model flyout
+    const flyout = document.getElementById('deployModelFlyout');
+    flyout.style.display = 'block';
+    // Add slight delay to ensure display is set before adding open class for animation
+    setTimeout(() => {
+        flyout.classList.add('open');
+    }, 10);
+}
+
+function closeDeployModelFlyout() {
+    const flyout = document.getElementById('deployModelFlyout');
+    flyout.classList.remove('open');
+    // Wait for animation to complete before hiding
+    setTimeout(() => {
+        flyout.style.display = 'none';
+        // Clear form fields
+        document.getElementById('endpointName').value = '';
+        document.getElementById('deploymentName').value = '';
+    }, 300);
+}
+
+function completeModelDeployment() {
+    const endpointName = document.getElementById('endpointName').value.trim();
+    const deploymentName = document.getElementById('deploymentName').value.trim();
+    const modelName = document.getElementById('model-details-title').textContent;
+    
+    // Validate required fields
+    if (!endpointName) {
+        alert('Please enter an endpoint name.');
+        return;
+    }
+    
+    if (!deploymentName) {
+        alert('Please enter a deployment name.');
+        return;
+    }
+    
+    // Create new endpoint
+    const newEndpoint = {
+        id: `endpoint-${Date.now()}`,
+        endpointName: endpointName,
+        deploymentName: deploymentName,
+        modelName: modelName,
+        createdAt: new Date().toISOString(),
+        status: 'Active'
+    };
+    
+    // Add to deployed endpoints
+    deployedEndpoints.push(newEndpoint);
+    
+    // Close the flyout
+    closeDeployModelFlyout();
+    
+    // Update endpoints list
+    updateEndpointsList();
+    
+    // Navigate to endpoint details page
+    showEndpointDetails(newEndpoint.id);
+}
+
+function showEndpointDetails(endpointId) {
+    // Find the endpoint
+    const endpoint = deployedEndpoints.find(ep => ep.id === endpointId);
+    if (!endpoint) {
+        alert('Endpoint not found.');
+        return;
+    }
+    
+    // Hide all pages and show endpoint details page
+    document.querySelectorAll('.page-content').forEach(page => page.style.display = 'none');
+    document.getElementById('endpoint-details-page').style.display = 'block';
+    
+    // Update navigation active state
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.querySelector('.nav-item[onclick="showEndpointsPage()"]').classList.add('active');
+    
+    // Populate endpoint details
+    document.getElementById('endpoint-details-title').textContent = endpoint.endpointName;
+    document.getElementById('endpoint-name-display').textContent = endpoint.endpointName;
+    document.getElementById('deployment-name-display').textContent = endpoint.deploymentName;
+    document.getElementById('deployed-model-display').textContent = endpoint.modelName;
+    document.getElementById('endpoint-created-display').textContent = formatDateTime(endpoint.createdAt);
+    document.getElementById('endpoint-url').textContent = `https://${endpoint.endpointName.toLowerCase()}.azureml.net/score`;
+    
+    // Set up test input placeholder based on model
+    const testInput = document.getElementById('test-input-data');
+    testInput.placeholder = '{\n  "data": [\n    {"feature1": 1.0, "feature2": 2.0, "feature3": "value"}\n  ]\n}';
+    
+    // Show details tab by default
+    showEndpointTab('details');
+}
+
+function backToEndpointsList() {
+    showEndpointsPage();
+}
+
+function refreshEndpointDetails() {
+    // Simulate refresh
+    alert('Endpoint details refreshed.');
+}
+
+function showEndpointTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(`endpoint-${tabName}-tab`).style.display = 'block';
+    document.getElementById(`endpoint-${tabName}-tab`).classList.add('active');
+    
+    // Add active class to selected tab button
+    event.target.classList.add('active');
+}
+
+function testEndpoint() {
+    const testData = document.getElementById('test-input-data').value.trim();
+    const resultsDiv = document.getElementById('test-results');
+    const responseDiv = document.getElementById('test-response');
+    
+    if (!testData) {
+        alert('Please enter test data in JSON format.');
+        return;
+    }
+    
+    try {
+        // Validate JSON
+        JSON.parse(testData);
+        
+        // Simulate API call
+        setTimeout(() => {
+            const mockResponse = {
+                predictions: [0.85],
+                model_version: "1.0",
+                timestamp: new Date().toISOString()
+            };
+            
+            responseDiv.innerHTML = `<pre>${JSON.stringify(mockResponse, null, 2)}</pre>`;
+            resultsDiv.style.display = 'block';
+        }, 1000);
+        
+        // Show loading state
+        responseDiv.innerHTML = '<div style="color: #666;">Sending request...</div>';
+        resultsDiv.style.display = 'block';
+        
+    } catch (error) {
+        alert('Invalid JSON format. Please check your input data.');
+    }
 }
 
 function downloadModel() {
