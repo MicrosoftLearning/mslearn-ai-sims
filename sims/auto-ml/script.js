@@ -5750,25 +5750,6 @@ function showEndpointDetails(endpointId) {
     // Set the textarea value to the formatted JSON (editable)
     testInput.value = JSON.stringify(testJson, null, 2);
     
-    // Add a helpful comment about data format
-    const helpText = document.createElement('div');
-    helpText.className = 'test-format-help';
-    helpText.style.cssText = 'margin-top: 10px; padding: 10px; background: #e8f5e8; border-radius: 4px; font-size: 12px; color: #2d5c2d; border: 1px solid #c3e6c3;';
-    helpText.innerHTML = `
-        <strong>✅ Use Original Data Format:</strong> This model includes preprocessing pipelines.
-        <br>• Enter data in the same format as your training data
-        <br>• Categorical values: use original strings like "Thursday", "April"
-        <br>• The model will automatically handle encoding, scaling, and missing values
-    `;
-    
-    // Insert help text after the textarea
-    const textarea = document.getElementById('test-input-data');
-    if (textarea.nextSibling && textarea.nextSibling.className === 'test-format-help') {
-        textarea.parentNode.replaceChild(helpText, textarea.nextSibling);
-    } else {
-        textarea.parentNode.insertBefore(helpText, textarea.nextSibling);
-    }
-    
     // Clear any placeholder text since we're setting actual content
     testInput.placeholder = '';
     

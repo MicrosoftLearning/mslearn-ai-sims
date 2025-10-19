@@ -2318,6 +2318,16 @@
         <div class="flyout-content">
             <form id="deployModelForm">
                 <div class="form-group">
+                    <label for="instanceCount">Instance count</label>
+                    <input type="text" id="instanceCount" name="instanceCount" value="1" readonly aria-describedby="instance-count-help">
+                    <div id="instance-count-help" class="sr-only">Number of compute instances for the deployment</div>
+                </div>
+                <div class="form-group">
+                    <label for="virtualMachine">Virtual machine</label>
+                    <input type="text" id="virtualMachine" name="virtualMachine" value="In-browser" readonly aria-describedby="virtual-machine-help">
+                    <div id="virtual-machine-help" class="sr-only">Type of compute environment for model deployment</div>
+                </div>
+                <div class="form-group">
                     <label for="endpointName">Endpoint name *</label>
                     <input type="text" id="endpointName" name="endpointName" required placeholder="Enter endpoint name" aria-describedby="endpoint-name-help">
                     <div id="endpoint-name-help" class="sr-only">Enter a unique name for the deployment endpoint</div>
