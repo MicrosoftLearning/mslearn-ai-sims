@@ -682,6 +682,45 @@ function resetWizard() {
         errorDiv.textContent = '';
     }
     
+    // Reset advanced configuration settings
+    const metricThresholdInput = document.getElementById('metric-threshold');
+    if (metricThresholdInput) {
+        metricThresholdInput.value = '';
+    }
+    
+    // Reset normalize features checkbox
+    const normalizeFeaturesCheckbox = document.getElementById('normalize-features');
+    if (normalizeFeaturesCheckbox) {
+        normalizeFeaturesCheckbox.checked = false;
+    }
+    
+    // Reset missing data strategy to default (remove)
+    const missingDataRadios = document.querySelectorAll('input[name="missing-data-strategy"]');
+    missingDataRadios.forEach(radio => {
+        radio.checked = radio.value === 'remove';
+    });
+    
+    // Reset primary metric dropdown
+    const primaryMetricSelect = document.getElementById('primary-metric');
+    if (primaryMetricSelect) {
+        primaryMetricSelect.value = '';
+    }
+    
+    // Reset algorithm selections (uncheck all)
+    const algorithmsList = document.getElementById('algorithms-list');
+    if (algorithmsList) {
+        const algorithmCheckboxes = algorithmsList.querySelectorAll('input[type="checkbox"]');
+        algorithmCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    }
+    
+    // Reset experiment timeout
+    const experimentTimeoutInput = document.getElementById('experiment-timeout');
+    if (experimentTimeoutInput) {
+        experimentTimeoutInput.value = '';
+    }
+    
     currentJobData = {};
     currentData = null;
     currentTarget = null;
@@ -2774,6 +2813,9 @@ function completeTraining(modelResults, jobId) {
     console.log('About to call refreshJobs() from completeTraining');
     refreshJobs();
     console.log('Finished calling refreshJobs()');
+    
+    // Reset wizard settings for next job
+    resetWizard();
 }
 
 function closeTrainingModal() {
@@ -2781,6 +2823,9 @@ function closeTrainingModal() {
     if (trainingModal) {
         trainingModal.style.display = 'none';
     }
+    
+    // Reset wizard settings when closing training modal
+    resetWizard();
 }
 
 // Model details and management
@@ -2875,7 +2920,8 @@ function updateJobsList() {
         jobDiv.className = 'job-item';
         jobDiv.onclick = () => navigateToJobDetails(job);
         
-        const statusClass = (job.status === 'Completed' || job.status === 'Completed (early stop)') ? 'completed' : 'running';
+        const statusClass = (job.status === 'Completed' || job.status === 'Completed (early stop)' || job.status === 'Completed (timed out)') ? 'completed' : 
+                          (job.status === 'Failed (timed out)' || job.status === 'Failed') ? 'failed' : 'running';
         const duration = job.endTime ? 
             Math.round((job.endTime - job.startTime) / 1000) + 's' : 
             'Running...';
@@ -2922,7 +2968,8 @@ function updateJobsPageList() {
         jobDiv.className = 'job-item';
         jobDiv.onclick = () => navigateToJobDetails(job);
         
-        const statusClass = (job.status === 'Completed' || job.status === 'Completed (early stop)') ? 'completed' : 'running';
+        const statusClass = (job.status === 'Completed' || job.status === 'Completed (early stop)' || job.status === 'Completed (timed out)') ? 'completed' : 
+                          (job.status === 'Failed (timed out)' || job.status === 'Failed') ? 'failed' : 'running';
         const duration = job.endTime ? 
             Math.round((job.endTime - job.startTime) / 1000) + 's' : 
             'Running...';
@@ -3407,11 +3454,20 @@ function handleTrainingComplete(resultsJson) {
             // Update job status
             const job = jobHistory.find(j => j.id === results.job_id);
             if (job) {
-                // Set status based on early stopping
-                job.status = results.early_stop_triggered ? 'Completed (stopped early)' : 'Completed';
+                // Set status based on timeout, early stopping, or normal completion
+                if (results.timed_out && results.results.length > 0) {
+                    job.status = 'Completed (timed out)';
+                } else if (results.timed_out && results.results.length === 0) {
+                    job.status = 'Failed (timed out)';
+                } else if (results.early_stop_triggered) {
+                    job.status = 'Completed (stopped early)';
+                } else {
+                    job.status = 'Completed';
+                }
                 job.models = results.results;
                 job.endTime = new Date();
                 job.early_stop_triggered = results.early_stop_triggered || false;
+                job.timed_out = results.timed_out || false;
                 
                 // Update child job statuses
                 if (job.childJobs && job.childJobs.length > 0) {
@@ -3434,6 +3490,21 @@ function handleTrainingComplete(resultsJson) {
                                 childJob.metrics = modelResult.metrics;
                                 childJob.primary_score = modelResult.primary_score;
                             }
+                        } else if (results.timed_out) {
+                            // This model was not trained due to timeout - check if it was completed vs skipped
+                            const modelResult = results.results.find(result => result.algorithm === childJob.algorithm);
+                            if (modelResult) {
+                                // Model was completed before timeout
+                                childJob.status = 'Completed (timed out)';
+                                childJob.modelResult = modelResult;
+                                childJob.metrics = modelResult.metrics;
+                                childJob.primary_score = modelResult.primary_score;
+                            } else {
+                                // Model was not trained due to timeout
+                                childJob.status = 'Skipped (timed out)';
+                                childJob.skipped_reason = 'Training stopped due to experiment timeout';
+                            }
+                            childJob.endTime = new Date();
                         } else if (results.early_stop_triggered) {
                             // This model was not trained due to early stopping
                             childJob.status = 'Skipped (stopped early)';
@@ -3466,8 +3537,13 @@ function handleTrainingComplete(resultsJson) {
                 }
             }
             
-            // Complete the training process
-            completeTraining(results.results, results.job_id);
+            // Complete the training process (even for timeout, as we may have partial results)
+            if (results.timed_out) {
+                // For timeout, we still call completeTraining but with timeout status
+                completeTraining(results.results, results.job_id);
+            } else {
+                completeTraining(results.results, results.job_id);
+            }
             
         } else {
             console.error('Training failed:', results.error);
@@ -3607,11 +3683,22 @@ function updateJobDetailsContent(job) {
         statusText.textContent = job.status; // Display the status as-is since it should already be properly formatted
         
         // Update status badge classes  
-        const statusClass = job.status.includes('Completed') ? 'completed' : job.status.toLowerCase();
+        let statusClass;
+        if (job.status === 'Completed (timed out)') {
+            statusClass = 'completed-timeout';
+        } else if (job.status.includes('Completed')) {
+            statusClass = 'completed';
+        } else if (job.status === 'Failed (timed out)') {
+            statusClass = 'failed-timeout';
+        } else if (job.status === 'Failed') {
+            statusClass = 'failed';
+        } else {
+            statusClass = job.status.toLowerCase();
+        }
         statusBadge.className = `job-status-badge ${statusClass}`;
         
         // Update Register model button state based on job status
-        if (job.status === 'Completed' || job.status === 'Completed (stopped early)') {
+        if (job.status === 'Completed' || job.status === 'Completed (stopped early)' || job.status === 'Completed (timed out)') {
             enableRegisterButton();
         } else {
             disableRegisterButton();
@@ -3709,7 +3796,7 @@ function updateJobDetailsContent(job) {
 function updateBestModelSection(job) {
     const bestModelContent = document.getElementById('best-model-content');
     
-    if ((job.status === 'Completed' || job.status === 'Completed (stopped early)') && job.models && job.models.length > 0) {
+    if ((job.status === 'Completed' || job.status === 'Completed (stopped early)' || job.status === 'Completed (timed out)') && job.models && job.models.length > 0) {
         const bestModel = job.models.find(m => m.is_best);
         if (bestModel) {
             // Get the proper display name for the primary metric
@@ -3863,7 +3950,7 @@ function updateModelsTabContent() {
     console.log('  - models:', currentJobDetails?.models);
     console.log('  - models length:', currentJobDetails?.models?.length);
     
-    if ((currentJobDetails.status === 'Completed' || currentJobDetails.status === 'Completed (stopped early)') && currentJobDetails.models && currentJobDetails.models.length > 0) {
+    if ((currentJobDetails.status === 'Completed' || currentJobDetails.status === 'Completed (stopped early)' || currentJobDetails.status === 'Completed (timed out)') && currentJobDetails.models && currentJobDetails.models.length > 0) {
         // Get the primary metric name for the column header
         const primaryMetric = currentJobDetails.primaryMetric || 'auc';
         const primaryMetricDisplayName = getMetricDisplayName(primaryMetric, currentJobDetails.taskType);
@@ -4188,7 +4275,19 @@ function updateChildJobDetailsContent(childJob, parentJob) {
         statusText.textContent = childJob.status;
         
         // Update status badge classes
-        statusBadge.className = `job-status-badge ${childJob.status.toLowerCase()}`;
+        let childStatusClass;
+        if (childJob.status === 'Completed (timed out)') {
+            childStatusClass = 'completed-timeout';
+        } else if (childJob.status.includes('Completed')) {
+            childStatusClass = 'completed';
+        } else if (childJob.status === 'Failed (timed out)') {
+            childStatusClass = 'failed-timeout';
+        } else if (childJob.status === 'Failed') {
+            childStatusClass = 'failed';
+        } else {
+            childStatusClass = childJob.status.toLowerCase().replace(/\s+/g, '-');
+        }
+        statusBadge.className = `job-status-badge ${childStatusClass}`;
         
         // Update properties section
         document.getElementById('child-properties-status').innerHTML = `

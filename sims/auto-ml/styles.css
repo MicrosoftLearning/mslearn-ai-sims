@@ -2751,6 +2751,22 @@ button:disabled {
     color: #721c24;
 }
 
+/* Timeout status styling - orange/amber theme */
+.job-status-badge.timed-out,
+.job-status-badge.failed-timeout {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+
+/* Completed with timeout - greenish with orange accent */
+.job-status-badge.completed-timeout {
+    background-color: #e7f4e7;
+    border-color: #c3d4c3;
+    color: #2d5a2d;
+    border-left: 3px solid #ffc107;
+}
+
 .status-icon {
     font-size: 12px;
 }
