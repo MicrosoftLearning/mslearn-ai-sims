@@ -4702,6 +4702,10 @@ function updateChildJobModelContent() {
                         <span class="detail-label">Compute Type:</span>
                         <span class="detail-value">${currentChildJobDetails.computeType || 'Serverless'}</span>
                     </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Deploy status:</span>
+                        <span class="detail-value">${currentChildJobDetails.deployStatus || 'No deployment yet'}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -5790,6 +5794,22 @@ function completeModelDeployment() {
     // Add to deployed endpoints
     deployedEndpoints.push(newEndpoint);
     
+    // Update deploy status for child job if deploying from child job
+    if (deploymentSource === 'child-job' && currentChildJobDetails) {
+        currentChildJobDetails.deployStatus = 'Deployed';
+        
+        // Also update the child job in the parent job's childJobs array if it exists
+        if (currentJobDetails && currentJobDetails.childJobs) {
+            const childJob = currentJobDetails.childJobs.find(cj => cj.id === currentChildJobDetails.id);
+            if (childJob) {
+                childJob.deployStatus = 'Deployed';
+            }
+        }
+        
+        // Refresh the current child job model content to show updated deploy status
+        updateChildJobModelContent();
+    }
+    
     // Close the flyout
     closeDeployModelFlyout();
     
@@ -5799,8 +5819,8 @@ function completeModelDeployment() {
     // Update endpoints list
     updateEndpointsList();
     
-    // Navigate to endpoint details page
-    showEndpointDetails(newEndpoint.id);
+    // Show success alert instead of navigating to endpoint details
+    alert(`Model has been successfully deployed!\n\nEndpoint: ${endpointName}\nDeployment: ${deploymentName}\nModel: ${modelName}`);
 }
 
 function showEndpointDetails(endpointId) {
