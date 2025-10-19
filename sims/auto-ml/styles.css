@@ -2061,9 +2061,8 @@ button:disabled {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 24px;
-    padding: 40px;
+    padding: 0;
     max-width: 1200px;
-    margin: 0 auto;
 }
 
 .gallery-item {
@@ -2192,6 +2191,55 @@ button:disabled {
     font-size: 20px;
     color: #f57c00;
     font-weight: bold;
+}
+
+/* Learning Cards Styles */
+.learning-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    min-height: 80px;
+}
+
+.learning-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.15);
+}
+
+.learning-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-circle {
+    background-color: #4da6ff;
+    color: white;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.learning-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #323130;
+    line-height: 1.4;
+    text-align: left;
+    flex: 1;
 }
 
 /* Data Page Styles */
@@ -3307,6 +3355,159 @@ button:disabled {
     font-weight: 600;
     color: #323130;
     margin: 0 0 24px 0;
+}
+
+/* Home Cards Styles */
+.home-card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+    min-height: 200px;
+}
+
+.home-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-bottom: 8px;
+}
+
+.data-icon {
+    background-color: #e3f2fd;
+}
+
+.model-icon {
+    background-color: #f3e5f5;
+}
+
+.ai-icon {
+    background-color: #e8f5e8;
+}
+
+.database-symbol {
+    position: relative;
+    width: 40px;
+    height: 30px;
+}
+
+.db-disk {
+    width: 40px;
+    height: 8px;
+    background-color: #1976d2;
+    border-radius: 50%;
+    position: absolute;
+    border: 2px solid #1976d2;
+}
+
+.db-disk:nth-child(1) { top: 0; }
+.db-disk:nth-child(2) { top: 10px; }
+.db-disk:nth-child(3) { top: 20px; }
+
+.training-symbol {
+    position: relative;
+    width: 40px;
+    height: 30px;
+}
+
+.training-line {
+    position: absolute;
+    width: 35px;
+    height: 2px;
+    background-color: #7b1fa2;
+    top: 50%;
+    left: 2px;
+    transform: translateY(-50%) rotate(-15deg);
+}
+
+.training-points {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.point {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: #7b1fa2;
+    border-radius: 50%;
+}
+
+.point:nth-child(1) { top: 5px; left: 5px; }
+.point:nth-child(2) { top: 12px; left: 15px; }
+.point:nth-child(3) { top: 18px; left: 25px; }
+.point:nth-child(4) { top: 8px; left: 35px; }
+
+.ai-symbol {
+    position: relative;
+    width: 40px;
+    height: 35px;
+}
+
+.brain-outline {
+    width: 35px;
+    height: 30px;
+    border: 3px solid #388e3c;
+    border-radius: 50% 50% 45% 45%;
+    position: relative;
+}
+
+.neural-node {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: #388e3c;
+    border-radius: 50%;
+}
+
+.neural-node:nth-child(1) { top: 8px; left: 8px; }
+.neural-node:nth-child(2) { top: 12px; right: 8px; }
+.neural-node:nth-child(3) { bottom: 8px; left: 50%; transform: translateX(-50%); }
+
+.neural-connection {
+    position: absolute;
+    width: 12px;
+    height: 1px;
+    background-color: #388e3c;
+}
+
+.neural-connection:nth-child(4) { top: 10px; left: 12px; transform: rotate(25deg); }
+.neural-connection:nth-child(5) { top: 14px; right: 12px; transform: rotate(-25deg); }
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #323130;
+    margin: 0;
+}
+
+.card-description {
+    font-size: 14px;
+    color: #605e5c;
+    margin: 0;
+    line-height: 1.4;
 }
 
 /* New ML-Related Image Styles */
