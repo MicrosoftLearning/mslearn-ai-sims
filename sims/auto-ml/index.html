@@ -10,6 +10,40 @@
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     
+    <!-- Hide PyScript warnings and output -->
+    <style>
+        /* Hide PyScript terminal and output elements */
+        py-terminal,
+        py-output,
+        .py-terminal,
+        .py-output,
+        .pyscript-terminal,
+        .pyscript-output,
+        .py-console,
+        .pyscript-console,
+        [data-testid="py-terminal"],
+        [data-testid="py-output"],
+        py-script + .py-terminal,
+        py-script + .py-output,
+        /* Hide any PyScript warning elements */
+        .py-warning,
+        .pyscript-warning,
+        .py-error,
+        .pyscript-error,
+        /* Hide stderr output from PyScript */
+        .py-stderr,
+        .pyscript-stderr,
+        /* Hide PyScript loading messages */
+        .py-loading,
+        .pyscript-loading {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+        }
+    </style>
+    
     <!-- PyScript Configuration -->
     <py-config>
         packages = ["pandas", "numpy", "scikit-learn"]
@@ -2149,6 +2183,55 @@
             
         print("PyScript initialization complete")
     </py-script>
+
+    <!-- Hide PyScript output elements with JavaScript -->
+    <script>
+        // Function to hide PyScript output elements
+        function hidePyScriptElements() {
+            const selectors = [
+                'py-terminal',
+                'py-output', 
+                '.py-terminal',
+                '.py-output',
+                '.pyscript-terminal',
+                '.pyscript-output',
+                '.py-console',
+                '.pyscript-console',
+                '[data-testid="py-terminal"]',
+                '[data-testid="py-output"]',
+                '.py-warning',
+                '.pyscript-warning',
+                '.py-error',
+                '.pyscript-error',
+                '.py-stderr',
+                '.pyscript-stderr'
+            ];
+            
+            selectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    element.style.display = 'none';
+                    element.style.visibility = 'hidden';
+                    element.style.height = '0';
+                    element.style.width = '0';
+                    element.style.overflow = 'hidden';
+                });
+            });
+        }
+        
+        // Hide elements immediately
+        hidePyScriptElements();
+        
+        // Hide elements after DOM is ready
+        document.addEventListener('DOMContentLoaded', hidePyScriptElements);
+        
+        // Hide elements periodically in case PyScript creates them dynamically
+        setInterval(hidePyScriptElements, 1000);
+        
+        // Also hide when PyScript finishes loading
+        window.addEventListener('py:ready', hidePyScriptElements);
+        window.addEventListener('py:all-done', hidePyScriptElements);
+    </script>
 
     <script src="script.js"></script>
 
