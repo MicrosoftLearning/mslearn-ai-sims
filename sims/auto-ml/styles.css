@@ -957,6 +957,142 @@ button:disabled {
     min-height: 0; /* Allow content to scroll */
 }
 
+/* Dataset Details Page Styles */
+.page-header-with-back {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.back-btn {
+    background: #0078d4;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.back-btn:hover {
+    background: #106ebe;
+}
+
+.page-header-content {
+    flex: 1;
+}
+
+.dataset-details-section {
+    padding: 24px 0;
+}
+
+.dataset-info-cards {
+    margin-bottom: 32px;
+}
+
+.info-card {
+    background: white;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.info-card-header {
+    background: #f8f9fa;
+    padding: 12px 16px;
+    font-weight: 600;
+    border-bottom: 1px solid #e1e5e9;
+}
+
+.info-card-content {
+    padding: 16px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #605e5c;
+}
+
+.info-value {
+    color: #323130;
+}
+
+.dataset-preview {
+    background: white;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dataset-preview-header {
+    background: #f8f9fa;
+    padding: 16px;
+    border-bottom: 1px solid #e1e5e9;
+}
+
+.dataset-preview-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.dataset-preview-content {
+    padding: 16px;
+}
+
+.dataset-table-container {
+    overflow-x: auto;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.dataset-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.dataset-table th {
+    background: #f8f9fa;
+    border: 1px solid #e1e5e9;
+    padding: 12px 8px;
+    text-align: left;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.dataset-table td {
+    border: 1px solid #e1e5e9;
+    padding: 8px;
+    white-space: nowrap;
+}
+
+.dataset-table tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+.no-preview {
+    text-align: center;
+    color: #605e5c;
+    padding: 32px;
+}
+
 .full-page-wizard {
     width: 100%;
     height: 100%;

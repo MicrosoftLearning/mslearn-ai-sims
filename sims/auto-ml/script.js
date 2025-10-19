@@ -63,6 +63,8 @@ function isMetricHigherBetter(metric, taskType) {
 document.addEventListener('DOMContentLoaded', function() {
     // Disable the new job button initially
     disableNewJobButton();
+    // Disable the register model button initially
+    disableRegisterButton();
     // Update initial status with specific message
     updatePyScriptStatus('Loading PyScript ML libraries (pandas, numpy, scikit-learn)...', false);
     
@@ -2691,10 +2693,12 @@ function updateDataFilesList() {
         fileDiv.className = 'data-file-item';
         fileDiv.onclick = () => showDataFileContent(file);
         
-        const formatFileSize = (bytes) => {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
-            return Math.round(bytes / (1024 * 1024)) + ' MB';
+        const formatRowCount = (file) => {
+            if (file.shape && file.shape[0] !== undefined) {
+                const rowCount = file.shape[0];
+                return `${rowCount.toLocaleString()} rows`;
+            }
+            return 'Unknown rows';
         };
         
         const uploadTime = file.uploadTime.toLocaleString();
@@ -2707,7 +2711,7 @@ function updateDataFilesList() {
                     <div class="data-file-meta">Uploaded: ${uploadTime}</div>
                 </div>
             </div>
-            <div class="data-file-size">${formatFileSize(file.size)}</div>
+            <div class="data-file-size">${formatRowCount(file)}</div>
         `;
         
         dataFilesListDiv.appendChild(fileDiv);
@@ -2715,69 +2719,53 @@ function updateDataFilesList() {
 }
 
 function showDataFileContent(file) {
-    // Open the modal
-    const dataContentModal = document.getElementById('data-content-modal');
-    if (dataContentModal) {
-        dataContentModal.style.display = 'flex';
-    }
+    // Hide all page content
+    const pages = document.querySelectorAll('.page-content');
+    pages.forEach(page => page.style.display = 'none');
     
-    // Set modal title
-    document.getElementById('data-file-title').textContent = `${file.name || file.filename} - Contents`;
+    // Show the dataset details page
+    const detailsPage = document.getElementById('dataset-details-page');
+    detailsPage.style.display = 'block';
     
-    // Display file content using the already parsed data
-    try {
-        // Create result object from existing file data
-        const result = {
-            info: {
-                rows: file.shape ? file.shape[0] : 0,
-                columns: file.shape ? file.shape[1] : 0,
-                size: file.size || 0,
-                filename: file.name || file.filename || 'Unknown'
-            },
-            columns: [],
-            preview: file.preview || [],
-            column_names: file.finalColumns || file.columns || []
-        };
-        
-        // Create column info from available data
+    // Populate dataset details
+    displayDatasetDetailsContent(file);
+}
+
+function displayDatasetDetailsContent(file) {
+    // Update page title and info
+    document.getElementById('dataset-details-title').textContent = file.name || file.filename || 'Dataset';
+    document.getElementById('dataset-info-name').textContent = file.name || file.filename || 'Unknown';
+    document.getElementById('dataset-info-rows').textContent = file.shape ? file.shape[0] : 'Unknown';
+    document.getElementById('dataset-info-columns').textContent = file.shape ? file.shape[1] : 'Unknown';
+    
+    // Create table for data preview
+    const tableContainer = document.getElementById('dataset-preview-table');
+    
+    if (file.preview && file.preview.length > 0) {
         const columns = file.finalColumns || file.columns || [];
-        const dtypes = file.dtypes || {};
+        let tableHTML = '<table class="dataset-table"><thead><tr>';
         
+        // Add column headers
         columns.forEach(col => {
-            const col_data = {
-                name: col,
-                type: dtypes[col] || 'unknown',
-                non_null: file.shape ? file.shape[0] : 0, // Approximate
-                null: 0 // Not available without re-parsing
-            };
-            result.columns.push(col_data);
+            tableHTML += `<th>${col}</th>`;
+        });
+        tableHTML += '</tr></thead><tbody>';
+        
+        // Add data rows (first 10)
+        const previewRows = file.preview.slice(0, 10);
+        previewRows.forEach(row => {
+            tableHTML += '<tr>';
+            columns.forEach(col => {
+                const value = row[col] !== undefined ? row[col] : '';
+                tableHTML += `<td>${value}</td>`;
+            });
+            tableHTML += '</tr>';
         });
         
-        // Display the content
-        displayDataFileContent(JSON.stringify(result));
-        
-    } catch (error) {
-        console.error('Error displaying file content:', error);
-        
-        // Fallback display with basic info
-        const basicResult = {
-            info: {
-                rows: file.shape ? file.shape[0] : 'Unknown',
-                columns: file.shape ? file.shape[1] : 'Unknown',
-                size: file.size || 'Unknown',
-                filename: file.name || file.filename || 'Unknown'
-            },
-            columns: (file.finalColumns || file.columns || []).map(col => ({
-                name: col,
-                type: 'unknown',
-                non_null: 'Unknown',
-                null: 'Unknown'
-            })),
-            preview: file.preview || [],
-            column_names: file.finalColumns || file.columns || []
-        };
-        
-        displayDataFileContent(JSON.stringify(basicResult));
+        tableHTML += '</tbody></table>';
+        tableContainer.innerHTML = tableHTML;
+    } else {
+        tableContainer.innerHTML = '<div class="no-preview">No preview data available</div>';
     }
 }
 
@@ -3327,6 +3315,13 @@ function updateJobDetailsContent(job) {
         
         // Update status badge classes
         statusBadge.className = `job-status-badge ${job.status.toLowerCase()}`;
+        
+        // Update Register model button state based on job status
+        if (job.status === 'Completed') {
+            enableRegisterButton();
+        } else {
+            disableRegisterButton();
+        }
         
         // Update properties section
         document.getElementById('properties-status').innerHTML = `
@@ -4817,6 +4812,7 @@ function enableRegisterButton() {
     if (button) {
         button.disabled = false;
         button.style.opacity = '1';
+        button.title = 'Register model from this completed job';
     }
 }
 
@@ -4825,6 +4821,7 @@ function disableRegisterButton() {
     if (button) {
         button.disabled = true;
         button.style.opacity = '0.5';
+        button.title = 'Job must be completed to register a model';
     }
 }
 
@@ -4875,8 +4872,8 @@ function registerModel() {
     // Get the current job from global variable
     const job = currentJobDetails;
     
-    if (!job || job.status !== 'Completed') {
-        alert('Job must be completed to register a model.');
+    if (!job) {
+        console.error('No job selected for model registration');
         return;
     }
 

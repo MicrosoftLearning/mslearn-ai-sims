@@ -247,6 +247,54 @@
                 </div>
             </div>
 
+            <!-- Dataset Details Page -->
+            <div id="dataset-details-page" class="page-content" style="display: none;">
+                <div class="page-header">
+                    <div class="page-header-with-back">
+                        <button class="back-btn" onclick="showDataPage()" data-tooltip="Back to Data">
+                            ← Back
+                        </button>
+                        <div class="page-header-content">
+                            <h1 id="dataset-details-title">Dataset Details</h1>
+                            <p id="dataset-details-description">Preview of the first 10 rows from your dataset.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dataset-details-section">
+                    <div class="dataset-info-cards">
+                        <div class="info-card">
+                            <div class="info-card-header">Dataset Information</div>
+                            <div class="info-card-content">
+                                <div class="info-item">
+                                    <span class="info-label">Name:</span>
+                                    <span class="info-value" id="dataset-info-name">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Rows:</span>
+                                    <span class="info-value" id="dataset-info-rows">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Columns:</span>
+                                    <span class="info-value" id="dataset-info-columns">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dataset-preview">
+                        <div class="dataset-preview-header">
+                            <h3>Data Preview (First 10 rows)</h3>
+                        </div>
+                        <div class="dataset-preview-content">
+                            <div id="dataset-preview-table" class="dataset-table-container">
+                                <!-- Table will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Jobs Page -->
             <div id="jobs-page" class="page-content" style="display: none;">
                 <div class="page-header">
