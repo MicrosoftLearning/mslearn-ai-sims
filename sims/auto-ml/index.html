@@ -294,19 +294,20 @@
                             <h1 id="model-details-title">Model1</h1>
                             <div class="model-type">Custom model</div>
                         </div>
-                        
-                        <div class="model-actions">
-                            <button class="action-button" onclick="refreshModelDetails()">
-                                ↻ Refresh
-                            </button>
-                            <button class="action-button primary" onclick="useThisModel()">
-                                Use this model
-                            </button>
-                            <button class="action-button" onclick="downloadModel()">
-                                ⬇ Download
-                            </button>
-                        </div>
                     </div>
+                </div>
+
+                <!-- Model Actions Toolbar -->
+                <div class="model-actions-toolbar">
+                    <button class="btn btn-secondary" onclick="refreshModelDetails()">
+                        ↻ Refresh
+                    </button>
+                    <button class="btn btn-secondary" onclick="useThisModel()">
+                        &#9655; Use this model
+                    </button>
+                    <button class="btn btn-secondary" onclick="downloadModel()">
+                        ⬇ Download
+                    </button>
                 </div>
 
                 <!-- Main Content -->
@@ -354,14 +355,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="job-actions">
-                            <button class="btn btn-secondary" onclick="refreshJob()" data-tooltip="Refresh job status">
-                                <span class="icon">↻</span> Refresh
-                            </button>
-                            <button class="btn btn-secondary" onclick="registerModel()" data-tooltip="Register best model">
-                                + Register model
-                            </button>
-                        </div>
                     </div>
                 </div>
 
@@ -372,6 +365,16 @@
                         <button class="tab-button" onclick="showJobTab('models')" data-tooltip="Trained models and results">Models + child jobs</button>
                         <button class="tab-button" onclick="showJobTab('outputs')" data-tooltip="Job outputs and artifacts">Outputs + logs</button>
                         <button class="tab-button" onclick="showJobTab('child-jobs')" data-tooltip="Individual model training runs">Child jobs</button>
+                    </div>
+
+                    <!-- Job Actions Toolbar -->
+                    <div class="job-actions-toolbar">
+                        <button class="btn btn-secondary" onclick="refreshJob()" data-tooltip="Refresh job status">
+                            <span class="icon">↻</span> Refresh
+                        </button>
+                        <button class="btn btn-secondary" onclick="registerModel()" data-tooltip="Register best model">
+                            + Register model
+                        </button>
                     </div>
 
                     <div class="job-tab-content">
@@ -459,10 +462,7 @@
 
                         <!-- Other tabs would go here -->
                         <div id="data-guardrails-tab" class="tab-panel" style="display: none;">
-                            <div class="tab-content-placeholder">
-                                <h4>Data guardrails</h4>
-                                <p>Data quality checks and validation results will appear here.</p>
-                            </div>
+                            <!-- Content will be populated by updateDataGuardrailsTabContent() -->
                         </div>
 
                         <div id="models-tab" class="tab-panel" style="display: none;">
@@ -508,14 +508,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="job-actions">
-                            <button class="btn btn-secondary" onclick="refreshChildJob()" data-tooltip="Refresh job status">
-                                <span class="icon">↻</span> Refresh
-                            </button>
-                            <button class="btn btn-secondary" onclick="registerChildModel()" data-tooltip="Register this model">
-                                + Register model
-                            </button>
-                        </div>
                     </div>
                 </div>
 
@@ -525,6 +517,22 @@
                         <button class="tab-button" onclick="showChildJobTab('model')" data-tooltip="Model details and metrics">Model</button>
                         <button class="tab-button" onclick="showChildJobTab('metrics')" data-tooltip="Performance metrics">Metrics</button>
                         <button class="tab-button" onclick="showChildJobTab('outputs')" data-tooltip="Job outputs and logs">Outputs + logs</button>
+                    </div>
+
+                    <!-- Child Job Actions Toolbar -->
+                    <div class="job-actions-toolbar">
+                        <button class="btn btn-secondary" onclick="refreshChildJob()" data-tooltip="Refresh job status">
+                            <span class="icon">↻</span> Refresh
+                        </button>
+                        <button class="btn btn-secondary" onclick="deployChildModel()" data-tooltip="Deploy this model">
+                            &#9655; Deploy
+                        </button>
+                        <button class="btn btn-secondary" onclick="downloadChildModel()" data-tooltip="Download this model">
+                            &#8595; Download
+                        </button>
+                        <button class="btn btn-secondary" onclick="registerChildModel()" data-tooltip="Register this model">
+                            + Register model
+                        </button>
                     </div>
 
                     <div class="job-tab-content">
@@ -880,8 +888,6 @@
                                             <label for="compute-type">Select compute type</label>
                                             <select id="compute-type" class="form-control">
                                                 <option value="serverless" selected>Serverless</option>
-                                                <option value="compute-instance" disabled>Compute Instance</option>
-                                                <option value="compute-cluster" disabled>Compute Cluster</option>
                                             </select>
                                             <div class="form-help">
                                                 <small>Serverless compute is the recommended option for getting started with automated ML.</small>
@@ -1000,7 +1006,7 @@
     <div id="config-settings-flyout" class="flyout">
         <div class="flyout-header">
             <h3>Configuration Settings</h3>
-            <span class="flyout-close" onclick="closeConfigSettingsModal()">&times;</span>
+            <span class="flyout-close" onclick="closeAllFlyouts()">&times;</span>
         </div>
         <div class="flyout-content">
             <div id="config-settings-content">
@@ -1664,6 +1670,7 @@
                     <div class="form-group">
                         <label for="modelName">Name *</label>
                         <input type="text" id="modelName" name="modelName" required placeholder="Enter model name">
+                        <div id="modelNameError" class="error-message" style="display: none; color: #d73a49; font-size: 12px; margin-top: 4px;"></div>
                     </div>
                     <div class="form-group">
                         <label for="modelSelection">Model *</label>
@@ -1675,7 +1682,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeRegisterModelModal()">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="completeModelRegistration()">Register</button>
+                <button type="button" class="btn btn-primary" id="registerModelButton" onclick="completeModelRegistration()">Register</button>
             </div>
         </div>
     </div>

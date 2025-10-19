@@ -4,9 +4,7 @@ let maxSteps = 5;
 let uploadedFiles = [];
 let currentJobData = {};
 let trainedModels = {};
-let deployedModels = {};
 let currentData = null;
-let currentTarget = null;
 let selectedModel = null;
 
 // Job management
@@ -98,9 +96,6 @@ let uploadedDataFiles = [];
 
 // Header mode preference (true = use first row as headers, false = use custom headers)
 let useFirstRowAsHeaders = true;
-
-// Track if current dataset is saved
-let isDataSaved = false;
 
 // Sidebar management
 function toggleSidebar() {
@@ -2184,6 +2179,7 @@ function startTrainingJob(capturedJobData) {
         status: 'running',
         taskType: currentJobData.taskType,
         targetColumn: currentJobData.targetColumn,
+        computeType: currentJobData.computeType,
         startTime: new Date(),
         models: [],
         childJobs: [],
@@ -2194,7 +2190,9 @@ function startTrainingJob(capturedJobData) {
         algorithms: currentJobData.algorithms,
         normalizeFeatures: currentJobData.normalizeFeatures,
         missingDataStrategy: currentJobData.missingDataStrategy,
-        categoricalSettings: currentJobData.categoricalSettings
+        categoricalSettings: currentJobData.categoricalSettings,
+        metricThreshold: currentJobData.metricThreshold,
+        experimentTimeout: currentJobData.experimentTimeout
     };
     
     // Create child jobs for each algorithm
@@ -2528,9 +2526,7 @@ function showModelDetails(model) {
     const deployBtn = document.getElementById('deploy-btn');
     const testBtn = document.getElementById('test-btn');
     
-    const isDeployed = model.isDeployed || Object.values(deployedModels).some(m => 
-        m.name === model.name && m.jobId === (selectedModel.jobId || 'current')
-    );
+    const isDeployed = model.isDeployed || false;
     
     if (isDeployed) {
         deployBtn.style.display = 'none';
@@ -2552,52 +2548,6 @@ function closeModelDetails() {
         modelDetailsModal.style.display = 'none';
     }
     selectedModel = null;
-}
-
-function displayConfusionMatrix(container, matrix, labels) {
-    const vizContainer = document.createElement('div');
-    vizContainer.className = 'visualization-container';
-    
-    let html = '<table style="border-collapse: collapse; margin: 0 auto;">';
-    html += '<tr><th></th>';
-    labels.forEach(label => {
-        html += `<th style="padding: 8px; border: 1px solid #ccc; background: #f0f0f0;">Predicted ${label}</th>`;
-    });
-    html += '</tr>';
-    
-    matrix.forEach((row, i) => {
-        html += `<tr><th style="padding: 8px; border: 1px solid #ccc; background: #f0f0f0;">Actual ${labels[i]}</th>`;
-        row.forEach(cell => {
-            html += `<td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${cell}</td>`;
-        });
-        html += '</tr>';
-    });
-    html += '</table>';
-    
-    vizContainer.innerHTML = html;
-    container.appendChild(vizContainer);
-}
-
-function displayScatterPlot(container, data) {
-    const vizContainer = document.createElement('div');
-    vizContainer.className = 'visualization-container';
-    
-    // Simple text-based scatter plot representation
-    let html = '<div style="font-family: monospace; font-size: 12px;">';
-    html += '<p>Predicted vs Actual Values (first 20 points):</p>';
-    html += '<table style="border-collapse: collapse;">';
-    html += '<tr><th style="padding: 4px; border: 1px solid #ccc;">Actual</th><th style="padding: 4px; border: 1px solid #ccc;">Predicted</th><th style="padding: 4px; border: 1px solid #ccc;">Difference</th></tr>';
-    
-    for (let i = 0; i < Math.min(20, data.actual.length); i++) {
-        const actual = data.actual[i].toFixed(3);
-        const predicted = data.predicted[i].toFixed(3);
-        const diff = Math.abs(data.actual[i] - data.predicted[i]).toFixed(3);
-        html += `<tr><td style="padding: 4px; border: 1px solid #ccc;">${actual}</td><td style="padding: 4px; border: 1px solid #ccc;">${predicted}</td><td style="padding: 4px; border: 1px solid #ccc;">${diff}</td></tr>`;
-    }
-    
-    html += '</table></div>';
-    vizContainer.innerHTML = html;
-    container.appendChild(vizContainer);
 }
 
 // Jobs list management
@@ -4805,11 +4755,106 @@ function navigateToAutoML() {
     showAutoMLPage();
 }
 
-// Job action functions (placeholder implementations)
-function refreshJob() {
-    // Do nothing - refresh functionality disabled
+// Model name validation functions
+function validateModelName() {
+    const modelNameInput = document.getElementById('modelName');
+    const modelName = modelNameInput.value.trim();
+    
+    // Check if name is empty
+    if (!modelName) {
+        showModelNameError('Model name is required');
+        disableRegisterButton();
+        return false;
+    }
+    
+    // Check if a model with this name already exists
+    const existingModel = registeredModels.find(model => 
+        model.name.toLowerCase() === modelName.toLowerCase()
+    );
+    
+    if (existingModel) {
+        showModelNameError(`A model with the name "${modelName}" already exists`);
+        disableRegisterButton();
+        return false;
+    }
+    
+    // Name is valid
+    clearModelNameError();
+    enableRegisterButton();
+    return true;
 }
 
+function showModelNameError(message) {
+    const errorDiv = document.getElementById('modelNameError');
+    if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+}
+
+function clearModelNameError() {
+    const errorDiv = document.getElementById('modelNameError');
+    if (errorDiv) {
+        errorDiv.textContent = '';
+        errorDiv.style.display = 'none';
+    }
+}
+
+function enableRegisterButton() {
+    const button = document.getElementById('registerModelButton');
+    if (button) {
+        button.disabled = false;
+        button.style.opacity = '1';
+    }
+}
+
+function disableRegisterButton() {
+    const button = document.getElementById('registerModelButton');
+    if (button) {
+        button.disabled = true;
+        button.style.opacity = '0.5';
+    }
+}
+
+function setupModelRegistrationModal() {
+    // Add event listeners for real-time validation
+    const modelNameInput = document.getElementById('modelName');
+    if (modelNameInput) {
+        // Remove existing listeners to avoid duplicates
+        modelNameInput.removeEventListener('input', validateModelName);
+        modelNameInput.removeEventListener('blur', validateModelName);
+        modelNameInput.removeEventListener('keydown', handleModelNameKeydown);
+        
+        // Add new listeners
+        modelNameInput.addEventListener('input', validateModelName);
+        modelNameInput.addEventListener('blur', validateModelName);
+        modelNameInput.addEventListener('keydown', handleModelNameKeydown);
+    }
+    
+    // Initial button state - start disabled until valid input
+    disableRegisterButton();
+}
+
+function handleModelNameKeydown(event) {
+    // Check if Enter key was pressed
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent form submission
+        event.stopPropagation(); // Stop event bubbling
+        
+        // Only trigger register if model name is valid
+        if (validateModelName()) {
+            // Click the register button
+            const registerButton = document.getElementById('registerModelButton');
+            if (registerButton && !registerButton.disabled) {
+                registerButton.click();
+            }
+        }
+        
+        return false; // Additional prevention of form submission
+    }
+}
+
+// Job action functions (placeholder implementations)
 function editAndResubmit() {
     alert('Edit and resubmit functionality will be implemented in a future version.');
 }
@@ -4856,11 +4901,18 @@ function registerModel() {
         });
     }
     
-    // Clear the name field
+    // Clear the name field and reset validation
     const modelNameInput = document.getElementById('modelName');
     if (modelNameInput) {
         modelNameInput.value = '';
     }
+    
+    // Setup validation
+    setupModelRegistrationModal();
+    
+    // Reset error state
+    clearModelNameError();
+    disableRegisterButton(); // Start with button disabled
     
     // Show the modal
     const registerModal = document.getElementById('registerModelModal');
@@ -4915,10 +4967,59 @@ function registerChildModel() {
         modelNameInput.value = '';
     }
     
+    // Setup validation and event listeners
+    setupModelRegistrationModal();
+    
     // Show the modal
     const registerModal = document.getElementById('registerModelModal');
     if (registerModal) {
         registerModal.style.display = 'block';
+    }
+}
+
+function deployChildModel() {
+    // Get the current child job
+    const childJob = currentChildJobDetails;
+    
+    if (!childJob) {
+        alert('No child job selected.');
+        return;
+    }
+    
+    if (childJob.status !== 'Completed') {
+        alert('Job must be completed to deploy the model.');
+        return;
+    }
+    
+    // Placeholder for deploy functionality
+    alert(`Deploying model from ${childJob.displayName || childJob.id}...`);
+    console.log('Deploy child model:', childJob);
+}
+
+function downloadChildModel() {
+    // Get the current child job
+    const childJob = currentChildJobDetails;
+    
+    if (!childJob) {
+        alert('No child job selected.');
+        return;
+    }
+    
+    if (childJob.status !== 'Completed') {
+        alert('Job must be completed to download the model.');
+        return;
+    }
+    
+    // Create a downloadable model file
+    try {
+        const modelData = createSklearnModelData(childJob);
+        const modelName = `${childJob.displayName || childJob.id}_model.pkl`;
+        downloadFile(modelData, modelName, 'application/octet-stream');
+        
+        console.log('Downloaded child model:', childJob);
+    } catch (error) {
+        console.error('Error downloading model:', error);
+        alert('Error creating model download. Please try again.');
     }
 }
 
@@ -4927,6 +5028,14 @@ function closeRegisterModelModal() {
     if (registerModal) {
         registerModal.style.display = 'none';
     }
+    
+    // Clear form and validation state
+    const modelNameInput = document.getElementById('modelName');
+    if (modelNameInput) {
+        modelNameInput.value = '';
+    }
+    clearModelNameError();
+    
     currentRegistrationContext = null;
 }
 
@@ -4934,8 +5043,8 @@ function completeModelRegistration() {
     const modelName = document.getElementById('modelName').value.trim();
     const selectedModelIndex = parseInt(document.getElementById('modelSelection').value);
     
-    if (!modelName) {
-        alert('Please enter a model name');
+    // Validate model name before proceeding
+    if (!validateModelName()) {
         return;
     }
     
@@ -5069,44 +5178,206 @@ function useThisModel() {
 
 function downloadModel() {
     const modelName = document.getElementById('model-details-title').textContent;
-    alert(`Model download for ${modelName} will be implemented in a future version.`);
+    
+    // Find the registered model data
+    const registeredModel = registeredModels.find(model => model.name === modelName);
+    
+    if (!registeredModel) {
+        alert('Model data not found.');
+        return;
+    }
+    
+    // Create a downloadable model file
+    try {
+        const modelData = createSklearnModelDataFromRegistered(registeredModel);
+        const fileName = `${modelName.replace(/[^a-zA-Z0-9-_]/g, '_')}_model.pkl`;
+        downloadFile(modelData, fileName, 'application/octet-stream');
+        
+        console.log('Downloaded registered model:', registeredModel);
+    } catch (error) {
+        console.error('Error downloading model:', error);
+        alert('Error creating model download. Please try again.');
+    }
+}
+
+function createSklearnModelData(childJob) {
+    // Create a mock scikit-learn model structure that represents the trained model
+    const algorithm = childJob.algorithm;
+    const metrics = childJob.metrics || {};
+    
+    // Create a simplified pickle-like structure that could be used with joblib/pickle
+    const modelStructure = {
+        // Model metadata
+        '_sklearn_version': '1.3.0',
+        'algorithm': algorithm,
+        'model_type': getModelTypeFromAlgorithm(algorithm),
+        'training_metrics': metrics,
+        'created_date': new Date().toISOString(),
+        'job_id': childJob.id,
+        'job_name': childJob.displayName || childJob.id,
+        
+        // Mock model parameters based on algorithm
+        'model_params': generateModelParams(algorithm, metrics),
+        
+        // Feature information (would normally come from training data)
+        'feature_names': generateFeatureNames(),
+        'n_features': 10, // Mock feature count
+        
+        // Classes for classification models
+        'classes_': algorithm.includes('classification') || 
+                   childJob.parentJobDetails?.taskType === 'classification' ? 
+                   ['Class_0', 'Class_1'] : null,
+                   
+        // Instructions for reconstruction
+        '_reconstruction_info': {
+            'note': 'This is a simulated model from Azure ML Studio simulation.',
+            'usage': 'This model structure can be adapted for use with scikit-learn.',
+            'algorithm': algorithm,
+            'performance': metrics
+        }
+    };
+    
+    // Convert to a blob that can be downloaded
+    return JSON.stringify(modelStructure, null, 2);
+}
+
+function createSklearnModelDataFromRegistered(registeredModel) {
+    // Create model data from a registered model
+    const modelStructure = {
+        '_sklearn_version': '1.3.0',
+        'algorithm': registeredModel.algorithm,
+        'model_type': getModelTypeFromAlgorithm(registeredModel.algorithm),
+        'training_metrics': registeredModel.metrics,
+        'created_date': registeredModel.createdDate,
+        'model_name': registeredModel.name,
+        'source_job': registeredModel.sourceJob,
+        
+        'model_params': generateModelParams(registeredModel.algorithm, registeredModel.metrics),
+        'feature_names': generateFeatureNames(),
+        'n_features': 10,
+        
+        'classes_': registeredModel.primaryMetric === 'auc' || 
+                   registeredModel.primaryMetric === 'accuracy' ? 
+                   ['Class_0', 'Class_1'] : null,
+                   
+        '_reconstruction_info': {
+            'note': 'This is a simulated model from Azure ML Studio simulation.',
+            'usage': 'This model structure can be adapted for use with scikit-learn.',
+            'registered_name': registeredModel.name,
+            'algorithm': registeredModel.algorithm,
+            'performance': registeredModel.metrics
+        }
+    };
+    
+    return JSON.stringify(modelStructure, null, 2);
+}
+
+function getModelTypeFromAlgorithm(algorithm) {
+    const classificationAlgorithms = ['logistic_regression', 'decision_tree', 'random_forest', 'svm', 'naive_bayes'];
+    const regressionAlgorithms = ['linear_regression', 'lasso', 'ridge', 'elastic_net'];
+    
+    if (classificationAlgorithms.includes(algorithm)) {
+        return 'classifier';
+    } else if (regressionAlgorithms.includes(algorithm)) {
+        return 'regressor';
+    }
+    return 'unknown';
+}
+
+function generateModelParams(algorithm, metrics) {
+    // Generate realistic model parameters based on the algorithm
+    const params = {
+        'algorithm': algorithm,
+        'fitted': true,
+        'training_score': metrics ? Object.values(metrics)[0] : 0.85
+    };
+    
+    // Add algorithm-specific parameters
+    switch (algorithm) {
+        case 'logistic_regression':
+            params.C = 1.0;
+            params.solver = 'lbfgs';
+            params.max_iter = 1000;
+            break;
+        case 'decision_tree':
+            params.max_depth = 10;
+            params.min_samples_split = 2;
+            params.min_samples_leaf = 1;
+            break;
+        case 'random_forest':
+            params.n_estimators = 100;
+            params.max_depth = 10;
+            params.min_samples_split = 2;
+            break;
+        case 'linear_regression':
+            params.fit_intercept = true;
+            params.normalize = false;
+            break;
+        case 'lasso':
+            params.alpha = 1.0;
+            params.max_iter = 1000;
+            break;
+    }
+    
+    return params;
+}
+
+function generateFeatureNames() {
+    // Generate mock feature names that would typically come from the training dataset
+    return [
+        'feature_1', 'feature_2', 'feature_3', 'feature_4', 'feature_5',
+        'feature_6', 'feature_7', 'feature_8', 'feature_9', 'feature_10'
+    ];
+}
+
+function downloadFile(content, fileName, mimeType) {
+    // Create a blob with the content
+    const blob = new Blob([content], { type: mimeType });
+    
+    // Create a temporary URL for the blob
+    const url = window.URL.createObjectURL(blob);
+    
+    // Create a temporary anchor element and trigger download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.style.display = 'none';
+    
+    // Add to DOM, click, and remove
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    // Clean up the URL
+    window.URL.revokeObjectURL(url);
+    
+    console.log(`Downloaded file: ${fileName}`);
+}
+
+function navigateToSourceJob() {
+    // Navigate to the job that created this model
+    // Find the model's source job from registered models
+    const currentModelName = document.getElementById('model-details-title').textContent;
+    
+    // Look for the job that created this model
+    const sourceJob = jobHistory.find(job => {
+        if (job.models && job.models.length > 0) {
+            return job.models.some(model => model.name === currentModelName);
+        }
+        return false;
+    });
+    
+    if (sourceJob) {
+        showJobDetails(sourceJob);
+    } else {
+        alert('Source job not found for this model.');
+    }
 }
 
 function showJobDetailsFromModel(jobIndex) {
     // Store the job index and navigate to job details
     sessionStorage.setItem('currentJobIndex', jobIndex);
     showJobDetails(jobIndex);
-}
-
-function cancelJob() {
-    if (currentJobDetails && currentJobDetails.status === 'running') {
-        alert('Job cancellation will be implemented in a future version.');
-    } else {
-        alert('Only running jobs can be cancelled.');
-    }
-}
-
-function deleteJob() {
-    if (currentJobDetails) {
-        const confirmDelete = confirm(`Are you sure you want to delete job "${currentJobDetails.name}"?`);
-        if (confirmDelete) {
-            alert('Job deletion will be implemented in a future version.');
-        }
-    }
-}
-
-function compareModels() {
-    if (currentJobDetails && currentJobDetails.models && currentJobDetails.models.length > 1) {
-        alert('Model comparison will be implemented in a future version.');
-    } else {
-        alert('Need at least 2 models to compare.');
-    }
-}
-
-function viewConfigSettings() {
-    if (currentJobDetails) {
-        showConfigSettingsModal();
-    }
 }
 
 function showConfigSettingsModal() {
@@ -5175,16 +5446,6 @@ function showConfigSettingsModal() {
     }
 }
 
-function closeConfigSettingsModal() {
-    const flyout = document.getElementById('config-settings-flyout');
-    const overlay = document.getElementById('flyout-overlay');
-    
-    if (flyout && overlay) {
-        flyout.classList.remove('open');
-        overlay.classList.remove('show');
-    }
-}
-
 function closeAllFlyouts() {
     // Close all flyouts and the overlay
     const flyouts = ['config-settings-flyout', 'config-flyout', 'featurization-flyout'];
@@ -5214,6 +5475,55 @@ window.addEventListener('keydown', function(event) {
         }
     }
 });
+
+function viewConfigSettings() {
+    if (!currentJobDetails) {
+        console.error('No job details available to show configuration');
+        return;
+    }
+    
+    // Populate the configuration settings content
+    const contentDiv = document.getElementById('config-settings-content');
+    if (!contentDiv) {
+        console.error('Configuration settings content div not found');
+        return;
+    }
+    
+    // Build the configuration display matching the Review step format
+    const configHtml = `
+        <div class="summary-section">
+            <h4>Job Configuration</h4>
+            <p><strong>Job Name:</strong> ${currentJobDetails.name || 'Unnamed Job'}</p>
+            <p><strong>Task Type:</strong> ${currentJobDetails.taskType || 'Not specified'}</p>
+            <p><strong>Target Column:</strong> ${currentJobDetails.targetColumn || 'Not specified'}</p>
+            <p><strong>Compute Type:</strong> ${currentJobDetails.computeType || 'Not specified'}</p>
+            <p><strong>Primary Metric:</strong> ${currentJobDetails.primaryMetric || 'Not specified'}</p>
+            <p><strong>Algorithms:</strong> ${currentJobDetails.algorithms ? currentJobDetails.algorithms.join(', ') : 'Not specified'}</p>
+            <p><strong>Normalize Features:</strong> ${currentJobDetails.normalizeFeatures ? 'Yes' : 'No'}</p>
+            <p><strong>Missing Data:</strong> ${currentJobDetails.missingDataStrategy === 'remove' ? 'Remove rows' : (currentJobDetails.missingDataStrategy ? 'Fill missing values' : 'Not specified')}</p>
+            ${currentJobDetails.categoricalSettings && Object.keys(currentJobDetails.categoricalSettings).length > 0 ? 
+                `<p><strong>Categorical Columns:</strong> ${JSON.stringify(currentJobDetails.categoricalSettings)}</p>` : ''}
+            ${currentJobDetails.metricThreshold ? 
+                `<p><strong>Metric Score Threshold:</strong> ${currentJobDetails.metricThreshold}</p>` : ''}
+            ${currentJobDetails.experimentTimeout ? 
+                `<p><strong>Experiment Timeout:</strong> ${currentJobDetails.experimentTimeout} minutes</p>` : ''}
+            <br>
+            <p><strong>Created:</strong> ${currentJobDetails.startTime ? new Date(currentJobDetails.startTime).toLocaleString() : 'Unknown'}</p>
+            <p><strong>Status:</strong> <span class="status-${currentJobDetails.status?.toLowerCase()}">${currentJobDetails.status || 'Unknown'}</span></p>
+        </div>
+    `;
+    
+    contentDiv.innerHTML = configHtml;
+    
+    // Show the flyout
+    const flyout = document.getElementById('config-settings-flyout');
+    const overlay = document.getElementById('flyout-overlay');
+    
+    if (flyout && overlay) {
+        overlay.classList.add('show');
+        flyout.classList.add('open');
+    }
+}
 
 // Update metric threshold input constraints based on selected primary metric
 function updateMetricThresholdConstraints(primaryMetric) {
@@ -5287,3 +5597,9 @@ window.notifyPyScriptReady = notifyPyScriptReady;
 window.registerModel = registerModel;
 window.closeRegisterModelModal = closeRegisterModelModal;
 window.completeModelRegistration = completeModelRegistration;
+window.navigateToSourceJob = navigateToSourceJob;
+window.closeAllFlyouts = closeAllFlyouts;
+window.viewConfigSettings = viewConfigSettings;
+window.handleModelNameKeydown = handleModelNameKeydown;
+window.deployChildModel = deployChildModel;
+window.downloadChildModel = downloadChildModel;
