@@ -2,6 +2,7 @@ import * as webllm from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.46/+es
 
 class ChatPlayground {
     constructor() {
+        // Core state
         this.engine = null;
         this.isModelLoaded = false;
         this.conversationHistory = [];
@@ -11,44 +12,104 @@ class ChatPlayground {
         this.typingState = null;
         this.currentSystemMessage = "You are an AI assistant that helps people find information.";
         this.currentModelId = null;
-        
-        // Model parameters
-        this.modelParameters = {
-            temperature: 0.7,
-            top_p: 0.9,
-            max_tokens: 1000,
-            repetition_penalty: 1.1
+
+        // Configuration objects
+        this.config = {
+            modelParameters: {
+                temperature: 0.7,
+                top_p: 0.9,
+                max_tokens: 1000,
+                repetition_penalty: 1.1
+            },
+            fileUpload: {
+                content: null,
+                fileName: null,
+                maxSize: 3 * 1024, // 3KB
+                allowedTypes: ['.txt']
+            },
+            speechSettings: {
+                speechToText: false,
+                textToSpeech: false,
+                voice: '',
+                speed: '1x',
+                sampleText: 'Hi, how can I help you today?'
+            },
+            visionSettings: {
+                imageAnalysis: false,
+                maxImageSize: 5 * 1024 * 1024, // 5MB
+                allowedImageTypes: ['image/jpeg', 'image/jpg', 'image/png']
+            }
         };
-        
-        // File upload
-        this.uploadedFileContent = null;
-        this.uploadedFileName = null;
-        
-        // Speech settings
+
+        // Initialize speech settings directly
         this.speechSettings = {
             speechToText: false,
             textToSpeech: false,
-            voice: '', // Will be set by populateVoices()
+            voice: '',
             speed: '1x',
             sampleText: 'Hi, how can I help you today?'
         };
-        
-        // Vision settings
+
+        // Initialize vision settings directly (for backward compatibility)
         this.visionSettings = {
-            imageAnalysis: false
+            imageAnalysis: false,
+            maxImageSize: 5 * 1024 * 1024, // 5MB
+            allowedImageTypes: ['image/jpeg', 'image/jpg', 'image/png']
         };
-        
-        // Vision model
+
+        // Ensure config object references work too
+        this.config.visionSettings = this.visionSettings;
+        this.config.fileUpload = this.config.fileUpload || {
+            content: null,
+            fileName: null,
+            maxSize: 3 * 1024,
+            allowedTypes: ['.txt']
+        };
+
+        // Vision and speech state
         this.mobileNetModel = null;
         this.isModelDownloading = false;
-        
-        // Pending image for next message
         this.pendingImage = null;
-        
-        // Speech recognition
         this.recognition = null;
         this.isListening = false;
-        
+
+        // Initialize DOM element registry
+        this.elements = {};
+        this.eventListeners = [];
+
+        // Initialize app
+        this.initialize();
+    }
+
+    // Constants for error messages and UI text
+    static MESSAGES = {
+        ERRORS: {
+            FILE_TYPE: 'Please select a valid file type',
+            FILE_SIZE: 'File too large. Please select a smaller file',
+            IMAGE_LOAD: 'Error loading image. Please try a different file',
+            IMAGE_PROCESS: 'Error processing image. Please try again',
+            MODEL_DOWNLOAD: 'Model is downloading. Please wait...',
+            MODEL_NOT_READY: 'Model not ready. Please try enabling again',
+            SPEECH_NOT_AVAILABLE: 'Speech recognition not available',
+            SPEECH_ERROR: 'Speech recognition error. Please try again',
+            VOICE_INPUT_FAILED: 'Could not start voice input. Please try again'
+        },
+        SUCCESS: {
+            FILE_UPLOADED: 'File uploaded successfully',
+            FILE_REMOVED: 'File removed',
+            IMAGE_READY: 'Image ready to send with next message',
+            SYSTEM_MESSAGE_UPDATED: 'System message updated',
+            PARAMETERS_RESET: 'Parameters reset to defaults',
+            SETTINGS_UPDATED: 'Chat settings updated'
+        },
+        UI: {
+            ADD_DATA_SOURCE: '📁 Add data source',
+            REPLACE_DATA_SOURCE: '📁 Replace data source'
+        }
+    };
+
+    // Centralized initialization
+    initialize() {
         this.initializeElements();
         this.attachEventListeners();
         this.initializeParameterControls();
@@ -60,53 +121,228 @@ class ChatPlayground {
     }
     
     initializeElements() {
-        this.progressContainer = document.getElementById('progress-container');
-        this.progressFill = document.getElementById('progress-fill');
-        this.progressText = document.getElementById('progress-text');
-        this.modelSelect = document.getElementById('model-select');
-        this.systemMessage = document.getElementById('system-message');
-        this.applyBtn = document.getElementById('apply-btn');
-        this.chatMessages = document.getElementById('chat-messages');
-        this.userInput = document.getElementById('user-input');
-        this.sendBtn = document.getElementById('send-btn');
-        this.stopBtn = document.getElementById('stop-btn');
-        this.attachBtn = document.getElementById('attach-btn');
+        // Define all element selectors in one place for easier maintenance
+        const elementSelectors = {
+            // Progress elements
+            progressContainer: 'progress-container',
+            progressFill: 'progress-fill',
+            progressText: 'progress-text',
+            
+            // Model and system elements
+            modelSelect: 'model-select',
+            systemMessage: 'system-message',
+            applyBtn: 'apply-btn',
+            
+            // Chat elements
+            chatMessages: 'chat-messages',
+            userInput: 'user-input',
+            sendBtn: 'send-btn',
+            stopBtn: 'stop-btn',
+            attachBtn: 'attach-btn',
+            voiceBtn: 'voice-btn',
+            
+            // File upload elements
+            fileInput: 'file-input',
+            fileInfo: 'file-info',
+            fileName: 'file-name',
+            fileSize: 'file-size',
+            addDataBtn: 'add-data-btn',
+            
+            // Speech elements
+            speechToTextToggle: 'speech-to-text-toggle',
+            textToSpeechToggle: 'text-to-speech-toggle',
+            voiceSelect: 'voice-select',
+            voiceSpeed: 'voice-speed',
+            voiceSampleText: 'voice-sample-text',
+            
+            // Vision elements
+            imageAnalysisToggle: 'image-analysis-toggle',
+            visionProgressContainer: 'vision-progress-container',
+            visionProgressFill: 'vision-progress-fill',
+            visionProgressText: 'vision-progress-text',
+            
+            // Input image elements
+            inputThumbnailContainer: 'input-thumbnail-container',
+            inputThumbnail: 'input-thumbnail',
+            removeThumbnailBtn: 'remove-thumbnail-btn',
+            
+            // Modal elements
+            chatCapabilitiesModal: 'chat-capabilities-modal',
+            saveCapabilitiesBtn: 'save-capabilities-btn'
+        };
+
+        // Populate elements object with actual DOM references
+        Object.entries(elementSelectors).forEach(([key, id]) => {
+            this.elements[key] = document.getElementById(id);
+        });
+
+        // Set legacy references for backward compatibility
+        this.progressContainer = this.elements.progressContainer;
+        this.progressFill = this.elements.progressFill;
+        this.progressText = this.elements.progressText;
+
+        this.modelSelect = this.elements.modelSelect;
+        this.systemMessage = this.elements.systemMessage;
+        this.applyBtn = this.elements.applyBtn;
+        this.chatMessages = this.elements.chatMessages;
+        this.userInput = this.elements.userInput;
+        this.sendBtn = this.elements.sendBtn;
+        this.stopBtn = this.elements.stopBtn;
+        this.attachBtn = this.elements.attachBtn;
     }
-    
+
+    // Getter for backward compatibility
+    get modelParameters() {
+        return this.config.modelParameters;
+    }
+
+    set modelParameters(value) {
+        this.config.modelParameters = value;
+    }
+
+    // Utility functions to reduce code duplication
+    getElement(id) {
+        return this.elements[id] || document.getElementById(id);
+    }
+
+    setElementProperty(elementId, property, value) {
+        const element = this.getElement(elementId);
+        if (element) {
+            element[property] = value;
+        }
+        return element;
+    }
+
+    setElementText(elementId, text) {
+        return this.setElementProperty(elementId, 'textContent', text);
+    }
+
+    setElementStyle(elementId, property, value) {
+        const element = this.getElement(elementId);
+        if (element) {
+            element.style[property] = value;
+        }
+        return element;
+    }
+
+    showElement(elementId) {
+        return this.setElementStyle(elementId, 'display', 'block');
+    }
+
+    hideElement(elementId) {
+        return this.setElementStyle(elementId, 'display', 'none');
+    }
+
+    toggleElement(elementId, show = null) {
+        const element = this.getElement(elementId);
+        if (element) {
+            const isVisible = element.style.display !== 'none';
+            const shouldShow = show !== null ? show : !isVisible;
+            element.style.display = shouldShow ? 'block' : 'none';
+        }
+        return element;
+    }
+
+    addEventListenerTracked(element, event, handler, options = false) {
+        if (typeof element === 'string') {
+            element = this.getElement(element);
+        }
+        if (element) {
+            element.addEventListener(event, handler, options);
+            this.eventListeners.push({ element, event, handler, options });
+        }
+    }
+
+    // Cleanup method to remove all tracked event listeners
+    cleanup() {
+        this.eventListeners.forEach(({ element, event, handler, options }) => {
+            if (element && element.removeEventListener) {
+                element.removeEventListener(event, handler, options);
+            }
+        });
+        this.eventListeners = [];
+    }
+
+    updateProgress(containerId, fillId, textId, percentage, text) {
+        this.showElement(containerId);
+        this.setElementStyle(fillId, 'width', `${percentage}%`);
+        this.setElementText(textId, text);
+    }
+
+    validateFileType(file, allowedTypes, maxSize = null) {
+        if (!allowedTypes.some(type => 
+            file.name.toLowerCase().endsWith(type.toLowerCase()) || 
+            file.type === type
+        )) {
+            return { valid: false, error: `Please select a ${allowedTypes.join(', ')} file.` };
+        }
+        
+        if (maxSize && file.size > maxSize) {
+            const sizeMB = (maxSize / (1024 * 1024)).toFixed(1);
+            return { valid: false, error: `File too large. Maximum size: ${sizeMB}MB` };
+        }
+        
+        return { valid: true };
+    }
+
     initializeParameterControls() {
-        // Initialize all parameter sliders
-        const parameterSliders = [
-            { id: 'temperature-slider', valueId: 'temperature-value', param: 'temperature' },
-            { id: 'top-p-slider', valueId: 'top-p-value', param: 'top_p' },
-            { id: 'max-tokens-slider', valueId: 'max-tokens-value', param: 'max_tokens' },
-            { id: 'repetition-penalty-slider', valueId: 'repetition-penalty-value', param: 'repetition_penalty' }
+        // Centralized parameter configuration
+        this.parameterConfig = [
+            { 
+                id: 'temperature-slider', 
+                valueId: 'temperature-value', 
+                param: 'temperature',
+                type: 'float',
+                displayName: 'Temperature'
+            },
+            { 
+                id: 'top-p-slider', 
+                valueId: 'top-p-value', 
+                param: 'top_p',
+                type: 'float',
+                displayName: 'Top P'
+            },
+            { 
+                id: 'max-tokens-slider', 
+                valueId: 'max-tokens-value', 
+                param: 'max_tokens',
+                type: 'int',
+                displayName: 'Max Tokens'
+            },
+            { 
+                id: 'repetition-penalty-slider', 
+                valueId: 'repetition-penalty-value', 
+                param: 'repetition_penalty',
+                type: 'float',
+                displayName: 'Repetition Penalty'
+            }
         ];
         
-        parameterSliders.forEach(({ id, valueId, param }) => {
-            const slider = document.getElementById(id);
-            const valueDisplay = document.getElementById(valueId);
-            
-            if (slider && valueDisplay) {
-                // Set initial value
-                slider.value = this.modelParameters[param];
-                valueDisplay.textContent = this.modelParameters[param];
-                
-                // Set initial aria-valuetext
-                slider.setAttribute('aria-valuetext', this.modelParameters[param].toString());
-                
-                // Add event listener for real-time updates
-                slider.addEventListener('input', (e) => {
-                    const value = param === 'max_tokens' ? parseInt(e.target.value) : parseFloat(e.target.value);
-                    this.modelParameters[param] = value;
-                    valueDisplay.textContent = value;
-                    
-                    // Update aria-valuetext for screen readers
-                    slider.setAttribute('aria-valuetext', value.toString());
-                    
-                    // Show toast notification for parameter change
-                    this.showToast(`${this.formatParameterName(param)}: ${value}`);
-                });
-            }
+        this.parameterConfig.forEach(config => {
+            this.initializeSlider(config);
+        });
+    }
+
+    initializeSlider({ id, valueId, param, type, displayName }) {
+        const slider = this.getElement(id);
+        const valueDisplay = this.getElement(valueId);
+        
+        if (!slider || !valueDisplay) return;
+
+        const initialValue = this.config.modelParameters[param];
+        
+        // Set initial values
+        slider.value = initialValue;
+        valueDisplay.textContent = initialValue;
+        slider.setAttribute('aria-valuetext', initialValue.toString());
+        
+        // Add event listener
+        this.addEventListenerTracked(slider, 'input', (e) => {
+            const value = type === 'int' ? parseInt(e.target.value) : parseFloat(e.target.value);
+            this.config.modelParameters[param] = value;
+            valueDisplay.textContent = value;
+            slider.setAttribute('aria-valuetext', value.toString());
+            this.showToast(`${displayName}: ${value}`);
         });
     }
     
@@ -121,26 +357,22 @@ class ChatPlayground {
     }
     
     initializeFileUpload() {
-        const fileInput = document.getElementById('file-input');
-        if (fileInput) {
-            fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
-        }
+        this.addEventListenerTracked('fileInput', 'change', (e) => this.handleFileUpload(e));
     }
     
     handleFileUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
         
-        // Validate file type
-        if (!file.name.toLowerCase().endsWith('.txt')) {
-            alert('Please select a text file (.txt)');
-            event.target.value = '';
-            return;
-        }
+        // Use centralized file validation
+        const validation = this.validateFileType(
+            file, 
+            this.config.fileUpload.allowedTypes, 
+            this.config.fileUpload.maxSize
+        );
         
-        // Validate file size (3KB = 3072 bytes)
-        if (file.size > 3072) {
-            alert('File size must be 3KB or smaller');
+        if (!validation.valid) {
+            alert(validation.error);
             event.target.value = '';
             return;
         }
@@ -148,10 +380,10 @@ class ChatPlayground {
         // Read file content
         const reader = new FileReader();
         reader.onload = (e) => {
-            this.uploadedFileContent = e.target.result;
-            this.uploadedFileName = file.name;
+            this.config.fileUpload.content = e.target.result;
+            this.config.fileUpload.fileName = file.name;
             this.displayFileInfo(file);
-            this.showToast(`File "${file.name}" uploaded successfully`);
+            this.showToast(`${ChatPlayground.MESSAGES.SUCCESS.FILE_UPLOADED}: ${file.name}`);
             
             // Restart conversation to apply the new file data to system message
             this.restartConversation('file-upload');
@@ -166,50 +398,46 @@ class ChatPlayground {
     }
     
     displayFileInfo(file) {
-        const fileInfo = document.getElementById('file-info');
-        const fileName = document.getElementById('file-name');
-        const fileSize = document.getElementById('file-size');
-        const addDataBtn = document.getElementById('add-data-btn');
-        
-        if (fileInfo && fileName && fileSize && addDataBtn) {
-            fileName.textContent = file.name;
-            fileSize.textContent = `${(file.size / 1024).toFixed(1)}KB`;
-            fileInfo.style.display = 'flex';
-            addDataBtn.textContent = '📁 Replace data source';
-        }
+        this.setElementText('fileName', file.name);
+        this.setElementText('fileSize', `${(file.size / 1024).toFixed(1)}KB`);
+        this.setElementStyle('fileInfo', 'display', 'flex');
+        this.setElementText('addDataBtn', ChatPlayground.MESSAGES.UI.REPLACE_DATA_SOURCE);
     }
     
     removeFile() {
-        this.uploadedFileContent = null;
-        this.uploadedFileName = null;
+        // Clear file data
+        this.config.fileUpload.content = null;
+        this.config.fileUpload.fileName = null;
         
-        const fileInfo = document.getElementById('file-info');
-        const fileInput = document.getElementById('file-input');
-        const addDataBtn = document.getElementById('add-data-btn');
+        // Update UI using utility functions
+        this.hideElement('fileInfo');
+        this.setElementProperty('fileInput', 'value', '');
+        this.setElementText('addDataBtn', ChatPlayground.MESSAGES.UI.ADD_DATA_SOURCE);
         
-        if (fileInfo && fileInput && addDataBtn) {
-            fileInfo.style.display = 'none';
-            fileInput.value = '';
-            addDataBtn.textContent = '📁 Add data source';
-        }
-        
-        this.showToast('File removed');
-        
-        // Restart conversation to remove the file data from system message
+        this.showToast(ChatPlayground.MESSAGES.SUCCESS.FILE_REMOVED);
         this.restartConversation('file-remove');
     }
     
     getEffectiveSystemMessage() {
         let systemMessage = this.currentSystemMessage;
         
+        // Remove any existing TTS instruction to avoid duplication
+        const ttsInstruction = '\n\nImportant: Always answer with a single, concise sentence.';
+        systemMessage = systemMessage.replace(ttsInstruction, '');
+        
+        // Remove any existing file upload content to avoid duplication
+        // Use a more specific pattern that doesn't consume the TTS instruction
+        const fileDataPattern = /\n\n---\nUse this data to answer questions:\n.*?(?=\n\nImportant:|$)/s;
+        systemMessage = systemMessage.replace(fileDataPattern, '');
+        
         // Append uploaded file content if available
-        if (this.uploadedFileContent) {
-            systemMessage += '\n\n---\nUse this data to answer questions:\n' + this.uploadedFileContent;
+        if (this.config.fileUpload.content) {
+            systemMessage += '\n\n---\nUse this data to answer questions:\n' + this.config.fileUpload.content;
         }
         
         // Add TTS instruction when text-to-speech is enabled
         if (this.speechSettings && this.speechSettings.textToSpeech) {
-            systemMessage += '\n\nImportant: Always answer with a single, concise sentence.';
+            systemMessage += ttsInstruction;
         }
         
         return systemMessage;
@@ -395,11 +623,12 @@ class ChatPlayground {
         const loadVoices = () => {
             const voices = speechSynthesis.getVoices();
             const microsoftVoices = voices.filter(voice => 
-                voice.name.includes('Microsoft') || 
+                voice && voice.name &&
+                (voice.name.includes('Microsoft') || 
                 voice.name.includes('Cortana') ||
                 voice.name.includes('Windows') ||
-                voice.voiceURI.includes('Microsoft') ||
-                voice.lang.startsWith('en')
+                (voice.voiceURI && voice.voiceURI.includes('Microsoft')) ||
+                (voice.lang && voice.lang.startsWith('en')))
             );
 
             // Preserve current selection
@@ -411,6 +640,7 @@ class ChatPlayground {
             if (microsoftVoices.length > 0) {
                 // Add Microsoft voices
                 microsoftVoices.forEach((voice, index) => {
+                    if (!voice || !voice.name) return; // Skip invalid voices
                     const option = document.createElement('option');
                     option.value = voice.name;
                     option.textContent = `${voice.name} (${voice.lang})`;
@@ -430,9 +660,10 @@ class ChatPlayground {
                 });
             } else {
                 // Fallback to all English voices if no Microsoft voices found
-                const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
+                const englishVoices = voices.filter(voice => voice && voice.lang && voice.lang.startsWith('en'));
                 if (englishVoices.length > 0) {
                     englishVoices.forEach((voice, index) => {
+                        if (!voice || !voice.name) return; // Skip invalid voices
                         const option = document.createElement('option');
                         option.value = voice.name;
                         option.textContent = `${voice.name} (${voice.lang})`;
@@ -728,17 +959,15 @@ class ChatPlayground {
     }
 
     async processImageFile(file) {
-        // Validate file type
-        const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-        if (!validTypes.includes(file.type)) {
-            this.showToast('Please select a JPG or PNG image file.');
-            return;
-        }
+        // Use centralized validation for image files
+        const validation = this.validateFileType(
+            file, 
+            this.config.visionSettings.allowedImageTypes, 
+            this.config.visionSettings.maxImageSize
+        );
         
-        // Validate file size (max 5MB)
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        if (file.size > maxSize) {
-            this.showToast('Image file is too large. Please select a file smaller than 5MB.');
+        if (!validation.valid) {
+            this.showToast(validation.error);
             return;
         }
         
@@ -758,11 +987,11 @@ class ChatPlayground {
                 // Display small thumbnail next to input
                 this.displayInputThumbnail(img);
                 
-                this.showToast('Image ready to send with next message');
+                this.showToast(ChatPlayground.MESSAGES.SUCCESS.IMAGE_READY);
             };
             
             img.onerror = () => {
-                this.showToast('Error loading image. Please try a different file.');
+                this.showToast(ChatPlayground.MESSAGES.ERRORS.IMAGE_LOAD);
                 URL.revokeObjectURL(imageUrl);
             };
             
@@ -770,7 +999,7 @@ class ChatPlayground {
             
         } catch (error) {
             console.error('Error processing image:', error);
-            this.showToast('Error processing image. Please try again.');
+            this.showToast(ChatPlayground.MESSAGES.ERRORS.IMAGE_PROCESS);
         }
     }
 
@@ -890,11 +1119,20 @@ class ChatPlayground {
     
     async initializeModel() {
         try {
+            console.log('initializeModel called - starting model initialization');
             this.updateProgress(0, 'Discovering available models...');
             console.log('Starting WebLLM initialization...');
+            console.log('WebLLM object:', webllm);
+            console.log('WebLLM.CreateMLCEngine:', typeof webllm?.CreateMLCEngine);
+            console.log('WebLLM.prebuiltAppConfig:', typeof webllm?.prebuiltAppConfig);
             
             // Check if WebLLM is available
             if (!webllm || !webllm.CreateMLCEngine || !webllm.prebuiltAppConfig) {
+                console.error('WebLLM check failed:', {
+                    webllm: !!webllm,
+                    CreateMLCEngine: !!webllm?.CreateMLCEngine,
+                    prebuiltAppConfig: !!webllm?.prebuiltAppConfig
+                });
                 throw new Error('WebLLM not properly loaded');
             }
             
