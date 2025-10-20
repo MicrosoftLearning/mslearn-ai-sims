@@ -33,6 +33,18 @@ class ChatPlayground {
             sampleText: 'Hi, how can I help you today?'
         };
         
+        // Vision settings
+        this.visionSettings = {
+            imageAnalysis: false
+        };
+        
+        // Vision model
+        this.mobileNetModel = null;
+        this.isModelDownloading = false;
+        
+        // Pending image for next message
+        this.pendingImage = null;
+        
         // Speech recognition
         this.recognition = null;
         this.isListening = false;
@@ -58,6 +70,7 @@ class ChatPlayground {
         this.userInput = document.getElementById('user-input');
         this.sendBtn = document.getElementById('send-btn');
         this.stopBtn = document.getElementById('stop-btn');
+        this.attachBtn = document.getElementById('attach-btn');
     }
     
     initializeParameterControls() {
@@ -240,6 +253,28 @@ class ChatPlayground {
             if (voiceSpeed) voiceSpeed.disabled = !isEnabled;
             if (playBtn) playBtn.disabled = !isEnabled;
             if (voiceSampleText) voiceSampleText.disabled = !isEnabled;
+        }
+
+        // Handle image analysis toggle
+        const imageAnalysisToggle = document.getElementById('image-analysis-toggle');
+        if (imageAnalysisToggle) {
+            imageAnalysisToggle.addEventListener('change', async (e) => {
+                const isEnabled = e.target.checked;
+                this.visionSettings.imageAnalysis = isEnabled;
+                this.updateAttachButtonState();
+                
+                // Download model when enabled for the first time
+                if (isEnabled && !this.mobileNetModel && !this.isModelDownloading) {
+                    this.updateSaveButtonState(); // Disable save button before download
+                    await this.downloadMobileNetModel();
+                    this.updateSaveButtonState(); // Re-enable save button after download
+                }
+                
+                console.log('Image analysis:', isEnabled ? 'enabled' : 'disabled');
+            });
+            // Initialize state
+            this.visionSettings.imageAnalysis = imageAnalysisToggle.checked;
+            this.updateAttachButtonState();
         }
     }
 
@@ -545,6 +580,248 @@ class ChatPlayground {
         }, 300);
     }
 
+    updateAttachButtonState() {
+        if (this.attachBtn) {
+            this.attachBtn.disabled = !this.visionSettings.imageAnalysis;
+        }
+    }
+
+    updateSaveButtonState() {
+        const saveBtn = document.getElementById('save-capabilities-btn');
+        if (saveBtn) {
+            const shouldDisable = this.isModelDownloading;
+            saveBtn.disabled = shouldDisable;
+            
+            if (shouldDisable) {
+                saveBtn.textContent = 'Downloading Model...';
+                saveBtn.style.opacity = '0.6';
+                saveBtn.style.cursor = 'not-allowed';
+            } else {
+                saveBtn.textContent = 'Save';
+                saveBtn.style.opacity = '1';
+                saveBtn.style.cursor = 'pointer';
+            }
+        }
+    }
+
+    async downloadMobileNetModel() {
+        if (this.mobileNetModel || this.isModelDownloading) {
+            return;
+        }
+
+        this.isModelDownloading = true;
+        this.updateSaveButtonState(); // Disable save button
+        
+        const progressContainer = document.getElementById('vision-progress-container');
+        const progressFill = document.getElementById('vision-progress-fill');
+        const progressText = document.getElementById('vision-progress-text');
+
+        try {
+            // Show progress container
+            if (progressContainer) {
+                progressContainer.style.display = 'block';
+            }
+
+            // Update progress text
+            if (progressText) {
+                progressText.textContent = 'Initializing TensorFlow.js...';
+            }
+
+            // Wait for TensorFlow.js to be ready
+            await tf.ready();
+
+            // Update progress
+            if (progressFill) progressFill.style.width = '30%';
+            if (progressText) progressText.textContent = 'Loading MobileNet model...';
+
+            // Load MobileNet model using the same approach as image-analyzer
+            const mobileNetModel = await mobilenet.load({
+                version: 2,
+                alpha: 1.0,
+                modelUrl: undefined,
+                inputRange: [0, 1]
+            });
+            
+            // Update progress
+            if (progressFill) progressFill.style.width = '90%';
+            if (progressText) progressText.textContent = 'Model ready!';
+
+            this.mobileNetModel = mobileNetModel;
+
+            // Complete progress
+            if (progressFill) progressFill.style.width = '100%';
+            if (progressText) progressText.textContent = 'Model ready!';
+
+            // Hide progress after a short delay
+            setTimeout(() => {
+                if (progressContainer) {
+                    progressContainer.style.display = 'none';
+                }
+            }, 2000);
+
+            console.log('MobileNet model downloaded and ready');
+
+        } catch (error) {
+            console.error('Error downloading MobileNet model:', error);
+            let errorMessage = 'Error downloading model: ';
+            if (error.message) {
+                errorMessage += error.message;
+            } else {
+                errorMessage += 'Unknown error occurred.';
+            }
+            
+            if (progressText) {
+                progressText.textContent = errorMessage;
+            }
+            
+            // Hide progress after error
+            setTimeout(() => {
+                if (progressContainer) {
+                    progressContainer.style.display = 'none';
+                }
+            }, 5000);
+        } finally {
+            this.isModelDownloading = false;
+            this.updateSaveButtonState(); // Re-enable save button
+        }
+    }
+
+    handleImageUpload() {
+        // Check if image analysis is enabled
+        if (!this.visionSettings.imageAnalysis) {
+            return;
+        }
+        
+        // Check if model is ready
+        if (!this.mobileNetModel) {
+            if (this.isModelDownloading) {
+                this.showToast('Model is downloading. Please wait...');
+            } else {
+                this.showToast('Model not ready. Please try enabling image analysis again.');
+            }
+            return;
+        }
+        
+        // Create a file input element
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.jpg,.jpeg,.png';
+        fileInput.style.display = 'none';
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.processImageFile(file);
+            }
+        });
+        
+        // Trigger file selection
+        document.body.appendChild(fileInput);
+        fileInput.click();
+        document.body.removeChild(fileInput);
+    }
+
+    async processImageFile(file) {
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!validTypes.includes(file.type)) {
+            this.showToast('Please select a JPG or PNG image file.');
+            return;
+        }
+        
+        // Validate file size (max 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            this.showToast('Image file is too large. Please select a file smaller than 5MB.');
+            return;
+        }
+        
+        try {
+            // Create image element
+            const img = new Image();
+            const imageUrl = URL.createObjectURL(file);
+            
+            img.onload = async () => {
+                // Store image data for next message
+                this.pendingImage = {
+                    img: img,
+                    fileName: file.name,
+                    imageUrl: imageUrl
+                };
+                
+                // Display small thumbnail next to input
+                this.displayInputThumbnail(img);
+                
+                this.showToast('Image ready to send with next message');
+            };
+            
+            img.onerror = () => {
+                this.showToast('Error loading image. Please try a different file.');
+                URL.revokeObjectURL(imageUrl);
+            };
+            
+            img.src = imageUrl;
+            
+        } catch (error) {
+            console.error('Error processing image:', error);
+            this.showToast('Error processing image. Please try again.');
+        }
+    }
+
+    displayInputThumbnail(img) {
+        // Get the input thumbnail container
+        const thumbnailContainer = document.getElementById('input-thumbnail-container');
+        const thumbnailImg = document.getElementById('input-thumbnail');
+        const removeBtn = document.getElementById('remove-thumbnail-btn');
+        
+        // Set the thumbnail image
+        thumbnailImg.src = img.src;
+        
+        // Show the thumbnail container
+        thumbnailContainer.style.display = 'block';
+        
+        // Add event listener to remove button (remove old listener first)
+        const newRemoveBtn = removeBtn.cloneNode(true);
+        removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+        
+        newRemoveBtn.addEventListener('click', () => {
+            this.removePendingImage();
+        });
+    }
+    
+    removePendingImage() {
+        // Clean up pending image data
+        if (this.pendingImage && this.pendingImage.imageUrl) {
+            URL.revokeObjectURL(this.pendingImage.imageUrl);
+        }
+        this.pendingImage = null;
+        
+        // Hide thumbnail container
+        const thumbnailContainer = document.getElementById('input-thumbnail-container');
+        thumbnailContainer.style.display = 'none';
+    }
+
+    async classifyImage(img) {
+        try {
+            // Get predictions from MobileNet
+            const predictions = await this.mobileNetModel.classify(img);
+            return predictions;
+        } catch (error) {
+            console.error('Error classifying image:', error);
+            throw error;
+        }
+    }
+
+    formatPredictions(predictions) {
+        // Format top 3 predictions as text for the model
+        const topPredictions = predictions.slice(0, 3);
+        return topPredictions.map((prediction, index) => {
+            const className = prediction.className.replace(/_/g, ' ');
+            const confidence = Math.round(prediction.probability * 100);
+            return `${index + 1}. ${className} (${confidence}% confidence)`;
+        }).join('\n');
+    }
+
     attachEventListeners() {
         this.sendBtn.addEventListener('click', () => this.handleSendMessage());
         this.userInput.addEventListener('keydown', (e) => {
@@ -568,6 +845,11 @@ class ChatPlayground {
         const voiceBtn = document.getElementById('voice-btn');
         if (voiceBtn) {
             voiceBtn.addEventListener('click', () => this.startVoiceInput());
+        }
+
+        // Attach button (image upload)
+        if (this.attachBtn) {
+            this.attachBtn.addEventListener('click', () => this.handleImageUpload());
         }
         
         // Auto-resize textarea
@@ -853,8 +1135,32 @@ class ChatPlayground {
     async handleSendMessage() {
         if (!this.isModelLoaded || this.isGenerating) return;
         
-        const userMessage = this.userInput.value.trim();
-        if (!userMessage) return;
+        let userMessage = this.userInput.value.trim();
+        if (!userMessage && !this.pendingImage) return;
+        if (!userMessage) userMessage = ""; // Allow empty message if there's an image
+        
+        // Process pending image if exists
+        let imageAnalysis = '';
+        let imageElement = null;
+        
+        if (this.pendingImage) {
+            try {
+                // Get image analysis
+                const predictions = await this.classifyImage(this.pendingImage.img);
+                const formattedPredictions = this.formatPredictions(predictions);
+                imageAnalysis = `\n---\nBase your response on the following image analysis:\n${formattedPredictions}`;
+                
+                // Create image element for message bubble
+                imageElement = document.createElement('img');
+                imageElement.src = this.pendingImage.img.src;
+                imageElement.className = 'message-image';
+                imageElement.alt = this.pendingImage.fileName;
+                
+            } catch (error) {
+                console.error('Error analyzing image:', error);
+                this.showToast('Error analyzing image. Sending message without analysis.');
+            }
+        }
         
         // Stop any ongoing speech
         if ('speechSynthesis' in window) {
@@ -869,10 +1175,17 @@ class ChatPlayground {
             this.typingState = null;
         }
         
-        // Add user message to chat
-        this.addMessage('user', userMessage);
+        // Add user message to chat (with image if available)
+        this.addMessage('user', userMessage, imageElement);
+        
+        // Clean up input and pending image
         this.userInput.value = '';
         this.userInput.style.height = 'auto';
+        
+        // Clean up pending image
+        if (this.pendingImage) {
+            this.removePendingImage();
+        }
         
         this.isGenerating = true;
         this.updateUIForGeneration(true);
@@ -889,7 +1202,10 @@ class ChatPlayground {
             // Add last 10 conversation pairs
             const recentHistory = this.conversationHistory.slice(-20); // 10 pairs = 20 messages
             messages.push(...recentHistory);
-            messages.push({ role: "user", content: userMessage });
+            
+            // Add user message with image analysis if available
+            const finalUserMessage = userMessage + imageAnalysis;
+            messages.push({ role: "user", content: finalUserMessage });
             
             // Remove typing indicator
             typingIndicator.remove();
@@ -1168,7 +1484,7 @@ class ChatPlayground {
         }
     }
     
-    addMessage(role, content) {
+    addMessage(role, content, imageElement = null) {
         // Hide welcome message if it exists
         const welcomeMessage = this.chatMessages.querySelector('.welcome-message');
         if (welcomeMessage) {
@@ -1188,6 +1504,12 @@ class ChatPlayground {
             </div>
             <div class="message-content">${content}</div>
         `;
+        
+        // Add image if provided
+        if (imageElement && role === 'user') {
+            const messageContent = messageEl.querySelector('.message-content');
+            messageContent.insertBefore(imageElement, messageContent.firstChild);
+        }
         
         this.chatMessages.appendChild(messageEl);
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
@@ -1475,7 +1797,7 @@ window.saveChatCapabilities = function() {
     // Save the current settings
     if (window.chatPlaygroundApp) {
         window.chatPlaygroundApp.saveSpeechSettings();
-        window.chatPlaygroundApp.showToast('Speech settings saved successfully');
+        window.chatPlaygroundApp.showToast('Chat settings updated');
     }
     
     // Close modal

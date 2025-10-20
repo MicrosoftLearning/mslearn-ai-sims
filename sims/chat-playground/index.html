@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Playground</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/mobilenet.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -139,6 +141,10 @@
                 
                 <div class="chat-input-container">
                     <div class="input-wrapper">
+                        <div class="input-thumbnail-container" id="input-thumbnail-container" style="display: none;">
+                            <img id="input-thumbnail" alt="Selected image thumbnail">
+                            <button class="remove-thumbnail-btn" id="remove-thumbnail-btn" title="Remove image">🗑️</button>
+                        </div>
                         <textarea 
                             id="user-input" 
                             placeholder="Type user query here (Shift + Enter for new line)"
@@ -150,6 +156,7 @@
                     <div class="input-info">
                         <span class="token-count">*1/128000 tokens in thread</span>
                         <button class="voice-btn" title="Voice input" id="voice-btn" disabled>🎙️</button>
+                        <button class="attach-btn" title="Upload image" id="attach-btn" disabled>📎</button>
                         <button class="stop-btn" title="Stop generation" id="stop-btn" style="display: none;">⏹️</button>
                     </div>
                 </div>
@@ -220,10 +227,33 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="vision-section">
+                    <h3>Vision</h3>
+                    
+                    <div class="vision-feature">
+                        <h4>Image analysis</h4>
+                        <p class="feature-description">The image analysis feature allows the model to analyze and describe images that are uploaded to the chat.</p>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="image-analysis-toggle">
+                            <label for="image-analysis-toggle" class="switch-label">
+                                <span class="switch-slider"></span>
+                                <span class="switch-text">Enable image analysis</span>
+                            </label>
+                        </div>
+                        
+                        <div class="vision-progress-container" id="vision-progress-container" style="display: none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="vision-progress-fill"></div>
+                            </div>
+                            <div class="progress-text" id="vision-progress-text">Downloading MobileNet model...</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeChatCapabilitiesModal()">Close</button>
-                <button class="btn-primary" onclick="saveChatCapabilities()">Save</button>
+                <button class="btn-primary" id="save-capabilities-btn" onclick="saveChatCapabilities()">Save</button>
             </div>
         </div>
     </div>
