@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Playground</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Chat playground</h1>
+        </header>
+        
+        <div class="chat-container">
+            <!-- Setup Panel -->
+            <div class="setup-panel">
+                <div class="setup-header">
+                    <h3>Setup</h3>
+                    <button class="hide-btn" onclick="toggleSetup()">📦 Hide</button>
+                </div>
+                
+                <div class="setup-content">
+                    <div class="model-section">
+                        <label for="model-select">Model</label>
+                        <select id="model-select" disabled>
+                            <option value="">Loading models...</option>
+                        </select>
+                        
+                        <div class="progress-container" id="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <div class="progress-text" id="progress-text">Downloading model: 0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="instructions-section">
+                        <label for="system-message">Give the model instructions and context</label>
+                        <textarea id="system-message" rows="3" disabled>You are an AI assistant that helps people find information.</textarea>
+                        <button class="apply-btn" id="apply-btn" disabled>📋 Apply changes</button>
+                    </div>
+                    
+                    <div class="collapsible-section">
+                        <button class="collapsible-btn" onclick="toggleSection('add-data')">
+                            ▶ Add your data
+                        </button>
+                        <div class="collapsible-content" id="add-data">
+                            <div class="data-upload-section">
+                                <p class="section-description">Upload a text file to provide additional context for the AI model.</p>
+                                
+                                <button class="add-data-btn" id="add-data-btn" onclick="triggerFileUpload()">
+                                    📁 Add data source
+                                </button>
+                                
+                                <input type="file" id="file-input" accept=".txt" style="display: none;">
+                                
+                                <div class="file-info" id="file-info" style="display: none;">
+                                    <div class="file-details">
+                                        <span class="file-name" id="file-name"></span>
+                                        <span class="file-size" id="file-size"></span>
+                                    </div>
+                                    <button class="remove-file-btn" id="remove-file-btn" onclick="removeFile()">🗑️</button>
+                                </div>
+                                
+                                <div class="upload-constraints">
+                                    <small>• Text files (.txt) only</small>
+                                    <small>• Maximum size: 3KB</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="collapsible-section">
+                        <button class="collapsible-btn" onclick="toggleSection('parameters')">
+                            ▶ Parameters
+                        </button>
+                        <div class="collapsible-content" id="parameters">
+                            <div class="parameter-group">
+                                <label for="temperature-slider">Temperature</label>
+                                <div class="slider-container">
+                                    <input type="range" id="temperature-slider" min="0" max="2" step="0.1" value="0.7" class="parameter-slider">
+                                    <span class="slider-value" id="temperature-value">0.7</span>
+                                </div>
+                                <div class="parameter-description">Controls randomness. Lower = more focused, Higher = more creative</div>
+                            </div>
+                            
+                            <div class="parameter-group">
+                                <label for="top-p-slider">Top P</label>
+                                <div class="slider-container">
+                                    <input type="range" id="top-p-slider" min="0" max="1" step="0.05" value="0.9" class="parameter-slider">
+                                    <span class="slider-value" id="top-p-value">0.9</span>
+                                </div>
+                                <div class="parameter-description">Nucleus sampling. Controls diversity of word choices</div>
+                            </div>
+                            
+                            <div class="parameter-group">
+                                <label for="max-tokens-slider">Max Tokens</label>
+                                <div class="slider-container">
+                                    <input type="range" id="max-tokens-slider" min="50" max="2000" step="50" value="1000" class="parameter-slider">
+                                    <span class="slider-value" id="max-tokens-value">1000</span>
+                                </div>
+                                <div class="parameter-description">Maximum length of the response</div>
+                            </div>
+                            
+                            <div class="parameter-group">
+                                <label for="repetition-penalty-slider">Repetition Penalty</label>
+                                <div class="slider-container">
+                                    <input type="range" id="repetition-penalty-slider" min="0.5" max="2" step="0.1" value="1.1" class="parameter-slider">
+                                    <span class="slider-value" id="repetition-penalty-value">1.1</span>
+                                </div>
+                                <div class="parameter-description">Reduces repetitive text. Higher values = less repetition</div>
+                            </div>
+                            
+                            <div class="parameter-actions">
+                                <button class="reset-btn" onclick="resetParameters()">Reset to Defaults</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Panel -->
+            <div class="chat-panel">
+                <div class="chat-header">
+                    <h3>Chat history</h3>
+                    <div class="chat-controls">
+                        <button class="icon-btn" title="Clear chat">🗑️</button>
+                        <button class="icon-btn" title="Settings">⚙️</button>
+                        <button class="icon-btn" title="Expand">⛶</button>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chat-messages">
+                    <div class="welcome-message">
+                        <div class="chat-icon">💬</div>
+                        <h3>Start with a prompt</h3>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="user-input" 
+                            placeholder="Type user query here (Shift + Enter for new line)"
+                            rows="1"
+                            disabled
+                        ></textarea>
+                        <button id="send-btn" disabled>➤</button>
+                    </div>
+                    <div class="input-info">
+                        <span class="token-count">*1/128000 tokens in thread</span>
+                        <button class="voice-btn" title="Voice input">🎙️</button>
+                        <button class="stop-btn" title="Stop generation" id="stop-btn" style="display: none;">⏹️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="script.js"></script>
+</body>
+</html>
