@@ -14,11 +14,17 @@ class ImageAnalyzer {
     }
 
     async init() {
-        // Load the MobileNet model
+        // Load the MobileNetV3 model
         try {
-            console.log('Loading MobileNet model...');
-            this.model = await mobilenet.load();
-            console.log('MobileNet model loaded successfully');
+            console.log('Loading MobileNetV3 model...');
+            // Use version 2 (MobileNetV3) with smaller size and better efficiency
+            this.model = await mobilenet.load({
+                version: 2,
+                alpha: 1.0,  // Model width multiplier
+                modelUrl: undefined,  // Use default CDN
+                inputRange: [0, 1]
+            });
+            console.log('MobileNetV3 model loaded successfully');
             this.showModelStatus(true);
         } catch (error) {
             console.error('Error loading model:', error);
@@ -119,8 +125,9 @@ class ImageAnalyzer {
         this.analyzeBtn.disabled = true;
 
         try {
-            // Make predictions
-            const predictions = await this.model.classify(img);
+            // Make predictions with MobileNetV3
+            // Get top 5 predictions instead of default 3 for better results
+            const predictions = await this.model.classify(img, 5);
             
             // Hide loading state
             this.loading.style.display = 'none';
@@ -176,7 +183,7 @@ class ImageAnalyzer {
         const status = document.createElement('div');
         status.className = `model-status ${loaded ? 'success' : 'error'}`;
         status.innerHTML = loaded 
-            ? '✅ AI Model Ready' 
+            ? '✅ MobileNetV3 Ready' 
             : '❌ Model Loading Failed';
         
         // Remove any existing status
