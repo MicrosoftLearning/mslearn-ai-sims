@@ -6,6 +6,9 @@ class ChatPlayground {
         this.isModelLoaded = false;
         this.conversationHistory = [];
         this.isGenerating = false;
+        this.isSpeaking = false;
+        this.stopRequested = false;
+        this.typingState = null;
         this.currentSystemMessage = "You are an AI assistant that helps people find information.";
         this.currentModelId = null;
         
@@ -21,10 +24,21 @@ class ChatPlayground {
         this.uploadedFileContent = null;
         this.uploadedFileName = null;
         
+        // Speech settings
+        this.speechSettings = {
+            speechToText: false,
+            textToSpeech: false,
+            voice: '', // Will be set by populateVoices()
+            speed: '1x',
+            sampleText: 'Hi, how can I help you today?'
+        };
+        
         this.initializeElements();
         this.attachEventListeners();
         this.initializeParameterControls();
         this.initializeFileUpload();
+        this.populateVoices();
+        this.setupSpeechToggleListeners();
         this.initializeModel();
     }
     
@@ -114,6 +128,9 @@ class ChatPlayground {
             this.uploadedFileName = file.name;
             this.displayFileInfo(file);
             this.showToast(`File "${file.name}" uploaded successfully`);
+            
+            // Restart conversation to apply the new file data to system message
+            this.restartConversation('file-upload');
         };
         
         reader.onerror = () => {
@@ -153,6 +170,9 @@ class ChatPlayground {
         }
         
         this.showToast('File removed');
+        
+        // Restart conversation to remove the file data from system message
+        this.restartConversation('file-remove');
     }
     
     getEffectiveSystemMessage() {
@@ -163,9 +183,248 @@ class ChatPlayground {
             systemMessage += '\n\n---\nUse this data to answer questions:\n' + this.uploadedFileContent;
         }
         
+        // Add TTS instruction when text-to-speech is enabled
+        if (this.speechSettings && this.speechSettings.textToSpeech) {
+            systemMessage += '\n\nImportant: Always answer with a single, concise sentence.';
+        }
+        
         return systemMessage;
     }
     
+    setupSpeechToggleListeners() {
+        // Setup toggle listeners for enabling/disabling controls
+        const speechToTextToggle = document.getElementById('speech-to-text-toggle');
+        const textToSpeechToggle = document.getElementById('text-to-speech-toggle');
+        const voiceBtn = document.getElementById('voice-btn');
+        const voiceSelect = document.getElementById('voice-select');
+        const voiceSpeed = document.getElementById('voice-speed');
+        const playBtn = document.querySelector('.play-btn');
+        const voiceSampleText = document.getElementById('voice-sample-text');
+
+        // Handle speech-to-text toggle
+        if (speechToTextToggle && voiceBtn) {
+            speechToTextToggle.addEventListener('change', (e) => {
+                voiceBtn.disabled = !e.target.checked;
+            });
+            // Initialize disabled state
+            voiceBtn.disabled = !speechToTextToggle.checked;
+        }
+
+        // Handle text-to-speech toggle
+        if (textToSpeechToggle) {
+            textToSpeechToggle.addEventListener('change', (e) => {
+                const isEnabled = e.target.checked;
+                if (voiceSelect) voiceSelect.disabled = !isEnabled;
+                if (voiceSpeed) voiceSpeed.disabled = !isEnabled;
+                if (playBtn) playBtn.disabled = !isEnabled;
+                if (voiceSampleText) voiceSampleText.disabled = !isEnabled;
+                
+                // Update speech settings
+                this.speechSettings.textToSpeech = isEnabled;
+                
+                // Restart conversation when TTS mode changes
+                this.restartConversation();
+            });
+            
+            // Initialize disabled states
+            const isEnabled = textToSpeechToggle.checked;
+            if (voiceSelect) voiceSelect.disabled = !isEnabled;
+            if (voiceSpeed) voiceSpeed.disabled = !isEnabled;
+            if (playBtn) playBtn.disabled = !isEnabled;
+            if (voiceSampleText) voiceSampleText.disabled = !isEnabled;
+        }
+    }
+
+    saveSpeechSettings() {
+        // Save current speech settings
+        const speechToTextToggle = document.getElementById('speech-to-text-toggle');
+        const textToSpeechToggle = document.getElementById('text-to-speech-toggle');
+        const voiceSelect = document.getElementById('voice-select');
+        const voiceSpeed = document.getElementById('voice-speed');
+        const voiceSampleText = document.getElementById('voice-sample-text');
+
+        this.speechSettings = {
+            speechToText: speechToTextToggle ? speechToTextToggle.checked : false,
+            textToSpeech: textToSpeechToggle ? textToSpeechToggle.checked : false,
+            voice: voiceSelect ? voiceSelect.value : 'default',
+            speed: voiceSpeed ? voiceSpeed.value : '1x',
+            sampleText: voiceSampleText ? voiceSampleText.value : 'Hi, how can I help you today?'
+        };
+    }
+
+    restoreSpeechSettings() {
+        // Restore speech settings to current saved values
+        if (!this.speechSettings) {
+            // Initialize default settings if none exist
+            this.speechSettings = {
+                speechToText: false,
+                textToSpeech: false,
+                voice: '', // Will be set by populateVoices()
+                speed: '1x',
+                sampleText: 'Hi, how can I help you today?'
+            };
+        }
+
+        const speechToTextToggle = document.getElementById('speech-to-text-toggle');
+        const textToSpeechToggle = document.getElementById('text-to-speech-toggle');
+        const voiceSelect = document.getElementById('voice-select');
+        const voiceSpeed = document.getElementById('voice-speed');
+        const voiceSampleText = document.getElementById('voice-sample-text');
+
+        if (speechToTextToggle) speechToTextToggle.checked = this.speechSettings.speechToText;
+        if (textToSpeechToggle) textToSpeechToggle.checked = this.speechSettings.textToSpeech;
+        if (voiceSelect && this.speechSettings.voice) voiceSelect.value = this.speechSettings.voice;
+        if (voiceSpeed) voiceSpeed.value = this.speechSettings.speed;
+        if (voiceSampleText) voiceSampleText.value = this.speechSettings.sampleText;
+
+        // Update UI states
+        this.setupSpeechToggleListeners();
+    }
+
+    speakResponse(text) {
+        // Check if text-to-speech is enabled
+        if (!this.speechSettings || !this.speechSettings.textToSpeech) {
+            return;
+        }
+
+        // Check if speech synthesis is available
+        if (!('speechSynthesis' in window)) {
+            return;
+        }
+
+        // Stop any currently speaking utterance
+        speechSynthesis.cancel();
+
+        // Create new utterance
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // Configure voice if selected
+        if (this.speechSettings.voice && this.speechSettings.voice !== 'default') {
+            const voices = speechSynthesis.getVoices();
+            const selectedVoice = voices.find(voice => voice.name === this.speechSettings.voice);
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+        }
+
+        // Configure speed
+        const speedMap = { '0.5x': 0.5, '1x': 1, '1.5x': 1.5, '2x': 2 };
+        utterance.rate = speedMap[this.speechSettings.speed] || 1;
+
+        // Configure other properties for better speech
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        // Track speech state
+        this.isSpeaking = true;
+
+        // Handle speech end
+        utterance.onend = () => {
+            this.isSpeaking = false;
+            // Update UI only if typing is also complete
+            if (!this.isGenerating) {
+                this.updateUIForGeneration(false);
+            }
+        };
+
+        utterance.onerror = () => {
+            this.isSpeaking = false;
+            // Update UI only if typing is also complete
+            if (!this.isGenerating) {
+                this.updateUIForGeneration(false);
+            }
+        };
+
+        // Speak the response
+        speechSynthesis.speak(utterance);
+    }
+
+    populateVoices() {
+        const voiceSelect = document.getElementById('voice-select');
+        if (!voiceSelect) return;
+
+        const loadVoices = () => {
+            const voices = speechSynthesis.getVoices();
+            const microsoftVoices = voices.filter(voice => 
+                voice.name.includes('Microsoft') || 
+                voice.name.includes('Cortana') ||
+                voice.name.includes('Windows') ||
+                voice.voiceURI.includes('Microsoft') ||
+                voice.lang.startsWith('en')
+            );
+
+            // Preserve current selection
+            const currentSelection = voiceSelect.value;
+
+            // Clear existing options
+            voiceSelect.innerHTML = '';
+
+            if (microsoftVoices.length > 0) {
+                // Add Microsoft voices
+                microsoftVoices.forEach((voice, index) => {
+                    const option = document.createElement('option');
+                    option.value = voice.name;
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    
+                    // Restore previous selection, or use first voice as default
+                    if (currentSelection && voice.name === currentSelection) {
+                        option.selected = true;
+                        this.speechSettings.voice = voice.name;
+                    } else if (!currentSelection && index === 0) {
+                        option.selected = true;
+                        // Only update speech settings if no voice was previously selected
+                        if (!this.speechSettings.voice) {
+                            this.speechSettings.voice = voice.name;
+                        }
+                    }
+                    voiceSelect.appendChild(option);
+                });
+            } else {
+                // Fallback to all English voices if no Microsoft voices found
+                const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
+                if (englishVoices.length > 0) {
+                    englishVoices.forEach((voice, index) => {
+                        const option = document.createElement('option');
+                        option.value = voice.name;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        
+                        // Restore previous selection, or use first voice as default
+                        if (currentSelection && voice.name === currentSelection) {
+                            option.selected = true;
+                            this.speechSettings.voice = voice.name;
+                        } else if (!currentSelection && index === 0) {
+                            option.selected = true;
+                            if (!this.speechSettings.voice) {
+                                this.speechSettings.voice = voice.name;
+                            }
+                        }
+                        voiceSelect.appendChild(option);
+                    });
+                } else {
+                    // Final fallback
+                    const option = document.createElement('option');
+                    option.value = 'default';
+                    option.textContent = 'Default System Voice';
+                    option.selected = true;
+                    voiceSelect.appendChild(option);
+                    if (!this.speechSettings.voice) {
+                        this.speechSettings.voice = 'default';
+                    }
+                }
+            }
+        };
+
+        // Load voices immediately if available
+        if (speechSynthesis.getVoices().length > 0) {
+            loadVoices();
+        } else {
+            // Wait for voices to be loaded
+            speechSynthesis.addEventListener('voiceschanged', loadVoices);
+            // Also try after a short delay as fallback
+            setTimeout(loadVoices, 100);
+        }
+    }
+
     attachEventListeners() {
         this.sendBtn.addEventListener('click', () => this.handleSendMessage());
         this.userInput.addEventListener('keydown', (e) => {
@@ -178,6 +437,9 @@ class ChatPlayground {
         this.applyBtn.addEventListener('click', () => {
             this.currentSystemMessage = this.systemMessage.value;
             this.showToast('System message updated');
+            
+            // Restart conversation to apply the new system message
+            this.restartConversation('system-message');
         });
         
         this.stopBtn.addEventListener('click', () => this.stopGeneration());
@@ -187,6 +449,24 @@ class ChatPlayground {
             this.userInput.style.height = 'auto';
             this.userInput.style.height = Math.min(this.userInput.scrollHeight, 120) + 'px';
         });
+        
+        // Voice selection change handler
+        const voiceSelect = document.getElementById('voice-select');
+        if (voiceSelect) {
+            voiceSelect.addEventListener('change', (e) => {
+                this.speechSettings.voice = e.target.value;
+                console.log('Voice changed to:', e.target.value);
+            });
+        }
+        
+        // Voice speed change handler
+        const voiceSpeed = document.getElementById('voice-speed');
+        if (voiceSpeed) {
+            voiceSpeed.addEventListener('change', (e) => {
+                this.speechSettings.speed = e.target.value;
+                console.log('Voice speed changed to:', e.target.value);
+            });
+        }
         
         // Clear chat button
         document.querySelector('.chat-controls .icon-btn').addEventListener('click', () => {
@@ -450,16 +730,29 @@ class ChatPlayground {
         const userMessage = this.userInput.value.trim();
         if (!userMessage) return;
         
+        // Stop any ongoing speech
+        if ('speechSynthesis' in window) {
+            speechSynthesis.cancel();
+        }
+        this.isSpeaking = false;
+        
+        // Reset stop state and typing state
+        this.stopRequested = false;
+        if (this.typingState) {
+            this.typingState.isTyping = false;
+            this.typingState = null;
+        }
+        
         // Add user message to chat
         this.addMessage('user', userMessage);
         this.userInput.value = '';
         this.userInput.style.height = 'auto';
         
-        // Show typing indicator
-        const typingIndicator = this.addTypingIndicator();
-        
         this.isGenerating = true;
         this.updateUIForGeneration(true);
+        
+        // Show typing indicator
+        const typingIndicator = this.addTypingIndicator();
         
         try {
             // Prepare conversation history
@@ -475,54 +768,277 @@ class ChatPlayground {
             // Remove typing indicator
             typingIndicator.remove();
             
-            // Add assistant message container
-            const assistantMessageEl = this.addMessage('assistant', '');
-            const contentEl = assistantMessageEl.querySelector('.message-content');
+            // Add thinking indicator with animated dots
+            const thinkingIndicator = this.addThinkingIndicator();
             
-            let fullResponse = '';
+            // Check if TTS is enabled to determine mode
+            const isTTSEnabled = this.speechSettings && this.speechSettings.textToSpeech;
             
-            // Stream the response
-            const completion = await this.engine.chat.completions.create({
-                messages: messages,
-                temperature: this.modelParameters.temperature,
-                top_p: this.modelParameters.top_p,
-                max_tokens: this.modelParameters.max_tokens,
-                repetition_penalty: this.modelParameters.repetition_penalty,
-                stream: true
-            });
-            
-            for await (const chunk of completion) {
-                if (!this.isGenerating) break; // Check if generation was stopped
-                
-                const content = chunk.choices[0]?.delta?.content || '';
-                if (content) {
-                    fullResponse += content;
-                    contentEl.textContent = fullResponse;
-                    
-                    // Auto-scroll to bottom
-                    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-                    
-                    // Small delay to simulate typing effect - reduced for faster typing
-                    await new Promise(resolve => setTimeout(resolve, 8));
-                }
+            if (isTTSEnabled) {
+                // TTS Mode: Wait for complete response, then type and speak together
+                await this.handleTTSMode(messages, thinkingIndicator, userMessage);
+            } else {
+                // Streaming Mode: Stream and type immediately
+                await this.handleStreamingMode(messages, thinkingIndicator, userMessage);
             }
-            
-            // Add to conversation history
-            this.conversationHistory.push({ role: "user", content: userMessage });
-            this.conversationHistory.push({ role: "assistant", content: fullResponse });
-            
-            // Update token count (approximate)
-            this.updateTokenCount();
             
         } catch (error) {
             console.error('Error generating response:', error);
             if (typingIndicator.parentNode) {
                 typingIndicator.remove();
             }
-            this.addMessage('assistant', 'Sorry, I encountered an error while generating a response. Please try again.');
+            // Remove thinking indicator if it exists
+            const thinkingIndicator = this.chatMessages.querySelector('.thinking-indicator');
+            if (thinkingIndicator) {
+                thinkingIndicator.remove();
+            }
+            
+            const errorMessage = 'Sorry, I encountered an error while generating a response. Please try again.';
+            const assistantMessageEl = this.addMessage('assistant', '');
+            const contentEl = assistantMessageEl.querySelector('.message-content');
+            
+            // Type out the error message
+            await this.typeResponse(contentEl, errorMessage);
+            
+            // Speak the error message if text-to-speech is enabled
+            if (this.speechSettings && this.speechSettings.textToSpeech) {
+                this.speakResponse(errorMessage);
+            }
         } finally {
             this.isGenerating = false;
             this.updateUIForGeneration(false);
+        }
+    }
+
+    async handleTTSMode(messages, thinkingIndicator, userMessage) {
+        // TTS Mode: Get complete response first, then type and speak together
+        let fullResponse = '';
+        
+        const completion = await this.engine.chat.completions.create({
+            messages: messages,
+            temperature: this.modelParameters.temperature,
+            top_p: this.modelParameters.top_p,
+            max_tokens: this.modelParameters.max_tokens,
+            repetition_penalty: this.modelParameters.repetition_penalty,
+            stream: true
+        });
+        
+        // Collect the entire response
+        for await (const chunk of completion) {
+            if (!this.isGenerating) return;
+            
+            const content = chunk.choices[0]?.delta?.content || '';
+            if (content) {
+                fullResponse += content;
+            }
+        }
+        
+        // Remove thinking indicator
+        thinkingIndicator.remove();
+        
+        if (fullResponse.trim()) {
+            // Create message container
+            const assistantMessageEl = this.addMessage('assistant', '');
+            const contentEl = assistantMessageEl.querySelector('.message-content');
+            
+            // Start speaking and typing simultaneously
+            this.speakResponse(fullResponse);
+            await this.typeResponse(contentEl, fullResponse);
+            
+            // Add to conversation history
+            this.conversationHistory.push({ role: "user", content: userMessage });
+            this.conversationHistory.push({ role: "assistant", content: fullResponse });
+            
+            // Update token count
+            this.updateTokenCount();
+        } else {
+            const fallbackMessage = "I apologize, but I couldn't generate a response. Please try again.";
+            const assistantMessageEl = this.addMessage('assistant', '');
+            const contentEl = assistantMessageEl.querySelector('.message-content');
+            await this.typeResponse(contentEl, fallbackMessage);
+        }
+    }
+
+    async handleStreamingMode(messages, thinkingIndicator, userMessage) {
+        // Streaming Mode: Type as soon as we have content
+        let fullResponse = '';
+        let hasStartedOutput = false;
+        const bufferSize = 30; // Start typing after 30 characters
+        let assistantMessageEl = null;
+        let contentEl = null;
+        
+        const completion = await this.engine.chat.completions.create({
+            messages: messages,
+            temperature: this.modelParameters.temperature,
+            top_p: this.modelParameters.top_p,
+            max_tokens: this.modelParameters.max_tokens,
+            repetition_penalty: this.modelParameters.repetition_penalty,
+            stream: true
+        });
+        
+        for await (const chunk of completion) {
+            if (!this.isGenerating) break;
+            
+            const content = chunk.choices[0]?.delta?.content || '';
+            if (content) {
+                fullResponse += content;
+                
+                // Start output once we have enough content buffered
+                if (!hasStartedOutput && fullResponse.length >= bufferSize) {
+                    // Remove thinking indicator
+                    thinkingIndicator.remove();
+                    
+                    // Create message container
+                    assistantMessageEl = this.addMessage('assistant', '');
+                    contentEl = assistantMessageEl.querySelector('.message-content');
+                    
+                    // Start typing animation
+                    this.startTypingAnimation(contentEl, fullResponse);
+                    hasStartedOutput = true;
+                } else if (hasStartedOutput && contentEl) {
+                    // Update the content for ongoing typing animation
+                    this.updateTypingContent(fullResponse);
+                }
+            }
+        }
+        
+        // Handle case where response is shorter than buffer size
+        if (!hasStartedOutput) {
+            // Remove thinking indicator
+            thinkingIndicator.remove();
+            
+            if (fullResponse.trim()) {
+                // Create message container
+                assistantMessageEl = this.addMessage('assistant', '');
+                contentEl = assistantMessageEl.querySelector('.message-content');
+                
+                // Type out the short response
+                await this.typeResponse(contentEl, fullResponse);
+            } else {
+                const fallbackMessage = "I apologize, but I couldn't generate a response. Please try again.";
+                assistantMessageEl = this.addMessage('assistant', '');
+                contentEl = assistantMessageEl.querySelector('.message-content');
+                await this.typeResponse(contentEl, fallbackMessage);
+            }
+        }
+        
+        // Add to conversation history
+        this.conversationHistory.push({ role: "user", content: userMessage });
+        this.conversationHistory.push({ role: "assistant", content: fullResponse });
+        
+        // Update token count
+        this.updateTokenCount();
+    }
+
+    addThinkingIndicator() {
+        const thinkingDiv = document.createElement('div');
+        thinkingDiv.className = 'thinking-indicator';
+        thinkingDiv.innerHTML = `
+            <div class="thinking-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        `;
+        this.chatMessages.appendChild(thinkingDiv);
+        
+        // Auto-scroll to bottom
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        
+        return thinkingDiv;
+    }
+
+    async typeResponse(contentEl, text) {
+        let currentIndex = 0;
+        const typingSpeed = 30; // milliseconds between characters
+        
+        // Continue typing as long as we haven't been stopped and there's more text
+        while (currentIndex < text.length && !this.stopRequested) {
+            contentEl.textContent = text.substring(0, currentIndex + 1);
+            
+            // Auto-scroll to bottom
+            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            
+            currentIndex++;
+            await new Promise(resolve => setTimeout(resolve, typingSpeed));
+        }
+        
+        // Ensure full text is displayed
+        contentEl.textContent = text;
+        
+        // Mark typing as complete but don't update UI if still speaking
+        this.isGenerating = false;
+        if (!this.isSpeaking) {
+            this.updateUIForGeneration(false);
+        }
+    }
+
+    startTypingAnimation(contentEl, initialText) {
+        this.typingState = {
+            contentEl: contentEl,
+            fullText: initialText,
+            currentIndex: 0,
+            isTyping: true,
+            typingSpeed: 30
+        };
+        
+        this.continueTyping();
+    }
+
+    updateTypingContent(newText) {
+        if (this.typingState) {
+            this.typingState.fullText = newText;
+        }
+    }
+
+    async continueTyping() {
+        if (!this.typingState || !this.typingState.isTyping) return;
+        
+        const { contentEl, typingSpeed } = this.typingState;
+        
+        while (this.typingState.isTyping && !this.stopRequested) {
+            // Use current fullText (which gets updated by streaming)
+            const currentFullText = this.typingState.fullText;
+            
+            // Check if we've typed everything we currently have
+            if (this.typingState.currentIndex >= currentFullText.length) {
+                // Wait a bit for more content to arrive, but continue if we're not generating anymore
+                if (!this.isGenerating) {
+                    break; // No more content coming, we're done
+                }
+                await new Promise(resolve => setTimeout(resolve, 50)); // Wait for more content
+                continue;
+            }
+            
+            // Type the next character
+            contentEl.textContent = currentFullText.substring(0, this.typingState.currentIndex + 1);
+            
+            // Auto-scroll to bottom
+            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            
+            this.typingState.currentIndex++;
+            await new Promise(resolve => setTimeout(resolve, typingSpeed));
+        }
+        
+        // Ensure full text is displayed
+        if (this.typingState && this.typingState.contentEl) {
+            this.typingState.contentEl.textContent = this.typingState.fullText;
+        }
+        
+        // Mark typing as complete but don't update UI if still speaking
+        if (this.typingState) {
+            this.typingState.isTyping = false;
+        }
+        
+        // Only update UI if not speaking
+        if (!this.isSpeaking) {
+            this.updateUIForGeneration(false);
+        }
+    }
+
+    async waitForTypingComplete() {
+        while (this.typingState && this.typingState.isTyping) {
+            await new Promise(resolve => setTimeout(resolve, 50));
         }
     }
     
@@ -577,12 +1093,19 @@ class ChatPlayground {
     }
     
     updateUIForGeneration(isGenerating) {
-        this.sendBtn.disabled = isGenerating;
-        this.userInput.disabled = isGenerating;
-        this.stopBtn.style.display = isGenerating ? 'block' : 'none';
+        // Show stop button if either generating or speaking
+        const showStopButton = isGenerating || this.isSpeaking;
         
-        if (isGenerating) {
-            this.sendBtn.textContent = '⏳';
+        this.sendBtn.disabled = showStopButton;
+        this.userInput.disabled = showStopButton;
+        this.stopBtn.style.display = showStopButton ? 'block' : 'none';
+        
+        if (showStopButton) {
+            if (this.isSpeaking && !isGenerating) {
+                this.sendBtn.textContent = '🔊'; // Speaking indicator
+            } else {
+                this.sendBtn.textContent = '⏳'; // Generating indicator
+            }
         } else {
             this.sendBtn.textContent = '➤';
         }
@@ -590,9 +1113,54 @@ class ChatPlayground {
     
     stopGeneration() {
         this.isGenerating = false;
+        this.isSpeaking = false;
+        this.stopRequested = true;
+        
+        // Stop typing animation
+        if (this.typingState) {
+            this.typingState.isTyping = false;
+        }
+        
+        // Stop any ongoing speech synthesis
+        if ('speechSynthesis' in window) {
+            speechSynthesis.cancel();
+        }
+        
         this.updateUIForGeneration(false);
     }
-    
+
+    restartConversation(reason = 'tts-toggle') {
+        // Clear the conversation history and reset the chat UI
+        this.clearChat();
+        
+        // Show a message to the user about the restart
+        let restartMessage;
+        const ttsStatus = this.speechSettings && this.speechSettings.textToSpeech 
+            ? ' (text-to-speech mode enabled)' 
+            : '';
+            
+        switch (reason) {
+            case 'system-message':
+                restartMessage = `Conversation restarted with updated system message${ttsStatus}.`;
+                break;
+            case 'file-upload':
+                restartMessage = `Conversation restarted with uploaded file data${ttsStatus}.`;
+                break;
+            case 'file-remove':
+                restartMessage = `Conversation restarted with file data removed${ttsStatus}.`;
+                break;
+            case 'tts-toggle':
+            default:
+                restartMessage = this.speechSettings && this.speechSettings.textToSpeech 
+                    ? 'Conversation restarted with text-to-speech mode enabled.' 
+                    : 'Conversation restarted with text-to-speech mode disabled.';
+                break;
+        }
+        
+        const systemMessageEl = this.addMessage('system', restartMessage);
+        systemMessageEl.classList.add('system-restart-message');
+    }
+
     clearChat() {
         this.conversationHistory = [];
         this.chatMessages.innerHTML = `
@@ -716,6 +1284,82 @@ window.removeFile = function() {
     }
 };
 
+window.openChatCapabilitiesModal = function() {
+    const modal = document.getElementById('chat-capabilities-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        
+        // Restore current settings when modal opens
+        if (window.chatPlaygroundApp) {
+            window.chatPlaygroundApp.restoreSpeechSettings();
+        }
+    }
+};
+
+window.closeChatCapabilitiesModal = function() {
+    const modal = document.getElementById('chat-capabilities-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scrolling
+        
+        // Restore original settings (cancel any unsaved changes)
+        if (window.chatPlaygroundApp) {
+            window.chatPlaygroundApp.restoreSpeechSettings();
+        }
+    }
+};
+
+window.playVoiceSample = function() {
+    // Get the voice sample text from the input field
+    const voiceSampleText = document.getElementById('voice-sample-text');
+    const sampleText = voiceSampleText ? voiceSampleText.value : 'Hi, how can I help you today?';
+    
+    // Simulate voice sample playback
+    const playBtn = document.querySelector('.play-btn');
+    if (playBtn) {
+        playBtn.textContent = '⏸️';
+        setTimeout(() => {
+            playBtn.textContent = '▶';
+        }, 2000); // Simulate 2-second sample
+    }
+    
+    // Here you would integrate with actual speech synthesis
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(sampleText);
+        const voiceSelect = document.getElementById('voice-select');
+        const speedSelect = document.getElementById('voice-speed');
+        
+        if (voiceSelect && voiceSelect.value && voiceSelect.value !== 'default') {
+            const voices = speechSynthesis.getVoices();
+            const selectedVoice = voices.find(voice => voice.name === voiceSelect.value);
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+        }
+        
+        const speedMap = { '0.5x': 0.5, '1x': 1, '1.5x': 1.5, '2x': 2 };
+        utterance.rate = speedMap[speedSelect.value] || 1;
+        
+        speechSynthesis.speak(utterance);
+    }
+};
+
+window.saveChatCapabilities = function() {
+    // Save the current settings
+    if (window.chatPlaygroundApp) {
+        window.chatPlaygroundApp.saveSpeechSettings();
+        window.chatPlaygroundApp.showToast('Speech settings saved successfully');
+    }
+    
+    // Close modal
+    const modal = document.getElementById('chat-capabilities-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+};
+
 // Add CSS animations
 const style = document.createElement('style');
 style.textContent = `
@@ -746,4 +1390,24 @@ document.head.appendChild(style);
 // Initialize the app when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.chatPlaygroundApp = new ChatPlayground();
+    
+    // Add modal click-outside-to-close functionality
+    const modal = document.getElementById('chat-capabilities-modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                window.closeChatCapabilitiesModal();
+            }
+        });
+    }
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('chat-capabilities-modal');
+            if (modal && modal.style.display !== 'none') {
+                window.closeChatCapabilitiesModal();
+            }
+        }
+    });
 });

@@ -126,7 +126,7 @@
                     <h3>Chat history</h3>
                     <div class="chat-controls">
                         <button class="icon-btn" title="Clear chat">🗑️</button>
-                        <button class="icon-btn" title="Settings">⚙️</button>
+                        <button class="icon-btn" title="Settings" onclick="openChatCapabilitiesModal()">⚙️</button>
                         <button class="icon-btn" title="Expand">⛶</button>
                     </div>
                 </div>
@@ -150,10 +150,81 @@
                     </div>
                     <div class="input-info">
                         <span class="token-count">*1/128000 tokens in thread</span>
-                        <button class="voice-btn" title="Voice input">🎙️</button>
+                        <button class="voice-btn" title="Voice input" id="voice-btn" disabled>🎙️</button>
                         <button class="stop-btn" title="Stop generation" id="stop-btn" style="display: none;">⏹️</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chat Capabilities Modal -->
+    <div class="modal-overlay" id="chat-capabilities-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Chat capabilities</h2>
+                <button class="modal-close-btn" onclick="closeChatCapabilitiesModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="speech-section">
+                    <h3>Speech</h3>
+                    
+                    <div class="speech-feature">
+                        <h4>Speech to text</h4>
+                        <p class="feature-description">The speech to text feature that allows spoken text to be used for input to the model can be enabled or disabled for the playground.</p>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="speech-to-text-toggle">
+                            <label for="speech-to-text-toggle" class="switch-label">
+                                <span class="switch-slider"></span>
+                                <span class="switch-text">Enable speech to text</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="speech-feature">
+                        <h4>Text to speech</h4>
+                        <p class="feature-description">The text to speech that reads the model responses can be enabled or disabled for the playground.</p>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="text-to-speech-toggle">
+                            <label for="text-to-speech-toggle" class="switch-label">
+                                <span class="switch-slider"></span>
+                                <span class="switch-text">Enable text to speech</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="voice-config">
+                        <div class="config-row">
+                            <div class="config-item">
+                                <label for="voice-select">Voice configuration</label>
+                                <select id="voice-select" class="form-select" disabled>
+                                    <option value="">Loading voices...</option>
+                                </select>
+                            </div>
+                            <div class="config-item">
+                                <label for="voice-speed">Voice speed</label>
+                                <select id="voice-speed" class="form-select" disabled>
+                                    <option value="1x" selected>1x</option>
+                                    <option value="0.5x">0.5x</option>
+                                    <option value="1.5x">1.5x</option>
+                                    <option value="2x">2x</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="voice-sample">
+                            <label>Voice sample</label>
+                            <div class="sample-container">
+                                <input type="text" class="sample-text" id="voice-sample-text" value="Hi, how can I help you today?" disabled>
+                                <button class="play-btn" onclick="playVoiceSample()" disabled>▶</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeChatCapabilitiesModal()">Close</button>
+                <button class="btn-primary" onclick="saveChatCapabilities()">Save</button>
             </div>
         </div>
     </div>
