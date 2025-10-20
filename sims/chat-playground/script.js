@@ -91,11 +91,17 @@ class ChatPlayground {
                 slider.value = this.modelParameters[param];
                 valueDisplay.textContent = this.modelParameters[param];
                 
+                // Set initial aria-valuetext
+                slider.setAttribute('aria-valuetext', this.modelParameters[param].toString());
+                
                 // Add event listener for real-time updates
                 slider.addEventListener('input', (e) => {
                     const value = param === 'max_tokens' ? parseInt(e.target.value) : parseFloat(e.target.value);
                     this.modelParameters[param] = value;
                     valueDisplay.textContent = value;
+                    
+                    // Update aria-valuetext for screen readers
+                    slider.setAttribute('aria-valuetext', value.toString());
                     
                     // Show toast notification for parameter change
                     this.showToast(`${this.formatParameterName(param)}: ${value}`);
@@ -1662,12 +1668,18 @@ window.toggleSetup = function() {
     const setupPanel = document.querySelector('.setup-panel');
     const hideBtn = document.querySelector('.hide-btn');
     
-    if (setupPanel.classList.contains('collapsed')) {
+    const isCollapsed = setupPanel.classList.contains('collapsed');
+    
+    if (isCollapsed) {
         setupPanel.classList.remove('collapsed');
         hideBtn.textContent = '📦 Hide';
+        hideBtn.setAttribute('aria-expanded', 'true');
+        hideBtn.setAttribute('aria-label', 'Hide setup panel');
     } else {
         setupPanel.classList.add('collapsed');
         hideBtn.textContent = '📦 Show';
+        hideBtn.setAttribute('aria-expanded', 'false');
+        hideBtn.setAttribute('aria-label', 'Show setup panel');
     }
 };
 
@@ -1675,12 +1687,16 @@ window.toggleSection = function(sectionId) {
     const content = document.getElementById(sectionId);
     const button = content.previousElementSibling;
     
-    if (content.style.display === 'block') {
+    const isExpanded = content.style.display === 'block';
+    
+    if (isExpanded) {
         content.style.display = 'none';
         button.textContent = button.textContent.replace('▼', '▶');
+        button.setAttribute('aria-expanded', 'false');
     } else {
         content.style.display = 'block';
         button.textContent = button.textContent.replace('▶', '▼');
+        button.setAttribute('aria-expanded', 'true');
     }
 };
 
@@ -1712,6 +1728,8 @@ window.resetParameters = function() {
             if (sliderEl && valueEl) {
                 sliderEl.value = defaults[param];
                 valueEl.textContent = defaults[param];
+                // Update aria-valuetext for screen readers
+                sliderEl.setAttribute('aria-valuetext', defaults[param].toString());
             }
         });
         
@@ -1735,13 +1753,27 @@ window.removeFile = function() {
 window.openChatCapabilitiesModal = function() {
     const modal = document.getElementById('chat-capabilities-modal');
     if (modal) {
+        // Store the currently focused element to restore later
+        window.lastFocusedElement = document.activeElement;
+        
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        
+        // Focus the modal for screen readers
+        setTimeout(() => {
+            const modalTitle = document.getElementById('modal-title');
+            if (modalTitle) {
+                modalTitle.focus();
+            }
+        }, 100);
         
         // Restore current settings when modal opens
         if (window.chatPlaygroundApp) {
             window.chatPlaygroundApp.restoreSpeechSettings();
         }
+        
+        // Add keyboard trap for accessibility
+        window.trapFocus(modal);
     }
 };
 
@@ -1750,6 +1782,15 @@ window.closeChatCapabilitiesModal = function() {
     if (modal) {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto'; // Restore scrolling
+        
+        // Restore focus to the element that opened the modal
+        if (window.lastFocusedElement) {
+            window.lastFocusedElement.focus();
+            window.lastFocusedElement = null;
+        }
+        
+        // Remove keyboard trap
+        window.removeFocusTrap();
         
         // Restore original settings (cancel any unsaved changes)
         if (window.chatPlaygroundApp) {
@@ -1834,6 +1875,42 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Focus trap functionality for modal accessibility
+window.trapFocus = function(modal) {
+    const focusableElements = modal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    
+    window.modalKeydownHandler = function(e) {
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === firstFocusable) {
+                    lastFocusable.focus();
+                    e.preventDefault();
+                }
+            } else {
+                if (document.activeElement === lastFocusable) {
+                    firstFocusable.focus();
+                    e.preventDefault();
+                }
+            }
+        } else if (e.key === 'Escape') {
+            window.closeChatCapabilitiesModal();
+        }
+    };
+    
+    document.addEventListener('keydown', window.modalKeydownHandler);
+};
+
+window.removeFocusTrap = function() {
+    if (window.modalKeydownHandler) {
+        document.removeEventListener('keydown', window.modalKeydownHandler);
+        window.modalKeydownHandler = null;
+    }
+};
 
 // Initialize the app when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
