@@ -9,6 +9,12 @@
 <body>
     <div class="container">
         <h1>Speech-Enabled App</h1>
+        <div class="voice-selection">
+            <label for="voiceSelect">Choose Voice:</label>
+            <select id="voiceSelect" class="voice-dropdown">
+                <option value="">Loading voices...</option>
+            </select>
+        </div>
         <button id="speakButton" class="speak-button">Click to speak</button>
         <div id="transcription" class="transcription"></div>
     </div>

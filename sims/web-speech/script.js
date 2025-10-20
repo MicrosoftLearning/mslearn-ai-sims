@@ -2,8 +2,11 @@ class SpeechApp {
     constructor() {
         this.speakButton = document.getElementById('speakButton');
         this.transcriptionDiv = document.getElementById('transcription');
+        this.voiceSelect = document.getElementById('voiceSelect');
         this.recognition = null;
         this.synthesis = window.speechSynthesis;
+        this.voices = [];
+        this.selectedVoice = null;
         
         this.init();
     }
@@ -32,12 +35,19 @@ class SpeechApp {
         // Set up event listeners
         this.setupEventListeners();
         
+        // Load voices
+        this.loadVoices();
+        
         // Initial message
         this.transcriptionDiv.textContent = 'Click the button to start speaking';
     }
     
     setupEventListeners() {
         this.speakButton.addEventListener('click', () => this.handleSpeakClick());
+        this.voiceSelect.addEventListener('change', () => this.handleVoiceChange());
+        
+        // Listen for voices changed event (some browsers load voices asynchronously)
+        this.synthesis.addEventListener('voiceschanged', () => this.loadVoices());
         
         this.recognition.onstart = () => {
             console.log('Speech recognition started');
@@ -73,6 +83,51 @@ class SpeechApp {
         };
     }
     
+    loadVoices() {
+        this.voices = this.synthesis.getVoices();
+        
+        if (this.voices.length === 0) {
+            // Voices might not be loaded yet, try again after a short delay
+            setTimeout(() => this.loadVoices(), 100);
+            return;
+        }
+        
+        // Clear existing options
+        this.voiceSelect.innerHTML = '';
+        
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Default Voice';
+        this.voiceSelect.appendChild(defaultOption);
+        
+        // Add voice options
+        this.voices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `${voice.name} (${voice.lang})`;
+            
+            // Mark default voice for the browser's language
+            if (voice.default) {
+                option.textContent += ' - Default';
+            }
+            
+            this.voiceSelect.appendChild(option);
+        });
+        
+        console.log(`Loaded ${this.voices.length} voices`);
+    }
+    
+    handleVoiceChange() {
+        const selectedIndex = this.voiceSelect.value;
+        if (selectedIndex === '') {
+            this.selectedVoice = null;
+        } else {
+            this.selectedVoice = this.voices[parseInt(selectedIndex)];
+            console.log('Selected voice:', this.selectedVoice.name);
+        }
+    }
+    
     handleSpeakClick() {
         this.speakButton.disabled = true;
         this.speakButton.textContent = 'Processing...';
@@ -106,6 +161,11 @@ class SpeechApp {
             utterance.rate = 1;
             utterance.pitch = 1;
             utterance.volume = 1;
+            
+            // Use selected voice if available
+            if (this.selectedVoice) {
+                utterance.voice = this.selectedVoice;
+            }
             
             utterance.onend = () => {
                 console.log('Finished speaking');
