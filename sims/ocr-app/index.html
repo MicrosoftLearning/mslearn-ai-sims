@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Receipt Reader</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OCR Receipt Reader</h1>
+            <p>Upload a receipt image to extract text using OCR technology</p>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <input type="file" id="imageInput" accept=".jpg,.jpeg,.png" style="display: none;">
+                <button id="uploadBtn" class="upload-btn">Upload Receipt</button>
+            </div>
+
+            <div class="progress-section" id="progressSection" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p id="progressText">Processing...</p>
+            </div>
+
+            <div class="result-section" id="resultSection" style="display: none;">
+                <div class="image-tabs">
+                    <button class="tab-btn active" data-tab="original">Original Image</button>
+                    <button class="tab-btn" data-tab="annotated">With Bounding Boxes</button>
+                </div>
+
+                <div class="image-container">
+                    <div class="tab-content active" id="originalTab">
+                        <h3>Original Image</h3>
+                        <img id="uploadedImage" alt="Uploaded receipt">
+                    </div>
+                    <div class="tab-content" id="annotatedTab">
+                        <h3>Text Detection Overlay</h3>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: rgba(255, 0, 0, 0.3); border: 2px solid #FF0000;"></div>
+                                <span>Individual Words</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: rgba(0, 255, 0, 0.3); border: 1px solid #00FF00;"></div>
+                                <span>Text Lines</span>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="annotatedCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>Extracted Text</h2>
+                <div class="text-container">
+                    <pre id="extractedText"></pre>
+                </div>
+
+                <div class="actions">
+                    <button id="copyBtn" class="action-btn">Copy Text</button>
+                    <button id="newUploadBtn" class="action-btn secondary">Upload Another</button>
+                </div>
+            </div>
+
+            <div class="error-section" id="errorSection" style="display: none;">
+                <h2>Error</h2>
+                <p id="errorMessage"></p>
+                <button id="retryBtn" class="action-btn">Try Again</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
