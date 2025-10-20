@@ -33,12 +33,17 @@ class ChatPlayground {
             sampleText: 'Hi, how can I help you today?'
         };
         
+        // Speech recognition
+        this.recognition = null;
+        this.isListening = false;
+        
         this.initializeElements();
         this.attachEventListeners();
         this.initializeParameterControls();
         this.initializeFileUpload();
         this.populateVoices();
         this.setupSpeechToggleListeners();
+        this.initializeSpeechRecognition();
         this.initializeModel();
     }
     
@@ -204,10 +209,13 @@ class ChatPlayground {
         // Handle speech-to-text toggle
         if (speechToTextToggle && voiceBtn) {
             speechToTextToggle.addEventListener('change', (e) => {
-                voiceBtn.disabled = !e.target.checked;
+                const isEnabled = e.target.checked;
+                voiceBtn.disabled = !isEnabled;
+                this.speechSettings.speechToText = isEnabled;
             });
             // Initialize disabled state
             voiceBtn.disabled = !speechToTextToggle.checked;
+            this.speechSettings.speechToText = speechToTextToggle.checked;
         }
 
         // Handle text-to-speech toggle
@@ -425,6 +433,118 @@ class ChatPlayground {
         }
     }
 
+    initializeSpeechRecognition() {
+        // Check if speech recognition is supported
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            console.warn('Speech recognition not supported in this browser.');
+            return;
+        }
+
+        // Initialize speech recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        this.recognition = new SpeechRecognition();
+        this.recognition.continuous = false;
+        this.recognition.interimResults = false;
+        this.recognition.lang = 'en-US';
+        this.recognition.maxAlternatives = 1;
+
+        // Handle speech recognition events
+        this.recognition.onstart = () => {
+            console.log('Speech recognition started');
+            this.isListening = true;
+            this.updateVoiceButtonState();
+        };
+
+        this.recognition.onresult = (event) => {
+            const result = event.results[0];
+            if (result.isFinal) {
+                const transcript = result[0].transcript.trim();
+                console.log('Speech recognition result:', transcript);
+                
+                if (transcript) {
+                    // Add the transcribed text to the input field
+                    this.userInput.value = transcript;
+                    this.userInput.style.height = 'auto';
+                    this.userInput.style.height = Math.min(this.userInput.scrollHeight, 120) + 'px';
+                    
+                    // Automatically send the message
+                    this.handleSendMessage();
+                }
+            }
+        };
+
+        this.recognition.onend = () => {
+            console.log('Speech recognition ended');
+            this.isListening = false;
+            this.updateVoiceButtonState();
+        };
+
+        this.recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            this.isListening = false;
+            this.updateVoiceButtonState();
+            
+            if (event.error === 'no-speech') {
+                this.showToast('No speech detected. Please try again.');
+            } else if (event.error === 'network') {
+                this.showToast('Network error. Please check your connection.');
+            } else {
+                this.showToast('Speech recognition error. Please try again.');
+            }
+        };
+    }
+
+    updateVoiceButtonState() {
+        const voiceBtn = document.getElementById('voice-btn');
+        if (voiceBtn) {
+            voiceBtn.textContent = this.isListening ? '🔴' : '🎙️';
+            voiceBtn.title = this.isListening ? 'Listening...' : 'Voice input';
+        }
+    }
+
+    playBeep() {
+        // Create a short beep sound
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.2);
+    }
+
+    startVoiceInput() {
+        if (!this.recognition) {
+            this.showToast('Speech recognition not available.');
+            return;
+        }
+        
+        if (this.isListening) {
+            // Stop listening
+            this.recognition.stop();
+            return;
+        }
+        
+        // Play beep and start listening
+        this.playBeep();
+        
+        // Start speech recognition after a short delay to let the beep play
+        setTimeout(() => {
+            try {
+                this.recognition.start();
+            } catch (error) {
+                console.error('Error starting speech recognition:', error);
+                this.showToast('Could not start voice input. Please try again.');
+            }
+        }, 300);
+    }
+
     attachEventListeners() {
         this.sendBtn.addEventListener('click', () => this.handleSendMessage());
         this.userInput.addEventListener('keydown', (e) => {
@@ -443,6 +563,12 @@ class ChatPlayground {
         });
         
         this.stopBtn.addEventListener('click', () => this.stopGeneration());
+        
+        // Voice input button
+        const voiceBtn = document.getElementById('voice-btn');
+        if (voiceBtn) {
+            voiceBtn.addEventListener('click', () => this.startVoiceInput());
+        }
         
         // Auto-resize textarea
         this.userInput.addEventListener('input', () => {
