@@ -44,6 +44,17 @@ const messageData = {
 let analysisContent;
 let messageItems;
 
+// Security utility function to escape HTML
+function escapeHtml(unsafe) {
+    if (unsafe == null) return '';
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     analysisContent = document.getElementById('analysisContent');
@@ -137,29 +148,29 @@ function displayAnalysis(message, messageId) {
         
         <div class="analysis-section">
             <h4 id="summary-heading">Summary:</h4>
-            <p aria-labelledby="summary-heading">${message.summary}</p>
+            <p aria-labelledby="summary-heading">${escapeHtml(message.summary)}</p>
         </div>
         
         <div class="analysis-section">
             <h4 id="caller-heading">Caller:</h4>
-            <p aria-labelledby="caller-heading">${message.caller}</p>
+            <p aria-labelledby="caller-heading">${escapeHtml(message.caller)}</p>
         </div>
         
         <div class="analysis-section">
             <h4 id="company-heading">Company:</h4>
-            <p aria-labelledby="company-heading">${message.company}</p>
+            <p aria-labelledby="company-heading">${escapeHtml(message.company)}</p>
         </div>
         
         <div class="analysis-section">
             <h4 id="sentiment-heading">Sentiment:</h4>
-            <p class="${sentimentClass}" aria-labelledby="sentiment-heading" aria-describedby="sentiment-description">${message.sentiment}</p>
-            <span id="sentiment-description" class="sr-only">Sentiment analysis indicates ${message.sentiment.toLowerCase()} tone in the voicemail</span>
+            <p class="${sentimentClass}" aria-labelledby="sentiment-heading" aria-describedby="sentiment-description">${escapeHtml(message.sentiment)}</p>
+            <span id="sentiment-description" class="sr-only">Sentiment analysis indicates ${escapeHtml(message.sentiment.toLowerCase())} tone in the voicemail</span>
         </div>
         
         <div class="analysis-section">
             <h4 id="tasks-heading">Tasks:</h4>
             <ul aria-labelledby="tasks-heading" role="list">
-                ${message.tasks.map((task, index) => `<li role="listitem">Task ${index + 1}: ${task}</li>`).join('')}
+                ${message.tasks.map((task, index) => `<li role="listitem">Task ${index + 1}: ${escapeHtml(task)}</li>`).join('')}
             </ul>
         </div>
         
@@ -200,10 +211,10 @@ function formatContactDetails(contactDetails) {
     
     let html = '';
     if (contactDetails.tel) {
-        html += `<p><span aria-label="Telephone number">${contactDetails.tel}</span></p>`;
+        html += `<p><span aria-label="Telephone number">${escapeHtml(contactDetails.tel)}</span></p>`;
     }
     if (contactDetails.email) {
-        html += `<p><span aria-label="Email address">${contactDetails.email}</span></p>`;
+        html += `<p><span aria-label="Email address">${escapeHtml(contactDetails.email)}</span></p>`;
     }
     
     return html || '<p>None available</p>';

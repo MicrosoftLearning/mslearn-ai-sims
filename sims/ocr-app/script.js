@@ -4,6 +4,16 @@ class OCRReceiptReader {
         this.bindEvents();
     }
 
+    // Security utility: Safely assign blob URL to image src
+    safelySetImageSrc(imgElement, blobURL) {
+        // Validate that this is a blob URL (not javascript: or data: URL)
+        if (blobURL.startsWith('blob:')) {
+            imgElement.src = blobURL;
+        } else {
+            console.error('Invalid URL scheme - only blob URLs are allowed');
+        }
+    }
+
     initializeElements() {
         this.uploadBtn = document.getElementById('uploadBtn');
         this.imageInput = document.getElementById('imageInput');
@@ -74,7 +84,7 @@ class OCRReceiptReader {
 
             // Display the uploaded image
             const imageURL = URL.createObjectURL(file);
-            this.uploadedImage.src = imageURL;
+            this.safelySetImageSrc(this.uploadedImage, imageURL);
 
             // Initialize Tesseract with progress tracking
             const worker = await Tesseract.createWorker('eng', 1, {
@@ -153,7 +163,7 @@ class OCRReceiptReader {
 
     loadOriginalImage(imageFile) {
         const imageURL = URL.createObjectURL(imageFile);
-        this.uploadedImage.src = imageURL;
+        this.safelySetImageSrc(this.uploadedImage, imageURL);
         
         // Clean up URL after image loads
         this.uploadedImage.onload = () => {
@@ -184,7 +194,7 @@ class OCRReceiptReader {
             URL.revokeObjectURL(imageURL);
         };
         
-        img.src = imageURL;
+        this.safelySetImageSrc(img, imageURL);
     }
 
     drawBoundingBoxes(ctx) {

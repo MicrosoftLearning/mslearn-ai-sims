@@ -21,6 +21,17 @@ let currentRegistrationContext = null;
 // PyScript status (keeping for future use)
 let pyScriptReady = false;
 
+// Security utility function to escape HTML
+function escapeHtml(unsafe) {
+    if (unsafe == null) return '';
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // Accessibility support functions
 function handleKeyPress(event, callback) {
     // Handle Enter and Space key presses for clickable elements
@@ -1217,8 +1228,8 @@ function selectTaskType(value) {
     
     selected.innerHTML = `
         <div class="selected-option">
-            ${icon.outerHTML}
-            <span>${text}</span>
+            ${escapeHtml(icon.outerHTML)}
+            <span>${escapeHtml(text)}</span>
         </div>
         <span class="dropdown-arrow">▼</span>
     `;
@@ -1759,7 +1770,7 @@ function displayUploadedFile(fileName) {
                         <table id="data-preview-table" style="border-collapse: collapse; font-size: 11px; min-width: 100%;">
                             <thead>
                                 <tr id="header-row">
-                                    ${columns.map(col => `<th style="padding: 6px 8px; border: 1px solid #ddd; background: #f1f3f4; text-align: left; white-space: nowrap; font-weight: 600;">${col}</th>`).join('')}
+                                    ${columns.map(col => `<th style="padding: 6px 8px; border: 1px solid #ddd; background: #f1f3f4; text-align: left; white-space: nowrap; font-weight: 600;">${escapeHtml(col)}</th>`).join('')}
                                 </tr>
                             </thead>
                             <tbody>
@@ -1776,7 +1787,7 @@ function displayUploadedFile(fileName) {
                                             if (value.length > 30) {
                                                 value = value.substring(0, 27) + '...';
                                             }
-                                            return `<td style="padding: 6px 8px; border: 1px solid #ddd; white-space: nowrap; max-width: 200px;">${value}</td>`;
+                                            return `<td style="padding: 6px 8px; border: 1px solid #ddd; white-space: nowrap; max-width: 200px;">${escapeHtml(value)}</td>`;
                                         }).join('')}
                                     </tr>
                                 `).join('')}
@@ -2055,7 +2066,7 @@ function updatePreviewTableHeaders(headers) {
     if (!headerRow) return;
     
     headerRow.innerHTML = headers.map(header => 
-        `<th style="padding: 6px 8px; border: 1px solid #ddd; background: #f1f3f4; text-align: left; white-space: nowrap; font-weight: 600;">${header}</th>`
+        `<th style="padding: 6px 8px; border: 1px solid #ddd; background: #f1f3f4; text-align: left; white-space: nowrap; font-weight: 600;">${escapeHtml(header)}</th>`
     ).join('');
     
     // Also update the target column dropdown if visible
@@ -2624,7 +2635,7 @@ function trainModels(job) {
     } catch (error) {
         console.error('Training error:', error);
         document.getElementById('training-progress').innerHTML += 
-            `<div class="progress-item error">✗ Training failed: ${error.message}</div>`;
+            `<div class="progress-item error">✗ Training failed: ${escapeHtml(error.message)}</div>`;
     }
 }
 
@@ -3816,8 +3827,8 @@ function updateBestModelSection(job) {
                         <span class="best-model-badge">Best Model</span>
                     </div>
                     <div class="best-model-algorithm">Algorithm name: 
-                        <button class="algorithm-link" onclick="navigateToChildJob('${bestModel.name.replace(/'/g, "\\'")}', currentJobDetails)" title="View child job details">
-                            ${bestModel.name}
+                        <button class="algorithm-link" onclick="navigateToChildJob(this.dataset.modelName, currentJobDetails)" data-model-name="${escapeHtml(bestModel.name)}" title="View child job details">
+                            ${escapeHtml(bestModel.name)}
                         </button>
                     </div>
                     <div class="best-model-score">${typeof bestModel.primary_score === 'number' ? bestModel.primary_score.toFixed(4) : bestModel.primary_score}</div>
@@ -4013,8 +4024,8 @@ function updateModelsTabContent() {
             
             row.innerHTML = `
                 <td class="algorithm-cell">
-                    <button class="algorithm-link" onclick="navigateToChildJob('${model.name.replace(/'/g, "\\'")}', currentJobDetails)" title="View child job details">
-                        ${model.display_name || model.name}
+                    <button class="algorithm-link" onclick="navigateToChildJob(this.dataset.modelName, currentJobDetails)" data-model-name="${escapeHtml(model.name)}" title="View child job details">
+                        ${escapeHtml(model.display_name || model.name)}
                     </button>
                     ${model.is_best ? '<span class="best-model-badge">Best Model</span>' : ''}
                 </td>
@@ -4818,8 +4829,8 @@ function updateChildJobsTabContent() {
             <td>
                 <div class="child-job-name">
                     <span class="job-icon">🤖</span>
-                    <button class="algorithm-link" onclick="navigateToChildJob('${childJob.algorithm.replace(/'/g, "\\'")}', currentJobDetails)" title="View child job details">
-                        ${childJob.displayName}
+                    <button class="algorithm-link" onclick="navigateToChildJob(this.dataset.algorithm, currentJobDetails)" data-algorithm="${escapeHtml(childJob.algorithm)}" title="View child job details">
+                        ${escapeHtml(childJob.displayName)}
                     </button>
                 </div>
             </td>
@@ -5996,7 +6007,7 @@ function testEndpoint() {
         
     } catch (error) {
         console.error('Test endpoint error:', error);
-        responseDiv.innerHTML = `<div style="color: #d73a49; padding: 10px; background: #ffeef0; border-radius: 4px; white-space: pre-wrap;">${error.message}</div>`;
+        responseDiv.innerHTML = `<div style="color: #d73a49; padding: 10px; background: #ffeef0; border-radius: 4px; white-space: pre-wrap;">${escapeHtml(error.message)}</div>`;
         resultsDiv.style.display = 'block';
     }
 }
@@ -6134,17 +6145,20 @@ function updateConsumeCodeExample(featureColumns, registeredModel) {
             sampleDataEntries = featureColumns.map(col => {
                 let value = sampleRow[col];
                 
+                // Escape column name for Python dictionary key
+                const escapedCol = String(col).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                
                 // Format the value appropriately for Python
                 if (typeof value === 'string') {
                     // Escape quotes and wrap in quotes for string values
-                    const escapedValue = value.replace(/'/g, "\\'").replace(/"/g, '\\"');
-                    return `    '${col}': '${escapedValue}'`;
+                    const escapedValue = value.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+                    return `    '${escapedCol}': '${escapedValue}'`;
                 } else if (typeof value === 'number') {
-                    return `    '${col}': ${value}`;
+                    return `    '${escapedCol}': ${value}`;
                 } else {
                     // Handle other data types or convert to string
-                    const stringValue = String(value).replace(/'/g, "\\'").replace(/"/g, '\\"');
-                    return `    '${col}': '${stringValue}'`;
+                    const stringValue = String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+                    return `    '${escapedCol}': '${stringValue}'`;
                 }
             });
         }
@@ -6162,6 +6176,9 @@ function updateConsumeCodeExample(featureColumns, registeredModel) {
         
         sampleDataEntries = featureColumns.map((col, index) => {
             let sampleValue;
+            
+            // Escape column name for Python dictionary key
+            const escapedCol = String(col).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
             
             // Check if this column is categorical (object/string type)
             const columnType = dtypes[col];
@@ -6207,7 +6224,7 @@ function updateConsumeCodeExample(featureColumns, registeredModel) {
                 }
             }
             
-            return `    '${col}': ${sampleValue}`;
+            return `    '${escapedCol}': ${sampleValue}`;
         });
     }
     
