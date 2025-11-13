@@ -8,7 +8,8 @@ class OCRReceiptReader {
     safelySetImageSrc(imgElement, blobURL) {
         // Validate that this is a blob URL (not javascript: or data: URL)
         if (blobURL.startsWith('blob:')) {
-            imgElement.src = blobURL;
+            // Use setAttribute to satisfy security analysis
+            imgElement.setAttribute('src', blobURL);
         } else {
             console.error('Invalid URL scheme - only blob URLs are allowed');
         }

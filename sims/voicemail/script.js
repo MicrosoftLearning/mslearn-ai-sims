@@ -185,7 +185,8 @@ function displayAnalysis(message, messageId) {
     analysisContent.innerHTML = analysisHTML;
     
     // Announce to screen readers that content has been updated
-    const announcement = `AI analysis loaded for message ${messageNumber} from ${message.caller}. ${message.sentiment} sentiment detected.`;
+    // Escape data for screen reader announcement (even though textContent is used internally)
+    const announcement = `AI analysis loaded for message ${escapeHtml(messageNumber)} from ${escapeHtml(message.caller)}. ${escapeHtml(message.sentiment)} sentiment detected.`;
     announceToScreenReader(announcement);
 }
 
