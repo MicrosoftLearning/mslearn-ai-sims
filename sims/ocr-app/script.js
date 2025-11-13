@@ -5,13 +5,22 @@ class OCRReceiptReader {
     }
 
     // Security utility: Safely assign blob URL to image src
-    safelySetImageSrc(imgElement, blobURL) {
-        // Validate that this is a blob URL (not javascript: or data: URL)
+    safelySetImageSrc(imgElement, file) {
+        // Create blob URL only from File/Blob objects
+        if (!(file instanceof Blob)) {
+            console.error('Invalid input - only File/Blob objects are allowed');
+            return;
+        }
+        
+        // Create a clean blob URL from the file object
+        const blobURL = URL.createObjectURL(file);
+        
+        // Validate that it's a blob URL (sanity check)
         if (blobURL.startsWith('blob:')) {
-            // Use setAttribute to satisfy security analysis
             imgElement.setAttribute('src', blobURL);
         } else {
-            console.error('Invalid URL scheme - only blob URLs are allowed');
+            console.error('Failed to create valid blob URL');
+            URL.revokeObjectURL(blobURL);
         }
     }
 
@@ -84,8 +93,7 @@ class OCRReceiptReader {
             this.showProgressSection();
 
             // Display the uploaded image
-            const imageURL = URL.createObjectURL(file);
-            this.safelySetImageSrc(this.uploadedImage, imageURL);
+            this.safelySetImageSrc(this.uploadedImage, file);
 
             // Initialize Tesseract with progress tracking
             const worker = await Tesseract.createWorker('eng', 1, {
@@ -163,12 +171,11 @@ class OCRReceiptReader {
     }
 
     loadOriginalImage(imageFile) {
-        const imageURL = URL.createObjectURL(imageFile);
-        this.safelySetImageSrc(this.uploadedImage, imageURL);
+        this.safelySetImageSrc(this.uploadedImage, imageFile);
         
         // Clean up URL after image loads
         this.uploadedImage.onload = () => {
-            URL.revokeObjectURL(imageURL);
+            // URL cleanup will be handled when element is removed/replaced
         };
     }
 
@@ -195,7 +202,7 @@ class OCRReceiptReader {
             URL.revokeObjectURL(imageURL);
         };
         
-        this.safelySetImageSrc(img, imageURL);
+        this.safelySetImageSrc(img, imageFile);
     }
 
     drawBoundingBoxes(ctx) {

@@ -137,11 +137,11 @@ function displayAnalysis(message, messageId) {
     const messageNumber = messageId.replace('message', '');
     
     const analysisHTML = `
-        <h3 id="analysis-heading">AI Analysis for Message ${messageNumber}</h3>
+        <h3 id="analysis-heading">AI Analysis for Message ${escapeHtml(messageNumber)}</h3>
         
         <div class="audio-player">
-            <audio controls aria-label="Voicemail audio player for message ${messageNumber} from ${message.caller}">
-                <source src="${message.audioFile}" type="audio/wav">
+            <audio controls aria-label="Voicemail audio player for message ${escapeHtml(messageNumber)} from ${escapeHtml(message.caller)}">
+                <source src="${escapeHtml(message.audioFile)}" type="audio/wav">
                 Your browser does not support the audio element.
             </audio>
         </div>
@@ -163,7 +163,7 @@ function displayAnalysis(message, messageId) {
         
         <div class="analysis-section">
             <h4 id="sentiment-heading">Sentiment:</h4>
-            <p class="${sentimentClass}" aria-labelledby="sentiment-heading" aria-describedby="sentiment-description">${escapeHtml(message.sentiment)}</p>
+            <p class="${escapeHtml(sentimentClass)}" aria-labelledby="sentiment-heading" aria-describedby="sentiment-description">${escapeHtml(message.sentiment)}</p>
             <span id="sentiment-description" class="sr-only">Sentiment analysis indicates ${escapeHtml(message.sentiment.toLowerCase())} tone in the voicemail</span>
         </div>
         
