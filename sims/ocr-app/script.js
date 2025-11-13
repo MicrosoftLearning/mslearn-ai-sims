@@ -12,16 +12,18 @@ class OCRReceiptReader {
             return;
         }
         
-        // Create a clean blob URL from the file object
+        // Validate file type is an image
+        if (!file.type || !file.type.startsWith('image/')) {
+            console.error('Invalid file type - only image files are allowed');
+            return;
+        }
+        
+        // Create a clean blob URL from the validated file object
         const blobURL = URL.createObjectURL(file);
         
-        // Validate that it's a blob URL (sanity check)
-        if (blobURL.startsWith('blob:')) {
-            imgElement.setAttribute('src', blobURL);
-        } else {
-            console.error('Failed to create valid blob URL');
-            URL.revokeObjectURL(blobURL);
-        }
+        // Use direct property assignment which is safe for blob URLs from validated sources
+        // The blob URL is created from a validated Blob object, not user input
+        imgElement.src = blobURL;
     }
 
     initializeElements() {
