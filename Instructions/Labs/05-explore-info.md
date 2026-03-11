@@ -1,7 +1,10 @@
 ---
 lab:
-    title: 'Explore AI information extraction scenarios'
-    description: 'Explore applications that demonstrates how AI can be used to extract the information from content in multiple formats.'
+  title: Explore AI information extraction scenarios
+  description: Explore applications that demonstrates how AI can be used to extract the information from content in multiple formats.
+  duration: 15 minutes
+  level: 100
+  islab: true
 ---
 
 # Explore AI information extraction scenarios
