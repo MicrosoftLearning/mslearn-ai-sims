@@ -1,7 +1,10 @@
 ---
 lab:
-    title: 'Explore natural language processing scenarios'
-    description: 'Explore applications that demonstrates how AI natural language processing capabilities can be used to transcribe and analyze spoken and written text.'
+  title: Explore natural language processing scenarios
+  description: Explore applications that demonstrates how AI natural language processing capabilities can be used to transcribe and analyze spoken and written text.
+  duration: 15 minutes
+  level: 100
+  islab: true
 ---
 
 # Explore natural language processing scenarios
