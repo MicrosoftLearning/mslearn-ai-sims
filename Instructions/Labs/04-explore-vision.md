@@ -1,7 +1,11 @@
 ---
 lab:
-    title: 'Explore computer vision scenarios'
-    description: 'Explore a applications that demonstrates how AI computer vision capabilities can be used to analyze images, generate captions and tags, and detect objects.'
+  title: Explore computer vision scenarios
+  description: Explore a applications that demonstrates how AI computer vision capabilities
+    can be used to analyze images, generate captions and tags, and detect objects.
+  duration: 15 minutes
+  level: 100
+  islab: true
 ---
 
 # Explore computer vision scenarios
