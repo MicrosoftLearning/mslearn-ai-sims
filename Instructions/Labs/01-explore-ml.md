@@ -1,7 +1,10 @@
 ---
 lab:
-    title: 'Explore machine learning scenarios'
-    description: 'Explore applications that demonstrate how a machine learning model can help you predict unknown information.'
+  title: Explore machine learning scenarios
+  description: Explore applications that demonstrate how a machine learning model can help you predict unknown information.
+  duration: 15 minutes
+  level: 100
+  islab: true
 ---
 
 # Explore machine learning scenarios
