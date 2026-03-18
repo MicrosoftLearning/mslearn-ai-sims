@@ -1,10 +1,12 @@
 ---
 lab:
-    title: 'Explore natural language processing scenarios'
+    title: 'Explore natural language processing scenarios (deprecated)'
     description: 'Explore applications that demonstrates how AI natural language processing capabilities can be used to transcribe and analyze spoken and written text.'
 ---
 
-# Explore natural language processing scenarios
+# Explore natural language processing scenarios (deprecated)
+
+> **Note**: This exercise is deprecated, and will be deleted soon. Consider completing the replacement exercise at <https://go.microsoft.com/fwlink/?linkid=2339548>.
 
 In this exercise you will explore applications that simulates an AI-powered social history project site and a social media analysis site.
 

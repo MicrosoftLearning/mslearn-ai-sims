@@ -1,10 +1,12 @@
 ---
 lab:
-    title: 'Explore generative AI and agent scenarios'
+    title: 'Explore generative AI and agent scenarios (deprecated)'
     description: 'Explore applications that demonstrate how Generative AI agents can reason over input and data, and generate intelligent responses.'
 ---
 
-# Explore generative AI and agent scenarios
+# Explore generative AI and agent scenarios (deprecated)
+
+> **Note**: This exercise is deprecated, and will be deleted soon. Consider completing the replacement exercise at <https://go.microsoft.com/fwlink/?linkid=2339547>.
 
 In this exercise you will explore applications that demonstrate how Generative AI agents can reason over input and data, and generate intelligent responses.
 

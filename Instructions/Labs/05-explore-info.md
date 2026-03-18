@@ -1,10 +1,12 @@
 ---
 lab:
-    title: 'Explore AI information extraction scenarios'
+    title: 'Explore AI information extraction scenarios (deprecated)'
     description: 'Explore applications that demonstrates how AI can be used to extract the information from content in multiple formats.'
 ---
 
-# Explore AI information extraction scenarios
+# Explore AI information extraction scenarios (deprecated)
+
+> **Note**: This exercise is deprecated, and will be deleted soon. Consider completing the replacement exercise at <https://go.microsoft.com/fwlink/?linkid=2339457>.
 
 In this exercise you will explore applications that demonstrates how AI can be used to extract the information from content in multiple formats.
 

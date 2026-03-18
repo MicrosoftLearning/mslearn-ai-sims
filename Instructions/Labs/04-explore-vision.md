@@ -1,10 +1,12 @@
 ---
 lab:
-    title: 'Explore computer vision scenarios'
+    title: 'Explore computer vision scenarios (deprecated)'
     description: 'Explore a applications that demonstrates how AI computer vision capabilities can be used to analyze images, generate captions and tags, and detect objects.'
 ---
 
-# Explore computer vision scenarios
+# Explore computer vision scenarios (deprecated)
+
+> **Note**: This exercise is deprecated, and will be deleted soon. Consider completing the replacement exercise at <https://go.microsoft.com/fwlink/?linkid=2339549>.
 
 In this exercise you will use applications that simulate AI-powered computer vision capabilities.
 
@@ -17,7 +19,7 @@ Suppose you work in a web publishing organization that uses images in articles. 
 1. In a web browser, open the [Photo Tagger](https://aka.ms/photo-tagger){:target="_blank"} app at `https://aka.ms/photo-tagger`.
 1. Use the **Upload Image** button to open **image1.jpg**. When the image opens, wait for the analysis to finish and review the caption that is generated for the image.
 1. Use the **Suggested tags** button to generate relevant tags for the image.
-    
+
     Organizations that create and publish content often need to create and maintain a *digital asset management* solution - essentially a library of digital assets like images that can be searched based on relevant keywords, or *tags*.
 
 1. Repeat the process for images 2, 3, and 4 reviewing the captions and tags that are generated.

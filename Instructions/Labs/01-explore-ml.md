@@ -1,10 +1,12 @@
 ---
 lab:
-    title: 'Explore machine learning scenarios'
+    title: 'Explore machine learning scenarios (deprecated)'
     description: 'Explore applications that demonstrate how a machine learning model can help you predict unknown information.'
 ---
 
-# Explore machine learning scenarios
+# Explore machine learning scenarios (deprecated)
+
+> **Note**: This exercise is deprecated, and will be deleted soon. Consider completing the replacement exercise at <https://go.microsoft.com/fwlink/?linkid=2339456>.
 
 In this exercise you will explore applications that use machine learning to predict unknown values.
 
