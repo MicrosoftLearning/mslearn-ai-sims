@@ -2,6 +2,7 @@
 lab:
     title: 'Explore machine learning scenarios (deprecated)'
     description: 'Explore applications that demonstrate how a machine learning model can help you predict unknown information.'
+    islab: false
 ---
 
 # Explore machine learning scenarios (deprecated)

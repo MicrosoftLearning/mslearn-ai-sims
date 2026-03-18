@@ -2,6 +2,7 @@
 lab:
     title: 'Explore AI information extraction scenarios (deprecated)'
     description: 'Explore applications that demonstrates how AI can be used to extract the information from content in multiple formats.'
+    islab: false
 ---
 
 # Explore AI information extraction scenarios (deprecated)

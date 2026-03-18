@@ -2,6 +2,7 @@
 lab:
     title: 'Explore computer vision scenarios (deprecated)'
     description: 'Explore a applications that demonstrates how AI computer vision capabilities can be used to analyze images, generate captions and tags, and detect objects.'
+    islab: false
 ---
 
 # Explore computer vision scenarios (deprecated)

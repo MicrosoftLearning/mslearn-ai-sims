@@ -2,6 +2,7 @@
 lab:
     title: 'Explore natural language processing scenarios (deprecated)'
     description: 'Explore applications that demonstrates how AI natural language processing capabilities can be used to transcribe and analyze spoken and written text.'
+    islab: false
 ---
 
 # Explore natural language processing scenarios (deprecated)

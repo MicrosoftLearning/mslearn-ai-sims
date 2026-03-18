@@ -2,6 +2,7 @@
 lab:
     title: 'Explore generative AI and agent scenarios (deprecated)'
     description: 'Explore applications that demonstrate how Generative AI agents can reason over input and data, and generate intelligent responses.'
+    islab: false
 ---
 
 # Explore generative AI and agent scenarios (deprecated)
