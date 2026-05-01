@@ -1,3 +1,5 @@
+**This course will be retired on 2026-4-30. Once course is retired, all GitHub repos will be removed. Thank you!**
+
 # Microsoft AI Application Simulations
 
 This repo contains lab exercises and associated application simulations that you can use to explore common AI capabilities and scenarios.
