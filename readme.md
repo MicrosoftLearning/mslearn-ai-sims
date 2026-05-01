@@ -1,4 +1,4 @@
-**This course will be retired on 2026-4-30. Once course is retired, all GitHub repos will be removed. Thank you!**
+**The material in this repo has been deprecated. Please see https://github.com/MicrosoftLearning/mslearn-ai-concepts for the latest content.**
 
 # Microsoft AI Application Simulations
 
